@@ -9,7 +9,7 @@
 	}
 
 	const osOptions = [
-		{ key: 'macos', title: 'MacOS' },
+		{ key: 'mac', title: 'MacOS' },
 		{ key: 'linux', title: 'Linux' }
 	];
 </script>

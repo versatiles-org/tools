@@ -2,17 +2,26 @@
 <script lang="ts">
 	import FormOption from './FormOption.svelte';
 
-	export let group;
+	export let group: string;
 	export let options: { key: string; title: string }[] = [];
 	export let onChange: (key: string) => void;
 
-	function handleChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		onChange(event.currentTarget.value);
+	let selectedKey = '';
+
+	function handleChange(event: Event) {
+		selectedKey = (event.target as HTMLInputElement).value;
+		onChange(selectedKey);
 	}
 </script>
 
 {#each options as option}
-	<FormOption {group} value={option.key} title={option.title} onChange={handleChange} />
+	<FormOption
+		{group}
+		key={option.key}
+		title={option.title}
+		{selectedKey}
+		onChange={handleChange}
+	/>
 {/each}
 
 <style>
