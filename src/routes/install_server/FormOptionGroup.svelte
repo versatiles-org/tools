@@ -14,12 +14,22 @@
 	}
 </script>
 
-{#each options as option}
-	<FormOption
-		{group}
-		key={option.key}
-		title={option.title}
-		{selectedKey}
-		onChange={handleChange}
-	/>
-{/each}
+<div>
+	{#each options as option}
+		<FormOption
+			{group}
+			key={option.key}
+			title={option.title}
+			{selectedKey}
+			onChange={handleChange}
+		/>
+	{/each}
+</div>
+
+<style>
+	div {
+		display: flex;
+		justify-content: center;
+		gap: 1em;
+	}
+</style>

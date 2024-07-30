@@ -16,11 +16,9 @@
 
 <style>
 	label {
-		display: flex;
-		align-items: center;
 		cursor: pointer;
-		padding: 10px 20px;
-		border: 2px solid #ccc;
+		padding: 0.5em 1em;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 		border-radius: 5px;
 		margin-bottom: 10px;
 		user-select: none;
@@ -29,8 +27,11 @@
 		display: none;
 	}
 	label.selected {
-		background-color: #007bff;
-		color: white;
-		border-color: #007bff;
+		background-color: rgba(255, 255, 255, 1) !important;
+		color: #000;
+	}
+	label:hover {
+		background-color: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.8);
 	}
 </style>
