@@ -68,22 +68,22 @@
 		switch (selectedMethod) {
 			case 'homebrew':
 				lines.push(
-					'# Install VersaTiles',
+					'# install versatiles',
 					'brew tap versatiles-org/versatiles',
 					'brew install versatiles'
 				);
 				break;
 			case 'script':
 				lines.push(
-					'# Install VersaTiles',
+					'# install versatiles',
 					'curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-linux.sh" | bash'
 				);
 				break;
 			case 'compile':
 				lines.push(
-					'# Install Rust',
+					'# install rust',
 					'curl https://sh.rustup.rs -sSf | sh',
-					'# Compile and Install VersaTiles',
+					'# compile and install versatiles',
 					'cargo install versatiles'
 				);
 				break;
@@ -92,7 +92,7 @@
 		switch (selectedFrontend) {
 			case 'yes':
 				lines.push(
-					'\n# Download Frontend',
+					'\n# download frontend',
 					'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 				);
 				break;
@@ -101,12 +101,12 @@
 		switch (selectedData) {
 			case 'world':
 				lines.push(
-					`\n# Download Data\nwget -c -O ${selectedData}.versatiles "https://download.versatiles.org/osm.versatiles"`
+					`\n# download data\nwget -c -O ${selectedData}.versatiles "https://download.versatiles.org/osm.versatiles"`
 				);
 				break;
 			case 'berlin':
 				lines.push(
-					'\n# Download Data',
+					'\n# download data',
 					`versatiles convert --bbox-border 3 --bbox "13.1,52.3,13.7,52.7" https://download.versatiles.org/osm.versatiles ${selectedData}.versatiles`
 				);
 				break;
@@ -116,7 +116,7 @@
 			const start = ['versatiles server -p 80'];
 			if (selectedFrontend === 'yes') start.push('-s frontend.br.tar');
 			start.push(`[osm]${selectedData}.versatiles`);
-			lines.push('\n# Start Server', start.join(' '));
+			lines.push('\n# start server', start.join(' '));
 		}
 
 		code = lines.join('\n');
@@ -157,10 +157,11 @@
 		</p>
 	{/if}
 
-	<hr />
-
-	<h2>Instructions</h2>
-	<CodeBlock {code} />
+	{#if selectedMethod}
+		<hr />
+		<h2>Instructions</h2>
+		<CodeBlock {code} />
+	{/if}
 </section>
 
 <style>
