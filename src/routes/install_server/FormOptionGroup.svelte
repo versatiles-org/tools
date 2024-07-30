@@ -4,25 +4,14 @@
 
 	export let group: string;
 	export let options: { key: string; title: string }[] = [];
-	export let onChange: (key: string) => void;
+	export let selected: string;
 
-	let selectedKey = '';
-
-	function handleChange(event: Event) {
-		selectedKey = (event.target as HTMLInputElement).value;
-		onChange(selectedKey);
-	}
+	$: selectedKey = selected;
 </script>
 
 <div>
 	{#each options as option}
-		<FormOption
-			{group}
-			key={option.key}
-			title={option.title}
-			{selectedKey}
-			onChange={handleChange}
-		/>
+		<FormOption {group} key={option.key} title={option.title} bind:selectedKey={selected} />
 	{/each}
 </div>
 

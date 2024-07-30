@@ -9,27 +9,6 @@
 	let selectedData = '';
 	let code = '';
 
-	function handleOSChange(key: string) {
-		selectedOS = key;
-		selectedMethod = '';
-		updateCode();
-	}
-
-	function handleMethodChange(key: string) {
-		selectedMethod = key;
-		updateCode();
-	}
-
-	function handleFrontendChange(key: string) {
-		selectedFrontend = key;
-		updateCode();
-	}
-
-	function handleDataChange(key: string) {
-		selectedData = key;
-		updateCode();
-	}
-
 	const osOptions = [
 		{
 			key: 'linux',
@@ -61,6 +40,12 @@
 
 	$: currentOS = osOptions.find((option) => option.key === selectedOS);
 	$: methodOptions = currentOS ? currentOS.methodOptions : [];
+
+	$: {
+		if (selectedOS || selectedMethod || selectedFrontend || selectedData) {
+			updateCode();
+		}
+	}
 
 	function updateCode() {
 		const lines = [];
@@ -133,27 +118,31 @@
 
 	<h2>1. Select your Operating System</h2>
 	<p>
-		<FormOptionGroup group="os" options={osOptions} onChange={handleOSChange} />
+		<FormOptionGroup group="os" options={osOptions} bind:selected={selectedOS} />
 	</p>
 
 	{#if selectedOS}
 		<h2>2. Choose Installation Method</h2>
 		<p>
-			<FormOptionGroup group="method" options={methodOptions} onChange={handleMethodChange} />
+			<FormOptionGroup group="method" options={methodOptions} bind:selected={selectedMethod} />
 		</p>
 	{/if}
 
 	{#if selectedMethod}
 		<h2>3. Do you want to include a Frontend</h2>
 		<p>
-			<FormOptionGroup group="frontend" options={frontendOptions} onChange={handleFrontendChange} />
+			<FormOptionGroup
+				group="frontend"
+				options={frontendOptions}
+				bind:selected={selectedFrontend}
+			/>
 		</p>
 	{/if}
 
 	{#if selectedFrontend}
 		<h2>4. Select Map Data</h2>
 		<p>
-			<FormOptionGroup group="data" options={dataOptions} onChange={handleDataChange} />
+			<FormOptionGroup group="data" options={dataOptions} bind:selected={selectedData} />
 		</p>
 	{/if}
 
