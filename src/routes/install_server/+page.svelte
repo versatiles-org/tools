@@ -6,6 +6,7 @@
 	let selectedOS = '';
 	let selectedMethod = '';
 	let selectedFrontend = '';
+	let selectedData = '';
 	let code = '';
 
 	function handleOSChange(key: string) {
@@ -21,6 +22,11 @@
 
 	function handleFrontendChange(key: string) {
 		selectedFrontend = key;
+		updateCode();
+	}
+
+	function handleDataChange(key: string) {
+		selectedData = key;
 		updateCode();
 	}
 
@@ -46,6 +52,11 @@
 	const frontendOptions = [
 		{ key: 'yes', title: 'Yes, please!' },
 		{ key: 'no', title: 'Nope' }
+	];
+
+	const dataOptions = [
+		{ key: 'world', title: 'World' },
+		{ key: 'berlin', title: 'Berlin' }
 	];
 
 	$: currentOS = osOptions.find((option) => option.key === selectedOS);
@@ -82,9 +93,30 @@
 			case 'yes':
 				lines.push(
 					'\n# Download Frontend',
-					'wget "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
+					'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 				);
 				break;
+		}
+
+		switch (selectedData) {
+			case 'world':
+				lines.push(
+					`\n# Download Data\nwget -c -O ${selectedData}.versatiles "https://download.versatiles.org/osm.versatiles"`
+				);
+				break;
+			case 'berlin':
+				lines.push(
+					'\n# Download Data',
+					`versatiles convert --bbox-border 3 --bbox "13.1,52.3,13.7,52.7" https://download.versatiles.org/osm.versatiles ${selectedData}.versatiles`
+				);
+				break;
+		}
+
+		if (selectedData) {
+			const start = ['versatiles server -p 80'];
+			if (selectedFrontend === 'yes') start.push('-s frontend.br.tar');
+			start.push(`[osm]${selectedData}.versatiles`);
+			lines.push('\n# Start Server', start.join(' '));
 		}
 
 		code = lines.join('\n');
@@ -115,6 +147,13 @@
 		<h2>3. Do you want to include a Frontend</h2>
 		<p>
 			<FormOptionGroup group="frontend" options={frontendOptions} onChange={handleFrontendChange} />
+		</p>
+	{/if}
+
+	{#if selectedFrontend}
+		<h2>4. Select Map Data</h2>
+		<p>
+			<FormOptionGroup group="data" options={dataOptions} onChange={handleDataChange} />
 		</p>
 	{/if}
 
