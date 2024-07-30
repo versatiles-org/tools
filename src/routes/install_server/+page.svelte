@@ -1,9 +1,11 @@
-<!-- InstallationGuide.svelte -->
+<!-- +page.svelte -->
 <script lang="ts">
 	import FormOptionGroup from './FormOptionGroup.svelte';
+	import CodeBlock from './CodeBlock.svelte';
 
 	let selectedOS = '';
 	let selectedMethod = '';
+	let code = [];
 
 	function handleOSChange(key: string) {
 		selectedOS = key;
@@ -35,6 +37,34 @@
 
 	$: currentOS = osOptions.find((option) => option.key === selectedOS);
 	$: methodOptions = currentOS ? currentOS.methodOptions : [];
+
+	function getCode(): string {
+		const code = [];
+		switch (selectedMethod) {
+			case 'homebrew':
+				code.push(
+					'# Install VersaTiles',
+					'brew tap versatiles-org/versatiles',
+					'brew install versatiles'
+				);
+				break;
+			case 'script':
+				code.push(
+					'# Install VersaTiles',
+					'curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-linux.sh" | bash'
+				);
+				break;
+			case 'compile':
+				code.push(
+					'# Install Rust',
+					'curl https://sh.rustup.rs -sSf | sh',
+					'# Compile and Install VersaTiles',
+					'cargo install versatiles'
+				);
+				break;
+		}
+		return code.join('\n');
+	}
 </script>
 
 <svelte:head>
@@ -44,8 +74,8 @@
 
 <section>
 	<h1>How to install VersaTiles?</h1>
-	<h2>1. Install Server</h2>
-	<p>Select your operating System:</p>
+
+	<h2>1. Select your Operating System</h2>
 	<p>
 		<FormOptionGroup group="os" options={osOptions} onChange={handleOSChange} />
 	</p>
@@ -58,27 +88,14 @@
 		</p>
 	{/if}
 
-	{#if selectedMethod}
-		<h2>3. Follow the Instructions</h2>
-		{#if selectedMethod === 'homebrew'}
-			<p>Install using Homebrew:</p>
-			<pre>
-				brew tap versatiles-org/versatiles
-				brew install versatiles
-			</pre>
-		{/if}
-		{#if selectedMethod === 'script'}
-			<p>Install using Install Script:</p>
-			<pre>curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-linux.sh" | bash</pre>
-		{/if}
-		{#if selectedMethod === 'compile'}
-			<p>Compile with Rust:</p>
-			<pre>
-				# Install Rust
-				curl https://sh.rustup.rs -sSf | sh
-				# Compile and Install VersaTiles
-				cargo install versatiles
-			  </pre>
-		{/if}
-	{/if}
+	<hr />
+
+	<h2>Instructions</h2>
+	<CodeBlock code={getCode()} />
 </section>
+
+<style>
+	hr {
+		margin: 3em;
+	}
+</style>
