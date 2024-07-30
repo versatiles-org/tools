@@ -23,10 +23,3 @@
 		onChange={handleChange}
 	/>
 {/each}
-
-<style>
-	/* Add your styles here */
-	:global(form) {
-		margin-bottom: 1em;
-	}
-</style>
