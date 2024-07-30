@@ -22,23 +22,26 @@
 <style>
 	.code-container {
 		position: relative;
-		margin-bottom: 1em;
+		margin: 0 auto 1em;
 		font-size: 0.7em;
+		width: 90%;
 	}
 	button {
 		position: absolute;
 		top: 0;
 		right: 0;
 		padding: 0.5em;
-		background: #000;
+		background: rgba(0, 0, 0, 0.5);
 		color: white;
 		border: none;
 		cursor: pointer;
 		border: 1px solid rgba(255, 255, 255, 0.2);
 		border-radius: 5px;
+		opacity: 0.5;
 	}
 	button:hover {
 		background-color: rgba(255, 255, 255, 0.2);
 		border-color: rgba(255, 255, 255, 0.8);
+		opacity: 1;
 	}
 </style>

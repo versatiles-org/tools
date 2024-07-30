@@ -78,7 +78,7 @@
 			case 'yes':
 				lines.push(
 					'\n# download frontend',
-					'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
+					'wget -Lq "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 				);
 				break;
 		}
