@@ -1,3 +1,4 @@
+<!-- CodeBlock.svelte -->
 <script lang="ts">
 	import Highlight from 'svelte-highlight';
 	import bash from 'svelte-highlight/languages/bash';

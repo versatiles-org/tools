@@ -1,17 +1,18 @@
 <!-- FormOptionGroup.svelte -->
 <script lang="ts">
 	import FormOption from './FormOption.svelte';
+	
+	type Option = { key: string; title: string };
 
 	export let group: string;
-	export let options: { key: string; title: string }[] = [];
-	export let selected: string;
+	export let options: Option[] = [];
+	export let selectedOption: Option;
 
-	$: selectedKey = selected;
 </script>
 
 <div>
 	{#each options as option}
-		<FormOption {group} key={option.key} title={option.title} bind:selectedKey={selected} />
+		<FormOption {group} {option} bind:selectedOption />
 	{/each}
 </div>
 

@@ -1,18 +1,19 @@
 <!-- FormOption.svelte -->
 <script lang="ts">
+	type Option = { key: string; title: string };
+
 	export let group: string;
-	export let key: string;
-	export let title: string;
-	export let selectedKey: string;
+	export let option: Option;
+	export let selectedOption: Option;
 
 	function handleChange(event: Event) {
-		selectedKey = (event.target as HTMLInputElement).value;
+		selectedOption = option;
 	}
 </script>
 
-<label class:selected={selectedKey === key}>
-	<input on:change={handleChange} type="radio" name={group} value={key} bind:group={selectedKey} />
-	{title}
+<label class:selected={selectedOption?.key === option.key}>
+	<input on:change={handleChange} type="radio" name={group} value={option.key} />
+	{option.title}
 </label>
 
 <style>

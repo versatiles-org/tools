@@ -1,12 +1,14 @@
 <!-- +page.svelte -->
 <script lang="ts">
-	import FormOptionGroup from './FormOptionGroup.svelte';
-	import CodeBlock from './CodeBlock.svelte';
+	import BBoxMap from '$lib/BBoxMap/BBoxMap.svelte';
+	import CodeBlock from '$lib/CodeBlock/CodeBlock.svelte';
+	import FormOptionGroup from '$lib/FormOption/FormOptionGroup.svelte';
 
-	let selectedOS = '';
-	let selectedMethod = '';
-	let selectedFrontend = '';
-	let selectedData = '';
+	let selectedOS = null;
+	let selectedMethod = null;
+	let selectedFrontend = null;
+	let selectedData = null;
+	let selectedBBox: [number, number, number, number];
 	let code = '';
 
 	const osOptions = [
@@ -35,11 +37,8 @@
 
 	const dataOptions = [
 		{ key: 'world', title: 'World' },
-		{ key: 'berlin', title: 'Berlin' }
+		{ key: 'bbox', title: 'Just a part of it' }
 	];
-
-	$: currentOS = osOptions.find((option) => option.key === selectedOS);
-	$: methodOptions = currentOS ? currentOS.methodOptions : [];
 
 	$: {
 		if (selectedOS || selectedMethod || selectedFrontend || selectedData) {
@@ -50,7 +49,7 @@
 	function updateCode() {
 		const lines = [];
 
-		switch (selectedMethod) {
+		switch (selectedMethod?.key) {
 			case 'homebrew':
 				lines.push(
 					'# install versatiles',
@@ -74,33 +73,34 @@
 				break;
 		}
 
-		switch (selectedFrontend) {
+		switch (selectedFrontend?.key) {
 			case 'yes':
 				lines.push(
 					'\n# download frontend',
-					'wget -Lq "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
+					'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 				);
 				break;
 		}
 
-		switch (selectedData) {
+		switch (selectedData?.key) {
 			case 'world':
 				lines.push(
-					`\n# download data\nwget -c -O ${selectedData}.versatiles "https://download.versatiles.org/osm.versatiles"`
+					'\n# download map data',
+					`wget -c -O osm.versatiles "https://download.versatiles.org/osm.versatiles"`
 				);
 				break;
 			case 'berlin':
 				lines.push(
-					'\n# download data',
-					`versatiles convert --bbox-border 3 --bbox "13.1,52.3,13.7,52.7" https://download.versatiles.org/osm.versatiles ${selectedData}.versatiles`
+					'\n# download map data',
+					`versatiles convert --bbox-border 3 --bbox "13.1,52.3,13.7,52.7" https://download.versatiles.org/osm.versatiles osm.versatiles`
 				);
 				break;
 		}
 
 		if (selectedData) {
 			const start = ['versatiles server -p 80'];
-			if (selectedFrontend === 'yes') start.push('-s frontend.br.tar');
-			start.push(`[osm]${selectedData}.versatiles`);
+			if (selectedFrontend?.key === 'yes') start.push('-s frontend.br.tar');
+			start.push(`osm.versatiles`);
 			lines.push('\n# start server', start.join(' '));
 		}
 
@@ -117,34 +117,35 @@
 	<h1>How to install VersaTiles?</h1>
 
 	<h2>1. Select your Operating System</h2>
-	<p>
-		<FormOptionGroup group="os" options={osOptions} bind:selected={selectedOS} />
-	</p>
+	<FormOptionGroup group="os" options={osOptions} bind:selectedOption={selectedOS} />
 
 	{#if selectedOS}
 		<h2>2. Choose Installation Method</h2>
-		<p>
-			<FormOptionGroup group="method" options={methodOptions} bind:selected={selectedMethod} />
-		</p>
+		<FormOptionGroup
+			group="method"
+			options={selectedOS?.methodOptions}
+			bind:selectedOption={selectedMethod}
+		/>
 	{/if}
 
 	{#if selectedMethod}
 		<h2>3. Do you want to include a Frontend</h2>
-		<p>
-			<FormOptionGroup
-				group="frontend"
-				options={frontendOptions}
-				bind:selected={selectedFrontend}
-			/>
-		</p>
+		<FormOptionGroup
+			group="frontend"
+			options={frontendOptions}
+			bind:selectedOption={selectedFrontend}
+		/>
 	{/if}
 
 	{#if selectedFrontend}
 		<h2>4. Select Map Data</h2>
-		<p>
-			<FormOptionGroup group="data" options={dataOptions} bind:selected={selectedData} />
-		</p>
+		<FormOptionGroup group="data" options={dataOptions} bind:selectedOption={selectedData} />
+
+		{#if selectedData?.key == 'bbox'}
+			<div></div>
+		{/if}
 	{/if}
+	<BBoxMap bind:selectedBBox />
 
 	{#if selectedMethod}
 		<hr />
