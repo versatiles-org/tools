@@ -5,7 +5,7 @@
 
 <section>
 	<ul>
-		<li><a href="install_server">Install Server</a></li>
+		<li><a href="setup_server">Setup Server</a></li>
 	</ul>
 </section>
 
