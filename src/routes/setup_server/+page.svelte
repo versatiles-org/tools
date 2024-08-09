@@ -139,7 +139,7 @@
 		<FormOptionGroup group="data" options={dataOptions} bind:selectedOption={selectedData} />
 
 		{#if selectedData?.key == 'bbox'}
-			<div style="width:80vmin; height:60vmin; margin:auto">
+			<div style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:auto">
 				<BBoxMap bind:selectedBBox />
 			</div>
 		{/if}

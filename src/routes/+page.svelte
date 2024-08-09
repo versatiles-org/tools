@@ -4,6 +4,7 @@
 </svelte:head>
 
 <section>
+	<p>Available Apps:</p>
 	<ul>
 		<li><a href="setup_server">Setup Server</a></li>
 	</ul>
