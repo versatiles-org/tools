@@ -41,7 +41,7 @@
 	];
 
 	$: {
-		if (selectedOS || selectedMethod || selectedFrontend || selectedData) {
+		if (selectedOS || selectedMethod || selectedFrontend || selectedData || selectedBBox) {
 			updateCode();
 		}
 	}
@@ -82,19 +82,16 @@
 				break;
 		}
 
-		switch (selectedData?.key) {
-			case 'world':
-				lines.push(
-					'\n# download map data',
-					`wget -c -O osm.versatiles "https://download.versatiles.org/osm.versatiles"`
-				);
-				break;
-			case 'berlin':
-				lines.push(
-					'\n# download map data',
-					`versatiles convert --bbox-border 3 --bbox "13.1,52.3,13.7,52.7" https://download.versatiles.org/osm.versatiles osm.versatiles`
-				);
-				break;
+		if (selectedData?.key == 'world') {
+			lines.push(
+				'\n# download map data',
+				`wget -c -O osm.versatiles "https://download.versatiles.org/osm.versatiles"`
+			);
+		} else if (selectedBBox && selectedData?.key == 'bbox') {
+			lines.push(
+				'\n# download map data',
+				`versatiles convert --bbox-border 3 --bbox "${selectedBBox.join(',')}" https://download.versatiles.org/osm.versatiles osm.versatiles`
+			);
 		}
 
 		if (selectedData) {
@@ -142,10 +139,11 @@
 		<FormOptionGroup group="data" options={dataOptions} bind:selectedOption={selectedData} />
 
 		{#if selectedData?.key == 'bbox'}
-			<div></div>
+			<div style="width:80vmin; height:60vmin; margin:auto">
+				<BBoxMap bind:selectedBBox />
+			</div>
 		{/if}
 	{/if}
-	<BBoxMap bind:selectedBBox />
 
 	{#if selectedMethod}
 		<hr />

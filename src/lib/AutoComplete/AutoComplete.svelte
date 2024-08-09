@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+
 	type T = $$Generic;
 
 	// Component properties
-	export let selectedValue: T | undefined = undefined;
 	export let placeholder: string = '';
 	export let minChar: number = 0;
 	export let maxItems: number = 10;
-	export let fromStart: boolean = false;
 
 	// Reactive variables
 	export let items: { key: string; value: T }[];
@@ -38,18 +39,10 @@
 		const searchText = inputText.trim();
 		const searchTextUpper = inputText.toUpperCase();
 		const searchReg = RegExp(regExpEscape(searchText), 'i');
-		const compareFunction = fromStart ? 'startsWith' : 'includes';
 		results = items
-			.filter((item) => item.key.toUpperCase()[compareFunction](searchTextUpper))
+			.filter((item) => item.key.toUpperCase().includes(searchTextUpper))
 			.slice(0, maxItems)
-			.map((item) => {
-				const { key, value } = item;
-				return {
-					key,
-					value,
-					label: key.replace(searchReg, '<span>$&</span>')
-				};
-			});
+			.map((item) => ({ ...item, label: item.key.replace(searchReg, '<span>$&</span>') }));
 	}
 
 	// Handle keyboard navigation
@@ -77,9 +70,7 @@
 		if (index > -1 && results[index]) {
 			const { key, value } = results[index];
 			inputText = key;
-			selectedValue = value;
-		} else if (!selectedValue) {
-			selectedValue = undefined;
+			dispatch('change', JSON.parse(JSON.stringify(value)));
 		}
 	}
 
@@ -117,17 +108,18 @@
 		line-height: normal;
 	}
 
-	input {
-		width: 100%;
-		padding: 0.3em 0.6em;
-		border: none;
-		border-radius: 1em;
-		background-color: rgba(0, 0, 0, 0.8);
-		border: 1px solid #000;
-	}
-
 	.autocomplete {
 		position: relative;
+		border-radius: 0.5em;
+		background: rgba(0, 0, 0, 0.8);
+	}
+
+	input {
+		width: 100%;
+		display: block;
+		padding: 0.3em 0.6em;
+		border: none;
+		background: none;
 	}
 
 	.hide-results {
@@ -137,10 +129,9 @@
 	.autocomplete-results {
 		padding: 0;
 		margin: 0;
-		border: 1px solid #000;
-		background-color: rgba(0, 0, 0, 0.8);
-		width: fit-content;
-		position: absolute;
+		border: none;
+		background: none;
+		width: 100%;
 		z-index: 100;
 	}
 

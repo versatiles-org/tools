@@ -4,7 +4,7 @@
 	import maplibregl, { type Point } from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import type { BBox, BBoxDrag } from './BBoxMap';
-	import { getBBoxDrag, getBBoxGeometry, getCursor, loadBBoxes } from './BBoxMap';
+	import { dragBBox, getBBoxDrag, getBBoxGeometry, getCursor, loadBBoxes } from './BBoxMap';
 	import AutoComplete from '$lib/AutoComplete/AutoComplete.svelte';
 
 	let bboxes: { key: string; value: BBox }[];
@@ -56,25 +56,53 @@
 		}
 
 		let lastDrag: BBoxDrag = false;
+		let dragging = false;
 		map.on('mousemove', (e) => {
-			const drag = getDrag(e.point);
-			if (drag === lastDrag) return;
-			lastDrag = drag;
-			canvas.style.cursor = getCursor(drag) || 'grab';
+			if (dragging) {
+				if (e.originalEvent.buttons % 2) {
+					const { drag, bbox } = dragBBox(selectedBBox, lastDrag, e.lngLat);
+					lastDrag = drag;
+					selectedBBox = bbox;
+					redrawBBox();
+					e.preventDefault();
+				} else {
+					dragging = false;
+				}
+			} else {
+				const drag = getDrag(e.point);
+				if (drag !== lastDrag) {
+					lastDrag = drag;
+					canvas.style.cursor = getCursor(drag) || 'grab';
+				}
+			}
 		});
 
-		return () => {
-			map.remove();
-		};
+		map.on('mousedown', (e) => {
+			if (e.originalEvent.buttons % 2) {
+				const drag = getDrag(e.point);
+				lastDrag = drag;
+				if (drag) {
+					dragging = true;
+					e.preventDefault();
+				}
+			}
+		});
+
+		map.on('mouseup', () => (dragging = false));
+
+		return () => map.remove();
 	});
 
-	// Reactive statement to update bbox source data when selectedBBox changes
-	$: {
-		if (map && map.getSource('bbox')) {
-			if (!selectedBBox) selectedBBox = worldBBox;
+	function redrawBBox() {
+		const bboxSource = map.getSource('bbox') as maplibregl.GeoJSONSource;
+		bboxSource.setData(getBBoxGeometry(selectedBBox));
+	}
 
-			const bboxSource = map.getSource('bbox') as maplibregl.GeoJSONSource;
-			bboxSource.setData(getBBoxGeometry(selectedBBox));
+	function flyTo(bbox: BBox) {
+		if (map && map.getSource('bbox')) {
+			selectedBBox = bbox ?? worldBBox;
+			redrawBBox();
+
 			const transform = map.cameraForBounds(selectedBBox);
 			transform.zoom -= 0.5;
 			map.flyTo({
@@ -94,7 +122,7 @@
 			<AutoComplete
 				items={bboxes}
 				placeholder="Find country, region or city …"
-				bind:selectedValue={selectedBBox}
+				on:change={(e) => flyTo(e.detail)}
 			/>
 		</div>
 	{/if}
@@ -103,9 +131,8 @@
 
 <style>
 	.container {
-		width: 80vmin;
-		height: 80vmin;
-		margin: auto;
+		width: 100%;
+		height: 100%;
 		position: relative;
 	}
 	.map {
