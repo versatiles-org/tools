@@ -114,32 +114,24 @@
 	<h1>How to install VersaTiles?</h1>
 
 	<h2>1. Select your Operating System</h2>
-	<FormOptionGroup group="os" options={osOptions} bind:selectedOption={selectedOS} />
+	<FormOptionGroup options={osOptions} bind:selectedOption={selectedOS} />
 
 	{#if selectedOS}
 		<h2>2. Choose Installation Method</h2>
-		<FormOptionGroup
-			group="method"
-			options={selectedOS?.methodOptions}
-			bind:selectedOption={selectedMethod}
-		/>
+		<FormOptionGroup options={selectedOS?.methodOptions} bind:selectedOption={selectedMethod} />
 	{/if}
 
 	{#if selectedMethod}
 		<h2>3. Do you want to include a Frontend</h2>
-		<FormOptionGroup
-			group="frontend"
-			options={frontendOptions}
-			bind:selectedOption={selectedFrontend}
-		/>
+		<FormOptionGroup options={frontendOptions} bind:selectedOption={selectedFrontend} />
 	{/if}
 
 	{#if selectedFrontend}
 		<h2>4. Select Map Data</h2>
-		<FormOptionGroup group="data" options={dataOptions} bind:selectedOption={selectedData} />
+		<FormOptionGroup options={dataOptions} bind:selectedOption={selectedData} />
 
 		{#if selectedData?.key == 'bbox'}
-			<div style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:auto">
+			<div style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:0.2em auto">
 				<BBoxMap bind:selectedBBox />
 			</div>
 		{/if}
@@ -147,13 +139,17 @@
 
 	{#if selectedMethod}
 		<hr />
-		<h2>Instructions</h2>
+		<h2>Copy & Paste these Instructions</h2>
 		<CodeBlock {code} />
 	{/if}
 </section>
 
 <style>
 	hr {
-		margin: 3em;
+		margin: 5em auto 2em;
+		border: none;
+		height: 1px;
+		background: #888;
+		width: 100vw;
 	}
 </style>
