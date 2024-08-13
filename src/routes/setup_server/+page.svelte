@@ -15,11 +15,11 @@
 	type FrontendOption = Option & { key: 'yes' | 'no' };
 	type DataOption = Option & { key: 'world' | 'bbox' };
 
-	let selectedOS: OSOption = undefined;
-	let selectedMethod: MethodOption = undefined;
-	let selectedFrontend: FrontendOption = undefined;
-	let selectedData: DataOption = undefined;
-	let selectedBBox: [number, number, number, number];
+	let selectedOS: OSOption | undefined = undefined;
+	let selectedMethod: MethodOption | undefined = undefined;
+	let selectedFrontend: FrontendOption | undefined = undefined;
+	let selectedData: DataOption | undefined = undefined;
+	let selectedBBox: [number, number, number, number] | undefined = undefined;
 	let code = '';
 
 	const osOptions: OSOption[] = [
@@ -27,8 +27,9 @@
 			key: 'linux',
 			title: 'Linux',
 			methodOptions: [
-				{ key: 'script_unix', title: 'Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' }
+				{ key: 'script_unix', title: 'Use Install Script' },
+				{ key: 'cargo', title: 'Compile with Rust' },
+				{ key: 'source_code', title: 'Build from Source' }
 			]
 		},
 		{
@@ -36,16 +37,18 @@
 			title: 'MacOS',
 			methodOptions: [
 				{ key: 'homebrew', title: 'Homebrew' },
-				{ key: 'script_unix', title: 'Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' }
+				{ key: 'script_unix', title: 'Use Install Script' },
+				{ key: 'cargo', title: 'Compile with Rust' },
+				{ key: 'source_code', title: 'Build from Source' }
 			]
 		},
 		{
 			key: 'windows',
 			title: 'Windows',
 			methodOptions: [
-				{ key: 'script_windows', title: 'Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' }
+				{ key: 'script_windows', title: 'Use Install Script' },
+				{ key: 'cargo', title: 'Compile with Rust' },
+				{ key: 'source_code', title: 'Build from Source' }
 			]
 		}
 	];
@@ -98,6 +101,20 @@
 				lines.push(
 					'# install versatiles',
 					'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"'
+				);
+				break;
+			case 'source_code':
+				lines.push(
+					'# clone the repository',
+					`git clone https://github.com/versatiles-org/versatiles-rs.git`,
+					'# navigate to the project directory',
+					'cd versatiles-rs',
+					'# build the project',
+					'cargo build --release',
+					'# install the binary',
+					isBash
+						? 'sudo cp target/release/versatiles /usr/local/bin/'
+						: 'Copy-Item "target\\release\\versatiles.exe" "C:\\Program Files\\versatiles\\"'
 				);
 				break;
 		}
