@@ -4,7 +4,7 @@
 	import CodeBlock from '$lib/CodeBlock/CodeBlock.svelte';
 	import FormOptionGroup from '$lib/FormOption/FormOptionGroup.svelte';
 
-	type Option = { title: string };
+	type Option = { title: string; small?: boolean };
 	type OSOption = Option & {
 		key: 'linux' | 'mac' | 'windows';
 		methodOptions: MethodOption[];
@@ -28,8 +28,8 @@
 			title: 'Linux',
 			methodOptions: [
 				{ key: 'script_unix', title: 'Use Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' },
-				{ key: 'source_code', title: 'Build from Source' }
+				{ key: 'cargo', title: 'Compile with Rust', small: true },
+				{ key: 'source_code', title: 'Build from Source', small: true }
 			]
 		},
 		{
@@ -38,8 +38,8 @@
 			methodOptions: [
 				{ key: 'homebrew', title: 'Homebrew' },
 				{ key: 'script_unix', title: 'Use Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' },
-				{ key: 'source_code', title: 'Build from Source' }
+				{ key: 'cargo', title: 'Compile with Rust', small: true },
+				{ key: 'source_code', title: 'Build from Source', small: true }
 			]
 		},
 		{
@@ -47,8 +47,8 @@
 			title: 'Windows',
 			methodOptions: [
 				{ key: 'script_windows', title: 'Use Install Script' },
-				{ key: 'cargo', title: 'Compile with Rust' },
-				{ key: 'source_code', title: 'Build from Source' }
+				{ key: 'cargo', title: 'Compile with Rust', small: true },
+				{ key: 'source_code', title: 'Build from Source', small: true }
 			]
 		}
 	];
@@ -165,25 +165,34 @@
 	<meta name="description" content="How to install VersaTiles?" />
 </svelte:head>
 
-<section>
+<section class="form">
 	<h1>How to install VersaTiles?</h1>
 
 	<h2>1. Select your Operating System</h2>
-	<FormOptionGroup options={osOptions} bind:selectedOption={selectedOS} />
+	<div class="options">
+		<FormOptionGroup options={osOptions} bind:selectedOption={selectedOS} />
+	</div>
 
 	{#if selectedOS}
 		<h2>2. Choose Installation Method</h2>
-		<FormOptionGroup options={selectedOS?.methodOptions} bind:selectedOption={selectedMethod} />
+		<div class="options">
+			<FormOptionGroup options={selectedOS?.methodOptions} bind:selectedOption={selectedMethod} />
+		</div>
 	{/if}
 
-	{#if selectedMethod}
-		<h2>3. Do you want to include a Frontend</h2>
-		<FormOptionGroup options={frontendOptions} bind:selectedOption={selectedFrontend} />
+	{#if selectedOS && selectedMethod}
+		<h2>3. Do you want to add a Frontend?</h2>
+		<p class="small">The frontend includes MapLibre-GL-JS, styles, fonts, sprites, tools etc.</p>
+		<div class="options">
+			<FormOptionGroup options={frontendOptions} bind:selectedOption={selectedFrontend} />
+		</div>
 	{/if}
 
-	{#if selectedFrontend}
+	{#if selectedOS && selectedMethod && selectedFrontend}
 		<h2>4. Select Map Data</h2>
-		<FormOptionGroup options={dataOptions} bind:selectedOption={selectedData} />
+		<div class="options">
+			<FormOptionGroup options={dataOptions} bind:selectedOption={selectedData} />
+		</div>
 
 		{#if selectedData?.key == 'bbox'}
 			<div
@@ -193,8 +202,10 @@
 			</div>
 		{/if}
 	{/if}
+</section>
 
-	{#if selectedMethod}
+<section>
+	{#if selectedOS && selectedMethod}
 		<hr />
 		<h2>Paste these Instructions to your Shell</h2>
 		<CodeBlock {code} />
@@ -208,5 +219,17 @@
 		height: 1px;
 		background: #888;
 		width: 100vw;
+	}
+	.form h2 {
+		margin-bottom: 0;
+	}
+	p.small {
+		margin-top: 0.2em;
+		font-size: 0.7em;
+		text-align: center;
+		opacity: 0.8;
+	}
+	div.options {
+		margin-top: 1em;
 	}
 </style>
