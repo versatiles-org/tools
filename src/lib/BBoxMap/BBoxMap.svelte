@@ -12,15 +12,26 @@
 	const worldBBox: BBox = [-180, -85, 180, 85];
 	export let selectedBBox: BBox = worldBBox;
 	let map: maplibregl.Map; // Declare map instance at the top level
+	let initialCountry: string = ''; // Initial search text
 
 	onMount(() => {
+		// Fetch country from timezone
+		try {
+			const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+			const region = new Intl.DisplayNames([locale], { type: 'region' });
+			const country = region.of(locale.split('-')[1]);
+			initialCountry = country || '';
+		} catch (error) {
+			console.error('Could not determine country from timezone:', error);
+			initialCountry = ''; // Fallback if no country can be determined
+		}
+
 		map = new maplibregl.Map({
 			container,
 			style: 'https://tiles.versatiles.org/assets/styles/colorful.json',
 			bounds: selectedBBox,
 			renderWorldCopies: false,
 			dragRotate: false,
-
 			attributionControl: { compact: false }
 		});
 
@@ -99,8 +110,9 @@
 	}
 
 	function flyTo(bbox: BBox) {
+		selectedBBox = bbox ?? worldBBox;
+		console.log(selectedBBox);
 		if (map && map.getSource('bbox')) {
-			selectedBBox = bbox ?? worldBBox;
 			redrawBBox();
 
 			const transform = map.cameraForBounds(selectedBBox);
@@ -122,6 +134,7 @@
 			<AutoComplete
 				items={bboxes}
 				placeholder="Find country, region or city …"
+				initialText={initialCountry}
 				on:change={(e) => flyTo(e.detail)}
 			/>
 		</div>

@@ -181,7 +181,7 @@
 	{/if}
 
 	{#if selectedOS && selectedMethod}
-		<h2>3. Do you want to add a Frontend?</h2>
+		<h2>3. Add a Frontend?</h2>
 		<p class="small">The frontend includes MapLibre-GL-JS, styles, fonts, sprites, tools etc.</p>
 		<div class="options">
 			<FormOptionGroup options={frontendOptions} bind:selectedOption={selectedFrontend} />
@@ -196,7 +196,7 @@
 
 		{#if selectedData?.key == 'bbox'}
 			<div
-				style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:0.2em auto"
+				style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:0.5em auto"
 			>
 				<BBoxMap bind:selectedBBox />
 			</div>
