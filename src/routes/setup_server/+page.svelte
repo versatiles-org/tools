@@ -1,8 +1,8 @@
 <!-- +page.svelte -->
 <script lang="ts">
-	import BBoxMap from '$lib/BBoxMap/BBoxMap.svelte';
 	import CodeBlock from '$lib/CodeBlock/CodeBlock.svelte';
 	import FormOptionGroup from '$lib/FormOption/FormOptionGroup.svelte';
+	import { BBoxMap } from '@versatiles/svelte';
 
 	type Option = { title: string; small?: boolean };
 	type OSOption = Option & {
@@ -70,14 +70,14 @@
 	}
 
 	function updateCode() {
-		const isBash = selectedOS?.key != 'windows';
+		const isNotPowershell = selectedOS?.key != 'windows';
 		const lines = [];
 
 		switch (selectedMethod?.key) {
 			case 'cargo':
 				lines.push(
 					'# install rust, also see: https://www.rust-lang.org/tools/install',
-					isBash
+					isNotPowershell
 						? 'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh'
 						: 'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe\n.\\rustup-init.exe',
 					'# compile and install versatiles',
@@ -112,7 +112,7 @@
 					'# build the project',
 					'cargo build --release',
 					'# install the binary',
-					isBash
+					isNotPowershell
 						? 'sudo cp target/release/versatiles /usr/local/bin/'
 						: 'Copy-Item "target\\release\\versatiles.exe" "C:\\Program Files\\versatiles\\"'
 				);
@@ -122,7 +122,7 @@
 		if (selectedFrontend?.key == 'yes') {
 			lines.push(
 				'\n# download frontend',
-				isBash
+				isNotPowershell
 					? 'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 					: 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar" -OutFile "frontend.br.tar"'
 			);
@@ -131,15 +131,15 @@
 		if (selectedData?.key == 'world') {
 			lines.push(
 				'\n# download map data',
-				isBash
+				isNotPowershell
 					? `wget -c -O osm.versatiles "https://download.versatiles.org/osm.versatiles"`
 					: 'Invoke-WebRequest -Uri "https://download.versatiles.org/osm.versatiles" -OutFile "osm.versatiles"'
 			);
 		} else if (selectedBBox && selectedData?.key == 'bbox') {
 			lines.push(
-				'\n# download map data',
+				'\n# download an extract of the map data',
 				[
-					`versatiles${isBash ? '' : '.exe'} convert`,
+					`versatiles${isNotPowershell ? '' : '.exe'} convert`,
 					'--bbox-border 3',
 					`--bbox "${selectedBBox.join(',')}"`,
 					'"https://download.versatiles.org/osm.versatiles"',
@@ -149,7 +149,7 @@
 		}
 
 		if (selectedData) {
-			let start = isBash ? 'versatiles' : 'versatiles.exe';
+			let start = isNotPowershell ? 'versatiles' : 'versatiles.exe';
 			start += ' server -p 80';
 			if (selectedFrontend?.key === 'yes') start += ' -s "frontend.br.tar"';
 			start += ` "osm.versatiles"`;
@@ -196,7 +196,7 @@
 
 		{#if selectedData?.key == 'bbox'}
 			<div
-				style="width:80vmin; height:60vmin; max-width:600px; max-height:450px; margin:0.5em auto"
+				style="width:80vmin;height:60vmin;max-width:600px;max-height:450px;margin:0.5em auto;color-scheme:dark;"
 			>
 				<BBoxMap bind:selectedBBox />
 			</div>
