@@ -3,8 +3,7 @@
 	import github from '$lib/images/github.svg';
 </script>
 
-<header>
-</header>
+<header></header>
 
 <style>
 	header {

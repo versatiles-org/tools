@@ -35,12 +35,12 @@ jobs:
 
       - name: Render Site
         run: npm run build
-        
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./build
-  
+
   deploy:
     needs: build
 
