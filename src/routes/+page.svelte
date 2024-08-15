@@ -7,6 +7,7 @@
 	<p>Available Apps:</p>
 	<ul>
 		<li><a href="setup_server">Setup Server</a></li>
+		<li><a href="bounding_box">Find a bounding box</a></li>
 	</ul>
 </section>
 

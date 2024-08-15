@@ -1,10 +1,24 @@
 <!-- CodeBlock.svelte -->
 <script lang="ts">
 	import Highlight from 'svelte-highlight';
-	import bash from 'svelte-highlight/languages/bash';
+	import { bash, json } from 'svelte-highlight/languages';
 	import github from 'svelte-highlight/styles/github-dark';
 
+	const languages = {
+		bash,
+		json
+	} as const;
+
+	type LanguageName = keyof typeof languages;
+	type LanguageType = (typeof languages)[LanguageName];
+
 	export let code = '';
+	export let languageName: LanguageName = 'bash';
+	let language: LanguageType = bash;
+
+	$: {
+		language = languages[languageName];
+	}
 
 	function copyToClipboard() {
 		navigator.clipboard.writeText(code);
@@ -16,7 +30,7 @@
 </svelte:head>
 
 <div class="code-container">
-	<Highlight language={bash} {code} />
+	<Highlight {language} {code} style="text-align:center" />
 	<button on:click={copyToClipboard}>copy</button>
 </div>
 
