@@ -13,7 +13,7 @@
 	type LanguageType = (typeof languages)[LanguageName];
 
 	export let code = '';
-	export let style;
+	export let style = '';
 	export let languageName: LanguageName = 'bash';
 	let language: LanguageType = bash;
 
