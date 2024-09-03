@@ -123,7 +123,7 @@
 			lines.push(
 				'\n# download frontend',
 				isNotPowershell
-					? 'wget -Ls "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
+					? 'wget "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
 					: 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar" -OutFile "frontend.br.tar"'
 			);
 		}

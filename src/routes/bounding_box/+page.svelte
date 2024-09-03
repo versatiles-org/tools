@@ -33,7 +33,7 @@
 		<BBoxMap bind:selectedBBox />
 	</div>
 	<div style="max-width: 30em; margin: 0 auto;">
-		<CodeBlock {code} languageName="json" />
+		<CodeBlock {code} style="text-align:center" languageName="json" />
 	</div>
 </section>
 

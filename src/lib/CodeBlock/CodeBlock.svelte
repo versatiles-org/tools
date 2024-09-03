@@ -13,6 +13,7 @@
 	type LanguageType = (typeof languages)[LanguageName];
 
 	export let code = '';
+	export let style;
 	export let languageName: LanguageName = 'bash';
 	let language: LanguageType = bash;
 
@@ -30,7 +31,7 @@
 </svelte:head>
 
 <div class="code-container">
-	<Highlight {language} {code} style="text-align:center" />
+	<Highlight {language} {code} {style} />
 	<button on:click={copyToClipboard}>copy</button>
 </div>
 
