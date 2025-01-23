@@ -123,8 +123,8 @@
 			lines.push(
 				'\n# download frontend',
 				isNotPowershell
-					? 'wget "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar"'
-					: 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar" -OutFile "frontend.br.tar"'
+					? 'wget "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar.gz"'
+					: 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar.gz" -OutFile "frontend.br.tar.gz"'
 			);
 		}
 
@@ -151,7 +151,7 @@
 		if (selectedData) {
 			let start = isNotPowershell ? 'versatiles' : 'versatiles.exe';
 			start += ' server -p 80';
-			if (selectedFrontend?.key === 'yes') start += ' -s "frontend.br.tar"';
+			if (selectedFrontend?.key === 'yes') start += ' -s "frontend.br.tar.gz"';
 			start += ` "osm.versatiles"`;
 			lines.push('\n# start server at port 80', start);
 		}
