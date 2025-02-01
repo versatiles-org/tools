@@ -2,5 +2,14 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [sveltekit()]
+	plugins: [sveltekit()],
+	build: {
+		target: 'esnext',
+		chunkSizeWarningLimit: 1024
+	},
+	optimizeDeps: {
+		esbuildOptions: {
+			target: 'esnext'
+		}
+	}
 });

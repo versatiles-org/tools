@@ -1,23 +1,17 @@
 <!-- +page.svelte -->
 <script lang="ts">
-	import CodeBlock from '$lib/CodeBlock/CodeBlock.svelte';
+	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 
 	let selectedBBox: [number, number, number, number] | undefined = undefined;
 	let code = '';
 
 	$: {
-		if (selectedBBox) {
-			updateCode();
-		}
+		if (selectedBBox) updateCode();
 	}
 
 	function updateCode() {
-		if (selectedBBox) {
-			code = JSON.stringify(selectedBBox);
-		} else {
-			code = '';
-		}
+		code = selectedBBox ? JSON.stringify(selectedBBox) : '';
 	}
 </script>
 
