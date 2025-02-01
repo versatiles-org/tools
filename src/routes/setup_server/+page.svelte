@@ -1,7 +1,7 @@
 <!-- +page.svelte -->
 <script lang="ts">
-	import CodeBlock from '$lib/CodeBlock/CodeBlock.svelte';
-	import FormOptionGroup from '$lib/FormOption/FormOptionGroup.svelte';
+	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
+	import FormOptionGroup from '../../lib/FormOption/FormOptionGroup.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 
 	type Option = { title: string; small?: boolean };
