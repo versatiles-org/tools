@@ -6,10 +6,5 @@ export default defineConfig({
 	build: {
 		target: 'esnext',
 		chunkSizeWarningLimit: 1024
-	},
-	optimizeDeps: {
-		esbuildOptions: {
-			target: 'esnext'
-		}
 	}
 });

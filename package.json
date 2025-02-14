@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"build-bboxes": "tsx ./build-bboxes.ts",
-		"build": "vite build",
+		"build": "svelte-kit sync && vite build",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"dev": "vite dev",
@@ -35,7 +35,7 @@
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.17.2",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
-		"@versatiles/svelte": "^1.0.1",
+		"@versatiles/svelte": "^1.0.2",
 		"globals": "^15.15.0",
 		"maplibre-gl": "^5.1.0",
 		"svelte": "^5.20.0",
