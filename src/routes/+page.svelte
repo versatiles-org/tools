@@ -3,20 +3,9 @@
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section>
-	<p>Available Apps:</p>
-	<ul>
-		<li><a href="setup_server">Setup Server</a></li>
-		<li><a href="bounding_box">Find a bounding box</a></li>
-	</ul>
-</section>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-</style>
+<h1>VersaTiles Tools</h1>
+<p>We've prepared some tools to help you get started with VersaTiles:</p>
+<ul>
+	<li><a href="setup_server">Setup a new server</a></li>
+	<li><a href="bounding_box">Find a bounding box</a></li>
+</ul>

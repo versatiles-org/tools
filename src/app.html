@@ -2,12 +2,62 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>VersaTiles Apps</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Tools</title>
+		<meta name="viewport" content="width=device-width" />
+
+		<link
+			rel="shortcut icon"
+			sizes="16x16 24x24 32x32 48x48 64x64"
+			href="https://versatiles.org/assets/logo/favicon.ico"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			href="https://versatiles.org/assets/logo/versatiles.32.png"
+			sizes="32x32"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			href="https://versatiles.org/assets/logo/versatiles.48.png"
+			sizes="48x48"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			href="https://versatiles.org/assets/logo/versatiles.64.png"
+			sizes="64x64"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			href="https://versatiles.org/assets/logo/versatiles.96.png"
+			sizes="96x96"
+		/>
+
+		<link rel="stylesheet" href="https://versatiles.org/assets/style.css" />
 		%sveltekit.head%
 	</head>
 
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
+	<body>
+		<header>
+			<nav>
+				<ul>
+					<li><a href="https://versatiles.org/">Overview</a></li>
+					<li class="selected"><a href="https://versatiles.org/tools/">Tools</a></li>
+					<li><a href="https://versatiles.org/playground/">Playground</a></li>
+					<li><a href="https://docs.versatiles.org/">Documentation</a></li>
+					<li class="github-icon"><a href="https://github.com/versatiles-org/"></a></li>
+				</ul>
+			</nav>
+		</header>
+		<main>%sveltekit.body%</main>
+		<footer>
+			<div id="github-link">
+				<a target="_blank" href="https://github.com/versatiles-org/tools"
+					>Improve this page on GitHub</a
+				>
+			</div>
+		</footer>
 	</body>
 </html>
