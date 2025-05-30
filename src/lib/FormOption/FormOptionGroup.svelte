@@ -24,7 +24,7 @@
 </script>
 
 <div>
-	{#each bigOptions as option}
+	{#each bigOptions as option (option.key)}
 		<button
 			class:selected={selectedOption?.key === option.key}
 			aria-pressed={selectedOption?.key === option.key}
@@ -37,7 +37,7 @@
 
 {#if smallOptions.length > 0}
 	<div class="small">
-		{#each smallOptions as option}
+		{#each smallOptions as option (option.key)}
 			<button
 				class:selected={selectedOption?.key === option.key}
 				aria-pressed={selectedOption?.key === option.key}

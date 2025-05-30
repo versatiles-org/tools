@@ -1,5 +1,7 @@
 <!-- CodeBlock.svelte -->
 <script lang="ts">
+	/* eslint svelte/no-at-html-tags: "off" */
+
 	import Highlight from 'svelte-highlight';
 	import { bash, json } from 'svelte-highlight/languages';
 	import github from 'svelte-highlight/styles/github-dark';
