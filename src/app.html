@@ -44,14 +44,21 @@
 			<nav>
 				<ul>
 					<li><a href="https://versatiles.org/">Overview</a></li>
-					<li class="selected"><a href="https://versatiles.org/tools/">Tools</a></li>
 					<li><a href="https://versatiles.org/playground/">Playground</a></li>
+					<li class="selected"><a href="https://versatiles.org/tools/">Tools</a></li>
 					<li><a href="https://docs.versatiles.org/">Documentation</a></li>
 					<li class="github-icon"><a href="https://github.com/versatiles-org/"></a></li>
 				</ul>
 			</nav>
 		</header>
-		<main>%sveltekit.body%</main>
+		<main
+			class="markdown-body"
+			data-color-mode="dark"
+			data-light-theme="dark"
+			data-dark-theme="dark"
+		>
+			%sveltekit.body%
+		</main>
 		<footer>
 			<div id="github-link">
 				<a target="_blank" href="https://github.com/versatiles-org/tools"
