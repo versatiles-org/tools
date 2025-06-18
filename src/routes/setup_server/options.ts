@@ -1,0 +1,86 @@
+import type { Option } from './FormOption/FormOptionGroup.svelte';
+
+// ### OS Options
+export type KeyOS = 'linux' | 'macos' | 'windows';
+export type OptionOS = Option & { key: KeyOS };
+export const optionsOS: OptionOS[] = [
+	{ key: 'linux', label: 'Linux', hint: 'Debian, Ubuntu, Fedora, Raspberry Pi OS, etc.' },
+	{ key: 'macos', label: 'MacOS', hint: 'MacOS 10.15 (Catalina) or later' },
+	{ key: 'windows', label: 'Windows', hint: 'Windows 10 or later' }
+];
+
+// ### Method Options
+export type OptionMethod = Option & { key: string };
+const methods: (OptionMethod & { os: KeyOS[] })[] = [
+	{ key: 'homebrew', label: 'Homebrew', os: ['macos'] },
+	{
+		key: 'script',
+		label: 'Use Install Script',
+		os: ['linux', 'macos', 'windows']
+	},
+	{
+		key: 'cargo',
+		label: 'Use Cargo',
+		small: true,
+		os: ['linux', 'macos', 'windows']
+	},
+	{
+		key: 'source_code',
+		label: 'Build from Source',
+		small: true,
+		os: ['linux', 'macos', 'windows']
+	}
+];
+export function optionsMethod(os: KeyOS): OptionMethod[] {
+	return methods
+		.filter((method) => method.os.includes(os))
+		.map((method) => ({
+			key: method.key,
+			label: method.label,
+			small: method.small
+		}));
+}
+
+// ### Map Options
+export type KeyMaps = 'osm';
+export type OptionMaps = Option & { key: KeyMaps };
+export const optionsMaps: OptionMaps[] = [{ key: 'osm', label: 'OpenStreetMap' }];
+
+// ### Coverage Options
+export type BBox = [number, number, number, number];
+export type KeyCoverage = 'global' | 'bbox';
+export type OptionCoverage = Option & { key: KeyCoverage };
+export const optionsCoverage: OptionCoverage[] = [
+	{ key: 'global', label: 'Entire World' },
+	{ key: 'bbox', label: 'Custom Bounding Box' }
+];
+
+// ### Frontend Options
+export type KeyFrontend = 'no' | 'standard' | 'dev' | 'min';
+export type OptionFrontend = Option & {
+	key: KeyFrontend;
+	hint: string;
+	name?: string;
+};
+export const optionsFrontend: OptionFrontend[] = [
+	{
+		key: 'standard',
+		label: 'Standard',
+		hint: 'The Standard Frontend includes MapLibre-GL-JS, styles, fonts, sprites.',
+		name: 'frontend',
+		selected: true
+	},
+	{
+		key: 'dev',
+		label: 'Development',
+		name: 'frontend-dev',
+		hint: 'The Development Frontend Includes additional debugging tools and features.'
+	},
+	{
+		key: 'min',
+		label: 'Minimal',
+		name: 'frontend-min',
+		hint: 'The Minimal Frontend Includes only the essential libraries and fonts.'
+	},
+	{ key: 'no', label: 'None', hint: 'No Frontend will be included.' }
+];

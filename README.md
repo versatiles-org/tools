@@ -1,6 +1,7 @@
 # VersaTiles Tools
 
-This repository contains a collection of tools for working with the VersaTiles project.
+This repository contains a collection of tools for working with the VersaTiles
+project.
 
 It deploys the site at: https://versatiles.org/tools/
 
