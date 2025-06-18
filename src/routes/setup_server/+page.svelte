@@ -49,14 +49,14 @@
 <section class="form">
 	<h1>How to install VersaTiles?</h1>
 
-	<h2>1. Select the Operating System</h2>
+	<h2>1. Select your Operating System</h2>
 	<div class="options">
 		<FormOptionGroup options={optionsOS} onselect={(s) => (selectedOS = s)} />
 	</div>
 
 	{#if selectedOS}
 		{#key selectedOS}
-			<h2>2. Select Installation Method</h2>
+			<h2>2. Select an Installation Method</h2>
 			<div class="options">
 				<FormOptionGroup
 					initialSelection={selectedMethod}
@@ -69,8 +69,8 @@
 		{#if selectedMethod}
 			<h2>3. Select Map Data</h2>
 			<p class="small">
-				Currently we only have OpenStreetMap vector data,<br />
-				but more map sources will be added in the future.
+				Currently, only OpenStreetMap vector data is available.<br />
+				More map sources will be added in the future.
 			</p>
 			<div class="options">
 				<FormOptionGroup
@@ -81,7 +81,7 @@
 			</div>
 
 			{#if selectedMaps.length > 0}
-				<h2>4. Select Coverage</h2>
+				<h2>4. Select Coverage Area</h2>
 				<div class="options">
 					<FormOptionGroup options={optionsCoverage} onselect={(s) => (selectedCoverage = s)} />
 				</div>
@@ -108,7 +108,7 @@
 <section>
 	{#if code}
 		<hr />
-		<h2>Paste these Instructions to your Shell</h2>
+		<h2>Paste these Instructions into your Shell</h2>
 		<CodeBlock {code} />
 	{/if}
 </section>
