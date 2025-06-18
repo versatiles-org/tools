@@ -3,7 +3,7 @@ import { Page } from 'cheerio_cms';
 
 process.chdir(new URL('../', import.meta.url).pathname);
 
-let html = await (await fetch('https://versatiles.org/tools.html')).text();
+const html = await (await fetch('https://versatiles.org/tools.html')).text();
 
 const page = new Page(html)
 	.setBaseUrl('https://versatiles.org/tools/')
@@ -11,6 +11,4 @@ const page = new Page(html)
 	.setContent('%sveltekit.body%');
 page.$('main').removeClass('markdown-body');
 
-html = page.render();
-
-writeFileSync('src/app.html', html);
+writeFileSync('src/app.html', page.render());
