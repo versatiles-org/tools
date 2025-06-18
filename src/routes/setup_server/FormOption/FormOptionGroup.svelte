@@ -21,7 +21,7 @@
 		multiselect?: boolean;
 		initialSelection?: MyOption | MyOption[];
 		onmultiselect?: (options: MyOption[]) => void;
-		onselect?: (options: MyOption) => void;
+		onselect?: (options: MyOption | undefined) => void;
 	} = $props();
 
 	let lookup = new Map<string, MyOption>(options.map((o) => [o.key, o]));
@@ -54,9 +54,9 @@
 
 	if (selection.size > 0) {
 		if (multiselect) {
-			onmultiselect?.(Array.from(selection).map((key) => lookup.get(key)));
+			onmultiselect?.(getMultiSelection());
 		} else {
-			onselect?.(lookup.get(selection.values().next().value));
+			onselect?.(getSingleSelection());
 		}
 	} else {
 		if (multiselect) {
@@ -73,12 +73,22 @@
 			} else {
 				selection.add(option.key);
 			}
-			onmultiselect?.(Array.from(selection).map((key) => lookup.get(key)));
+			onmultiselect?.(getMultiSelection());
 		} else {
 			selection.clear();
 			selection.add(option.key);
 		}
 		onselect?.(lookup.get(option.key));
+	}
+
+	function getSingleSelection(): MyOption | undefined {
+		return selection.size === 1 ? lookup.get(selection.values().next().value!) : undefined;
+	}
+
+	function getMultiSelection(): MyOption[] {
+		return Array.from(selection)
+			.map((key) => lookup.get(key))
+			.filter((e) => e != undefined) as MyOption[];
 	}
 </script>
 
@@ -109,8 +119,8 @@
 		</div>
 	{/if}
 
-	{#if selection.size === 1 && selection.values().next().value.hint}
-		<p class="small">{@html selection.values().next().value.hint}</p>
+	{#if !multiselect && getSingleSelection()?.hint}
+		<p class="small">{getSingleSelection()!.hint}</p>
 	{/if}
 {/key}
 
