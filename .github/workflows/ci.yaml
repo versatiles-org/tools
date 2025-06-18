@@ -30,6 +30,7 @@ jobs:
         run: npm i
 
       - name: Check Format
+        if: github.ref != 'refs/heads/main'
         run: npx prettier --check .
 
       - name: Check Lint

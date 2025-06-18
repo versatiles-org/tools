@@ -1,18 +1,25 @@
 import { describe, it, expect } from 'vitest';
 import { generateCode } from './generate_code';
-import type { BBox, OptionCoverage, OptionFrontend, OptionMaps, OptionMethod, OptionOS } from './options';
+import type {
+	BBox,
+	OptionCoverage,
+	OptionFrontend,
+	OptionMaps,
+	OptionMethod,
+	OptionOS
+} from './options';
 import { allMethods, optionsCoverage, optionsFrontend, optionsMaps, optionsOS } from './options';
 
-const osWindows: OptionOS = optionsOS.find(opt => opt.key === 'windows')!;
-const osLinux: OptionOS = optionsOS.find(opt => opt.key === 'linux')!;
-const methodHomebrew: OptionMethod = allMethods.find(opt => opt.key === 'homebrew')!;
-const methodScript: OptionMethod = allMethods.find(opt => opt.key === 'script')!;
-const methodCargo: OptionMethod = allMethods.find(opt => opt.key === 'cargo')!;
-const methodSource: OptionMethod = allMethods.find(opt => opt.key === 'source_code')!;
+const osWindows: OptionOS = optionsOS.find((opt) => opt.key === 'windows')!;
+const osLinux: OptionOS = optionsOS.find((opt) => opt.key === 'linux')!;
+const methodHomebrew: OptionMethod = allMethods.find((opt) => opt.key === 'homebrew')!;
+const methodScript: OptionMethod = allMethods.find((opt) => opt.key === 'script')!;
+const methodCargo: OptionMethod = allMethods.find((opt) => opt.key === 'cargo')!;
+const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source_code')!;
 const maps: OptionMaps[] = optionsMaps;
-const coverageBbox: OptionCoverage = optionsCoverage.find(opt => opt.key === 'bbox')!;
+const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
 const bbox: BBox = [1, 2, 3, 4];
-const frontend: OptionFrontend = optionsFrontend.find(opt => opt.key === 'standard')!;
+const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'standard')!;
 
 describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {
@@ -24,7 +31,9 @@ describe('generateCode', () => {
 
 	it('generates code for script on windows', () => {
 		const code = generateCode(osWindows, methodScript, maps);
-		expect(code).toContain('Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-windows.ps1"');
+		expect(code).toContain(
+			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-windows.ps1"'
+		);
 		expect(code).toContain('Invoke-WebRequest -OutFile "osm.versatiles"');
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
 	});
