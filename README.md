@@ -30,3 +30,14 @@ The following NPM scripts are available:
 | `format`       | Formats all project files using Prettier.                                                                                            |
 | `lint`         | Checks code formatting with Prettier and runs ESLint for code quality.                                                               |
 | `upgrade`      | Updates dependencies, removes lock files and `node_modules`, and reinstalls packages.                                                |
+
+## Tools
+
+### Setup Server Tool
+
+This tool is implemented in [src/routes/setup_server](./src/routes/setup_server):
+
+- The form is defined in [+page.svelte](./src/routes/setup_server/+page.svelte).
+- Options are defined in [options.ts](./src/routes/setup_server/options.ts).
+- The shell code is generated in [generate_code.ts](./src/routes/setup_server/generate_code.ts).
+- The tool uses [FormOptions/FormOptionGroup.svelte](./src/routes/setup_server/FormOptions/FormOptionGroup.svelte) to render the button groups.

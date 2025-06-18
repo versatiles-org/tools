@@ -36,7 +36,7 @@ jobs:
       - name: Check Lint
         run: npx eslint .
 
-      - name: check Svelte
+      - name: Check Svelte
         run: npm run check-svelte
 
       - name: Run Tests
