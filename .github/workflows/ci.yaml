@@ -29,8 +29,17 @@ jobs:
       - name: Install node dependencies
         run: npm i
 
-      - name: Check Site
-        run: npm run check
+      - name: Check Format
+        run: npx prettier --check .
+
+      - name: Check Lint
+        run: npx eslint .
+
+      - name: check Svelte
+        run: npm run check-svelte
+
+      - name: Run Tests
+        run: npm run test
 
       - name: Render Site
         run: npm run build

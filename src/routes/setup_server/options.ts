@@ -11,7 +11,7 @@ export const optionsOS: OptionOS[] = [
 
 // ### Method Options
 export type OptionMethod = Option & { key: string };
-const methods: (OptionMethod & { os: KeyOS[] })[] = [
+export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 	{ key: 'homebrew', label: 'Homebrew', os: ['macos'] },
 	{
 		key: 'script',
@@ -32,7 +32,7 @@ const methods: (OptionMethod & { os: KeyOS[] })[] = [
 	}
 ];
 export function optionsMethod(os: KeyOS): OptionMethod[] {
-	return methods
+	return allMethods
 		.filter((method) => method.os.includes(os))
 		.map((method) => ({
 			key: method.key,
