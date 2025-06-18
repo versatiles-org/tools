@@ -2,8 +2,19 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>Tools</title>
-		<meta name="viewport" content="width=device-width" />
+		<title>VersaTiles - Tools</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="Tools and utilities for VersaTiles" />
+
+		<meta property="og:title" content="VersaTiles - Tools" />
+		<meta property="og:description" content="Tools and utilities for VersaTiles" />
+		<meta property="og:image" content="https://versatiles.org/assets/social.png" />
+		<meta property="og:type" content="website" />
+
+		<meta name="twitter:title" content="VersaTiles - Tools" />
+		<meta name="twitter:description" content="Tools and utilities for VersaTiles" />
+		<meta name="twitter:image" content="https://versatiles.org/assets/social.png" />
+		<meta name="twitter:card" content="summary_large_image" />
 
 		<link
 			rel="shortcut icon"
@@ -39,7 +50,7 @@
 		%sveltekit.head%
 	</head>
 
-	<body>
+	<body data-color-mode="dark" data-light-theme="dark" data-dark-theme="dark">
 		<header>
 			<nav>
 				<ul>
@@ -51,14 +62,7 @@
 				</ul>
 			</nav>
 		</header>
-		<main
-			class="markdown-body"
-			data-color-mode="dark"
-			data-light-theme="dark"
-			data-dark-theme="dark"
-		>
-			%sveltekit.body%
-		</main>
+		<main>%sveltekit.body%</main>
 		<footer>
 			<div id="github-link">
 				<a target="_blank" href="https://github.com/versatiles-org/tools"
