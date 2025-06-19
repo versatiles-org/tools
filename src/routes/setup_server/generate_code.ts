@@ -31,9 +31,9 @@ export function generateCode(
 			case 'script':
 				yield `# Install VersaTiles`;
 				if (os.key === 'windows') {
-					yield 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/helpers/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"';
+					yield 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"';
 				} else {
-					yield 'curl -Ls "https://raw.githubusercontent.com/versatiles-org/versatiles-rs/main/helpers/install-unix.sh" | bash';
+					yield 'curl -Ls "https://raw.githubusercontent.com/versatiles-org/versatiles-rs/main/scripts/install-unix.sh" | bash';
 				}
 				break;
 			case 'cargo':
