@@ -33,7 +33,7 @@ export function generateCode(
 				if (os.key === 'windows') {
 					yield 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"';
 				} else {
-					yield 'curl -Ls "https://raw.githubusercontent.com/versatiles-org/versatiles-rs/main/scripts/install-unix.sh" | bash';
+					yield 'curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-unix.sh" | sudo sh';
 				}
 				break;
 			case 'cargo':
@@ -52,7 +52,7 @@ export function generateCode(
 				yield '# navigate to the project directory';
 				yield 'cd versatiles-rs';
 				yield '# build the project';
-				yield 'cargo build --release';
+				yield 'cargo build --bin versatiles --release';
 				yield '# install the binary';
 				if (os.key === 'windows') {
 					yield 'Copy-Item "target\\release\\versatiles.exe" "C:\\Program Files\\versatiles\\"';
