@@ -12,17 +12,17 @@ describe('optionsMethod', () => {
 	it('should return correct methods for macos', () => {
 		const result = optionsMethod('macos');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'homebrew', 'script', 'source_code']);
+		expect(keys).toStrictEqual(['cargo', 'homebrew', 'script', 'source']);
 	});
 	it('should return correct methods for linux', () => {
 		const result = optionsMethod('linux');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'script', 'source_code']);
+		expect(keys).toStrictEqual(['cargo', 'script', 'source']);
 	});
 	it('should return correct methods for windows', () => {
 		const result = optionsMethod('windows');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'script', 'source_code']);
+		expect(keys).toStrictEqual(['cargo', 'script', 'source']);
 	});
 	it('should include small property when present', () => {
 		const result = optionsMethod('linux');

@@ -15,7 +15,7 @@ const osLinux: OptionOS = optionsOS.find((opt) => opt.key === 'linux')!;
 const methodHomebrew: OptionMethod = allMethods.find((opt) => opt.key === 'homebrew')!;
 const methodScript: OptionMethod = allMethods.find((opt) => opt.key === 'script')!;
 const methodCargo: OptionMethod = allMethods.find((opt) => opt.key === 'cargo')!;
-const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source_code')!;
+const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source')!;
 const maps: OptionMaps[] = optionsMaps;
 const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
 const bbox: BBox = [1, 2, 3, 4];
@@ -46,7 +46,7 @@ describe('generateCode', () => {
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
-	it('generates code for source_code on windows', () => {
+	it('generates code for source on windows', () => {
 		const code = generateCode(osWindows, methodSource, maps);
 		expect(code).toContain('git clone https://github.com/versatiles-org/versatiles-rs.git');
 		expect(code).toContain('Copy-Item "target\\release\\versatiles.exe"');

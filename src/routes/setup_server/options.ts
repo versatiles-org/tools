@@ -25,7 +25,7 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 		os: ['linux', 'macos', 'windows']
 	},
 	{
-		key: 'source_code',
+		key: 'source',
 		label: 'Build from Source',
 		small: true,
 		os: ['linux', 'macos', 'windows']

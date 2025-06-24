@@ -3,6 +3,8 @@
 	import FormOptionGroup from './FormOption/FormOptionGroup.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
+	import { onMount } from 'svelte';
+	import { decodeHash, encodeHash } from './hash';
 
 	import {
 		optionsCoverage,
@@ -27,6 +29,19 @@
 	let selectedBBox: BBox | undefined = $state(undefined);
 	let selectedFrontend: OptionFrontend | undefined = $state(undefined);
 
+	onMount(() => {
+		const { os, method, maps, coverage, frontend } = decodeHash(window.location.hash);
+		console.log('decoded hash:', { os, method, maps, coverage, frontend });
+		if (os) {
+			selectedOS = optionsOS.find((o) => o.key === os);
+			if (selectedOS && method)
+				selectedMethod = optionsMethod(selectedOS.key).find((m) => m.key === method);
+		}
+		if (maps) selectedMaps = optionsMaps.filter((m) => maps.includes(m.key));
+		if (coverage) selectedCoverage = optionsCoverage.find((c) => c.key === coverage);
+		if (frontend) selectedFrontend = optionsFrontend.find((f) => f.key === frontend);
+	});
+
 	let code: string | undefined = $derived(
 		selectedOS && selectedMethod
 			? generateCode(
@@ -39,6 +54,28 @@
 				)
 			: undefined
 	);
+
+	$effect(() => {
+		let hash = encodeHash({
+			selectedOS,
+			selectedMethod,
+			selectedMaps,
+			selectedCoverage,
+			selectedFrontend
+		});
+		hash = hash ? `#${hash}` : '';
+
+		console.log('generated hash:', hash);
+
+		if (hash !== window.location.hash.slice(1)) {
+			let new_url = new URL(hash, window.location.href);
+			if (!hash) {
+				new_url.hash = '';
+			}
+			console.log('updating URL:', new_url.href);
+			history.replaceState(null, '', new_url.href);
+		}
+	});
 </script>
 
 <svelte:head>

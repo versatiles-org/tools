@@ -46,7 +46,7 @@ export function generateCode(
 				yield '# compile and install versatiles';
 				yield 'cargo install versatiles';
 				break;
-			case 'source_code':
+			case 'source':
 				yield '# clone the repository';
 				yield `git clone https://github.com/versatiles-org/versatiles-rs.git`;
 				yield '# navigate to the project directory';
