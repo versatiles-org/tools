@@ -32,6 +32,7 @@ export function encodeHash({
 	if (!selectedMethod) return parts.join('+');
 	parts.push(selectedMethod.key);
 
+	if (selectedMaps.length === 0) return parts.join('+');
 	parts.push(selectedMaps.map((m) => m.key).join(','));
 
 	if (!selectedCoverage) return parts.join('+');

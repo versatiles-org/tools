@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	import { SvelteSet } from 'svelte/reactivity';
 	export type Option = {
 		key: string;
 		label: string;
@@ -10,85 +9,86 @@
 </script>
 
 <script lang="ts" generics="MyOption extends Option">
-	const {
+	import { SvelteSet } from 'svelte/reactivity';
+	let {
 		options,
-		multiselect = false,
-		initialSelection = undefined,
-		onselect,
-		onmultiselect
+		allowMultiselect = false,
+		// bind:value   for single‑select
+		value = $bindable<MyOption | undefined>(undefined),
+		// bind:valueList for multi‑select
+		valueList = $bindable<MyOption[]>([])
 	}: {
 		options: MyOption[];
-		multiselect?: boolean;
-		initialSelection?: MyOption | MyOption[];
-		onmultiselect?: (options: MyOption[]) => void;
-		onselect?: (options: MyOption | undefined) => void;
+		allowMultiselect?: boolean;
+		value?: MyOption | undefined;
+		valueList?: MyOption[];
 	} = $props();
 
-	let lookup = new Map<string, MyOption>(options.map((o) => [o.key, o]));
-	let selection = new SvelteSet<string>();
+	/*───────────────────────────────────────────────────────────────────────
+	 * Guard: `allowMultiselect` must never change after mount
+	 *───────────────────────────────────────────────────────────────────────*/
+	let _lockedAllow = allowMultiselect;
+	$effect(() => {
+		if (allowMultiselect !== _lockedAllow) {
+			throw new Error('FormOptionGroup: `allowMultiselect` cannot be changed after mount');
+		}
+	});
 
-	// Filter big and small options
+	/*───────────────────────────────────────────────────────────────────────
+	 * Internals
+	 *───────────────────────────────────────────────────────────────────────*/
+	const lookup = new Map<string, MyOption>(options.map((o) => [o.key, o]));
+	const selection = new SvelteSet<string>();
+
+	// Split big/small options once (assumes `options` is static)
 	const bigOptions: MyOption[] = [];
 	const smallOptions: MyOption[] = [];
+	for (const opt of options) (opt.small ? smallOptions : bigOptions).push(opt);
 
-	for (const option of options) {
-		if (option.small) {
-			smallOptions.push(option);
-		} else {
-			bigOptions.push(option);
-		}
-		if (!initialSelection && option.selected) {
-			selection.add(option.key);
-		}
-	}
-
-	if (initialSelection) {
-		if (Array.isArray(initialSelection)) {
-			for (const option of initialSelection) {
-				selection.add(option.key);
-			}
-		} else {
-			selection.add(initialSelection.key);
-		}
-	}
-
-	if (selection.size > 0) {
-		if (multiselect) {
-			onmultiselect?.(getMultiSelection());
-		} else {
-			onselect?.(getSingleSelection());
-		}
+	/*───────────────────────────────────────────────────────────────────────
+	 * Keep `selection` in sync with the outward binding
+	 *───────────────────────────────────────────────────────────────────────*/
+	if (allowMultiselect) {
+		$effect(() => {
+			selection.clear();
+			valueList.forEach((o) => {
+				if (lookup.has(o.key)) {
+					selection.add(o.key);
+				}
+			});
+		});
 	} else {
-		if (multiselect) {
-			onmultiselect?.([]);
-		} else {
-			onselect?.(undefined);
-		}
+		$effect(() => {
+			selection.clear();
+			if (value) {
+				selection.add(value.key);
+			}
+			console.log('selection updated:', selection);
+		});
 	}
 
+	/*───────────────────────────────────────────────────────────────────────
+	 * Click handler – mutates both `selection` and the bindables
+	 *───────────────────────────────────────────────────────────────────────*/
 	function handleClick(option: MyOption) {
-		if (multiselect) {
+		if (allowMultiselect) {
+			// toggle membership
 			if (selection.has(option.key)) {
 				selection.delete(option.key);
 			} else {
 				selection.add(option.key);
 			}
-			onmultiselect?.(getMultiSelection());
+			// push out new list
+			valueList = Array.from(selection)
+				.map((k) => lookup.get(k))
+				.filter(Boolean) as MyOption[];
 		} else {
-			selection.clear();
-			selection.add(option.key);
+			value = option;
 		}
-		onselect?.(lookup.get(option.key));
 	}
 
 	function getSingleSelection(): MyOption | undefined {
 		return selection.size === 1 ? lookup.get(selection.values().next().value!) : undefined;
-	}
-
-	function getMultiSelection(): MyOption[] {
-		return Array.from(selection)
-			.map((key) => lookup.get(key))
-			.filter((e) => e != undefined) as MyOption[];
 	}
 </script>
 
@@ -119,7 +119,7 @@
 		</div>
 	{/if}
 
-	{#if !multiselect && getSingleSelection()?.hint}
+	{#if getSingleSelection()?.hint}
 		<p class="small">{getSingleSelection()!.hint}</p>
 	{/if}
 {/key}

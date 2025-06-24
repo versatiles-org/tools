@@ -88,18 +88,14 @@
 
 	<h2>1. Select your Operating System</h2>
 	<div class="options">
-		<FormOptionGroup options={optionsOS} onselect={(s) => (selectedOS = s)} />
+		<FormOptionGroup options={optionsOS} bind:value={selectedOS} />
 	</div>
 
 	{#if selectedOS}
 		{#key selectedOS}
 			<h2>2. Select an Installation Method</h2>
 			<div class="options">
-				<FormOptionGroup
-					initialSelection={selectedMethod}
-					options={optionsMethod(selectedOS.key)}
-					onselect={(s) => (selectedMethod = s)}
-				/>
+				<FormOptionGroup options={optionsMethod(selectedOS.key)} bind:value={selectedMethod} />
 			</div>
 		{/key}
 
@@ -112,15 +108,15 @@
 			<div class="options">
 				<FormOptionGroup
 					options={optionsMaps}
-					multiselect={true}
-					onmultiselect={(s) => (selectedMaps = s)}
+					allowMultiselect={true}
+					bind:valueList={selectedMaps}
 				/>
 			</div>
 
 			{#if selectedMaps.length > 0}
 				<h2>4. Select Coverage Area</h2>
 				<div class="options">
-					<FormOptionGroup options={optionsCoverage} onselect={(s) => (selectedCoverage = s)} />
+					<FormOptionGroup options={optionsCoverage} bind:value={selectedCoverage} />
 				</div>
 
 				{#if selectedCoverage?.key == 'bbox'}
@@ -134,7 +130,7 @@
 				{#if selectedCoverage}
 					<h2>5. Add a Frontend?</h2>
 					<div class="options">
-						<FormOptionGroup options={optionsFrontend} onselect={(s) => (selectedFrontend = s)} />
+						<FormOptionGroup options={optionsFrontend} bind:value={selectedFrontend} />
 					</div>
 				{/if}
 			{/if}
