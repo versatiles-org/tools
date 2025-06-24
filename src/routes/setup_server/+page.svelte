@@ -31,7 +31,6 @@
 
 	onMount(() => {
 		const { os, method, maps, coverage, frontend } = decodeHash(window.location.hash);
-		console.log('decoded hash:', { os, method, maps, coverage, frontend });
 		if (os) {
 			selectedOS = optionsOS.find((o) => o.key === os);
 			if (selectedOS && method)
@@ -61,18 +60,16 @@
 			selectedMethod,
 			selectedMaps,
 			selectedCoverage,
+			selectedBBox,
 			selectedFrontend
 		});
 		hash = hash ? `#${hash}` : '';
-
-		console.log('generated hash:', hash);
 
 		if (hash !== window.location.hash.slice(1)) {
 			let new_url = new URL(hash, window.location.href);
 			if (!hash) {
 				new_url.hash = '';
 			}
-			console.log('updating URL:', new_url.href);
 			history.replaceState(null, '', new_url.href);
 		}
 	});

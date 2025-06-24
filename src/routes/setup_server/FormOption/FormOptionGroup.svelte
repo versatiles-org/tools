@@ -63,7 +63,6 @@
 			if (value) {
 				selection.add(value.key);
 			}
-			console.log('selection updated:', selection);
 		});
 	}
 
