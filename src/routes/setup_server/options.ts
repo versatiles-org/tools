@@ -19,6 +19,11 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 		os: ['linux', 'macos', 'windows']
 	},
 	{
+		key: 'docker-nginx',
+		label: 'Docker with Nginx+TLS',
+		os: ['linux']
+	},
+	{
 		key: 'cargo',
 		label: 'Use Cargo',
 		small: true,
@@ -56,7 +61,7 @@ export const optionsCoverage: OptionCoverage[] = [
 ];
 
 // ### Frontend Options
-export type KeyFrontend = 'no' | 'standard' | 'dev' | 'min';
+export type KeyFrontend = 'none' | 'default' | 'dev' | 'min';
 export type OptionFrontend = Option & {
 	key: KeyFrontend;
 	hint: string;
@@ -64,8 +69,8 @@ export type OptionFrontend = Option & {
 };
 export const optionsFrontend: OptionFrontend[] = [
 	{
-		key: 'standard',
-		label: 'Standard',
+		key: 'default',
+		label: 'Default',
 		hint: 'The Standard Frontend includes MapLibre-GL-JS, styles, fonts, sprites.',
 		name: 'frontend',
 		selected: true
@@ -82,5 +87,5 @@ export const optionsFrontend: OptionFrontend[] = [
 		name: 'frontend-min',
 		hint: 'The Minimal Frontend Includes only the essential libraries and fonts.'
 	},
-	{ key: 'no', label: 'None', hint: 'No Frontend will be included.' }
+	{ key: 'none', label: 'None', hint: 'No Frontend will be included.' }
 ];

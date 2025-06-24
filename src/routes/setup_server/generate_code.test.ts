@@ -19,7 +19,7 @@ const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source'
 const maps: OptionMap[] = optionsMap;
 const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
 const bbox: BBox = [1, 2, 3, 4];
-const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'standard')!;
+const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'default')!;
 
 describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {

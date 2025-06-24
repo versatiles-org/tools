@@ -17,7 +17,7 @@ describe('optionsMethod', () => {
 	it('should return correct methods for linux', () => {
 		const result = optionsMethod('linux');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'script', 'source']);
+		expect(keys).toStrictEqual(['cargo', 'docker-nginx', 'script', 'source']);
 	});
 	it('should return correct methods for windows', () => {
 		const result = optionsMethod('windows');
@@ -47,9 +47,9 @@ describe('optionsCoverage', () => {
 describe('optionsFrontend', () => {
 	it('should contain all frontend options', () => {
 		const keys = optionsFrontend.map((opt) => opt.key);
-		expect(keys).toEqual(['standard', 'dev', 'min', 'no']);
+		expect(keys).toEqual(['default', 'dev', 'min', 'none']);
 	});
-	it('should have selected true for standard', () => {
-		expect(optionsFrontend.find((opt) => opt.key === 'standard')?.selected).toBe(true);
+	it('should have selected true for default', () => {
+		expect(optionsFrontend.find((opt) => opt.key === 'default')?.selected).toBe(true);
 	});
 });

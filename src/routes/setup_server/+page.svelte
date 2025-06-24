@@ -138,7 +138,7 @@
 <section>
 	{#if code}
 		<hr />
-		<h2>Paste these Instructions into your Shell</h2>
+		<h2>Check and paste these instructions into your shell</h2>
 		<CodeBlock {code} />
 	{/if}
 </section>

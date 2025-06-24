@@ -15,11 +15,40 @@ export function generateCode(
 	bbox?: BBox,
 	frontend?: OptionFrontend
 ): string {
+	if (method.key.startsWith('docker')) {
+		return [...runDocker()].join('\n');
+	}
+
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
 
 	return [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()].join(
 		'\n'
 	);
+
+	function* runDocker(): Generator<string> {
+		switch (method.key) {
+			case 'docker-nginx':
+				yield `# 1. Point your domain to the server IP`;
+				yield `# 2. Install Docker on your server,`;
+				yield `#    e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
+				yield `# 3. Configure and run Docker container`;
+				yield `# CHECK YOUR DOMAIN AND EMAIL SETTINGS!`;
+				yield `docker run -d --name versatiles \\`;
+				yield `  -p 80:80 -p 443:443 \\`;
+				yield `  -v $(pwd)/data:/data \\`;
+				yield `  -e DOMAIN=maps.example.com \\ # USE CORRECT DOMAIN!`;
+				yield `  -e EMAIL=admin@example.com \\ # USE CORRECT EMAIL!`;
+
+				yield `  -e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')} \\`;
+
+				if (coverage?.key === 'bbox' && bbox) {
+					yield `  -e BBOX="${bbox.join(',')}" \\`;
+				}
+
+				yield `  -e FRONTEND=${frontend?.key ?? 'default'} \\`;
+				yield `  versatiles/versatiles-nginx:latest`;
+		}
+	}
 
 	function* installVersatiles(): Generator<string> {
 		switch (method.key) {
