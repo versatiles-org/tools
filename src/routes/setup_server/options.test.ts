@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { optionsOS, optionsMethod, optionsMaps, optionsCoverage, optionsFrontend } from './options';
+import { optionsOS, optionsMethod, optionsMap, optionsCoverage, optionsFrontend } from './options';
 
 describe('optionsOS', () => {
 	it('should contain all OS options', () => {
@@ -33,7 +33,7 @@ describe('optionsMethod', () => {
 
 describe('optionsMaps', () => {
 	it('should contain OpenStreetMap option', () => {
-		expect(optionsMaps).toEqual([expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' })]);
+		expect(optionsMap).toEqual([expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' })]);
 	});
 });
 

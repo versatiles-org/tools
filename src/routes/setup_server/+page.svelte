@@ -9,7 +9,7 @@
 	import {
 		optionsCoverage,
 		optionsFrontend,
-		optionsMaps,
+		optionsMap,
 		optionsMethod,
 		optionsOS
 	} from './options';
@@ -17,14 +17,14 @@
 		BBox,
 		OptionCoverage,
 		OptionFrontend,
-		OptionMaps,
+		OptionMap,
 		OptionMethod,
 		OptionOS
 	} from './options';
 
 	let selectedOS: OptionOS | undefined = $state(undefined);
 	let selectedMethod: OptionMethod | undefined = $state(undefined);
-	let selectedMaps: OptionMaps[] = $state([]);
+	let selectedMaps: OptionMap[] = $state([]);
 	let selectedCoverage: OptionCoverage | undefined = $state(undefined);
 	let selectedBBox: BBox | undefined = $state(undefined);
 	let selectedFrontend: OptionFrontend | undefined = $state(undefined);
@@ -36,7 +36,7 @@
 			if (selectedOS && method)
 				selectedMethod = optionsMethod(selectedOS.key).find((m) => m.key === method);
 		}
-		if (maps) selectedMaps = optionsMaps.filter((m) => maps.includes(m.key));
+		if (maps) selectedMaps = optionsMap.filter((m) => maps.includes(m.key));
 		if (coverage) selectedCoverage = optionsCoverage.find((c) => c.key === coverage);
 		if (frontend) selectedFrontend = optionsFrontend.find((f) => f.key === frontend);
 	});
@@ -104,7 +104,7 @@
 			</p>
 			<div class="options">
 				<FormOptionGroup
-					options={optionsMaps}
+					options={optionsMap}
 					allowMultiselect={true}
 					bind:valueList={selectedMaps}
 				/>

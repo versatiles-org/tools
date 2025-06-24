@@ -4,11 +4,11 @@ import type {
 	BBox,
 	OptionCoverage,
 	OptionFrontend,
-	OptionMaps,
+	OptionMap,
 	OptionMethod,
 	OptionOS
 } from './options';
-import { allMethods, optionsCoverage, optionsFrontend, optionsMaps, optionsOS } from './options';
+import { allMethods, optionsCoverage, optionsFrontend, optionsMap, optionsOS } from './options';
 
 const osWindows: OptionOS = optionsOS.find((opt) => opt.key === 'windows')!;
 const osLinux: OptionOS = optionsOS.find((opt) => opt.key === 'linux')!;
@@ -16,7 +16,7 @@ const methodHomebrew: OptionMethod = allMethods.find((opt) => opt.key === 'homeb
 const methodScript: OptionMethod = allMethods.find((opt) => opt.key === 'script')!;
 const methodCargo: OptionMethod = allMethods.find((opt) => opt.key === 'cargo')!;
 const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source')!;
-const maps: OptionMaps[] = optionsMaps;
+const maps: OptionMap[] = optionsMap;
 const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
 const bbox: BBox = [1, 2, 3, 4];
 const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'standard')!;

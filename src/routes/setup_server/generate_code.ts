@@ -2,7 +2,7 @@ import type {
 	BBox,
 	OptionCoverage,
 	OptionFrontend,
-	OptionMaps,
+	OptionMap,
 	OptionMethod,
 	OptionOS
 } from './options';
@@ -10,7 +10,7 @@ import type {
 export function generateCode(
 	os: OptionOS,
 	method: OptionMethod,
-	maps: OptionMaps[],
+	maps: OptionMap[],
 	coverage?: OptionCoverage,
 	bbox?: BBox,
 	frontend?: OptionFrontend

@@ -42,9 +42,9 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 }
 
 // ### Map Options
-export type KeyMaps = 'osm';
-export type OptionMaps = Option & { key: KeyMaps };
-export const optionsMaps: OptionMaps[] = [{ key: 'osm', label: 'OpenStreetMap' }];
+export type KeyMap = 'osm';
+export type OptionMap = Option & { key: KeyMap };
+export const optionsMap: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap' }];
 
 // ### Coverage Options
 export type BBox = [number, number, number, number];

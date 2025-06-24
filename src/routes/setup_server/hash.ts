@@ -2,7 +2,7 @@ import type {
 	BBox,
 	OptionCoverage,
 	OptionFrontend,
-	OptionMaps,
+	OptionMap,
 	OptionMethod,
 	OptionOS
 } from './options';
@@ -19,7 +19,7 @@ export function encodeHash({
 }: {
 	selectedOS?: OptionOS;
 	selectedMethod?: OptionMethod;
-	selectedMaps: OptionMaps[];
+	selectedMaps: OptionMap[];
 	selectedCoverage?: OptionCoverage;
 	selectedBBox?: BBox;
 	selectedFrontend?: OptionFrontend;
