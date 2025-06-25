@@ -32,20 +32,19 @@ export function generateCode(
 				yield `# 2. Install Docker on your server,`;
 				yield `#    e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
 				yield `# 3. Configure and run Docker container`;
-				yield `# CHECK YOUR DOMAIN AND EMAIL SETTINGS!`;
+				yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
 				yield `docker run -d --name versatiles \\`;
 				yield `  -p 80:80 -p 443:443 \\`;
 				yield `  -v $(pwd)/data:/data \\`;
-				yield `  -e DOMAIN=maps.example.com \\ # USE CORRECT DOMAIN!`;
-				yield `  -e EMAIL=admin@example.com \\ # USE CORRECT EMAIL!`;
-
+				yield `  -e DOMAIN=maps.example.com \\`;
+				yield `  -e EMAIL=admin@example.com \\`;
 				yield `  -e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')} \\`;
 
 				if (coverage?.key === 'bbox' && bbox) {
 					yield `  -e BBOX="${bbox.join(',')}" \\`;
 				}
 
-				yield `  -e FRONTEND=${frontend?.key ?? 'default'} \\`;
+				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
 				yield `  versatiles/versatiles-nginx:latest`;
 		}
 	}

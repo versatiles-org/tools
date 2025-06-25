@@ -61,7 +61,7 @@ export const optionsCoverage: OptionCoverage[] = [
 ];
 
 // ### Frontend Options
-export type KeyFrontend = 'none' | 'default' | 'dev' | 'min';
+export type KeyFrontend = 'none' | 'standard' | 'dev' | 'min';
 export type OptionFrontend = Option & {
 	key: KeyFrontend;
 	hint: string;
@@ -69,8 +69,8 @@ export type OptionFrontend = Option & {
 };
 export const optionsFrontend: OptionFrontend[] = [
 	{
-		key: 'default',
-		label: 'Default',
+		key: 'standard',
+		label: 'Standard',
 		hint: 'The Standard Frontend includes MapLibre-GL-JS, styles, fonts, sprites.',
 		name: 'frontend',
 		selected: true
