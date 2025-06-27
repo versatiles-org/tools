@@ -96,7 +96,7 @@ export function generateCode(
 
 		yield `\n# Download Maps`;
 
-		const bboxArg = coverage?.key === 'bbox' && bbox ? `--bbox "${bbox.join(',')}"` : false;
+		const bboxArg = coverage?.key === 'bbox' && bbox ? bbox.join(',') : false;
 		for (const map of maps) {
 			const filename = `${map.key}.versatiles`;
 			const url = `https://download.versatiles.org/${filename}`;
