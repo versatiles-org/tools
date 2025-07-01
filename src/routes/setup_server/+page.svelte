@@ -128,9 +128,7 @@
 				</div>
 
 				{#if selection.coverage?.key == 'bbox'}
-					<div
-						style="width:80vmin;height:60vmin;max-width:600px;max-height:450px;margin:0.5em auto;color-scheme:dark;"
-					>
+					<div class="bbox-map">
 						<BBoxMap bind:selectedBBox={selection.bbox} />
 					</div>
 				{/if}
@@ -173,5 +171,13 @@
 	}
 	div.options {
 		margin: 1rem 0 0.5rem;
+	}
+	.bbox-map {
+		width: 80vmin;
+		height: 60vmin;
+		max-width: 600px;
+		max-height: 450px;
+		margin: 0.5em auto;
+		color-scheme: dark;
 	}
 </style>
