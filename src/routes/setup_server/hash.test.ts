@@ -27,7 +27,7 @@ describe('encodeHash', () => {
 				selectedMethod: { key: 'docker' } as OptionMethod,
 				selectedMaps: []
 			})
-		).toBe('linux|docker');
+		).toBe('linux+docker');
 	});
 
 	it('returns OS, method, and maps', () => {
@@ -37,7 +37,7 @@ describe('encodeHash', () => {
 				selectedMethod: { key: 'docker' } as OptionMethod,
 				selectedMaps: [{ key: 'osm' }, { key: 'sat' }] as OptionMap[]
 			})
-		).toBe('linux|docker|osm,sat');
+		).toBe('linux+docker+osm,sat');
 	});
 
 	it('returns OS, method, maps, and global coverage', () => {
@@ -48,7 +48,7 @@ describe('encodeHash', () => {
 				selectedMaps: [{ key: 'osm' }] as OptionMap[],
 				selectedCoverage: { key: 'global' } as OptionCoverage
 			})
-		).toBe('linux|docker|osm|global');
+		).toBe('linux+docker+osm+global');
 	});
 
 	it('returns OS, method, maps, bbox coverage, and bbox', () => {
@@ -60,7 +60,7 @@ describe('encodeHash', () => {
 				selectedCoverage: { key: 'bbox' } as OptionCoverage,
 				selectedBBox: [1, 2, 3, 4]
 			})
-		).toBe('linux|docker|osm|bbox:1,2,3,4');
+		).toBe('linux+docker+osm+bbox,1,2,3,4');
 	});
 
 	it('returns full hash with frontend', () => {
@@ -72,7 +72,7 @@ describe('encodeHash', () => {
 				selectedCoverage: { key: 'global' } as OptionCoverage,
 				selectedFrontend: { key: 'web' } as OptionFrontend
 			})
-		).toBe('linux|docker|osm|global|web');
+		).toBe('linux+docker+osm+global+web');
 	});
 });
 
@@ -90,7 +90,7 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes OS and method', () => {
-		expect(decodeHash('linux|docker')).toEqual({
+		expect(decodeHash('linux+docker')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: []
@@ -98,7 +98,7 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes OS, method, and maps', () => {
-		expect(decodeHash('linux|docker|osm,sat')).toEqual({
+		expect(decodeHash('linux+docker+osm,sat')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: ['osm', 'sat']
@@ -106,7 +106,7 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes global coverage', () => {
-		expect(decodeHash('linux|docker|osm|global')).toEqual({
+		expect(decodeHash('linux+docker+osm+global')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: ['osm'],
@@ -115,7 +115,7 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes bbox coverage with valid bbox', () => {
-		expect(decodeHash('linux|docker|osm|bbox:1,2,3,4')).toEqual({
+		expect(decodeHash('linux+docker+osm+bbox,1,2,3,4')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: ['osm'],
@@ -125,7 +125,7 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes full hash with frontend', () => {
-		expect(decodeHash('linux|docker|osm|global|web')).toEqual({
+		expect(decodeHash('linux+docker+osm+global+web')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: ['osm'],
@@ -135,7 +135,7 @@ describe('decodeHash', () => {
 	});
 
 	it('ignores invalid bbox', () => {
-		expect(decodeHash('linux|docker|osm|bbox:1,2,3')).toEqual({
+		expect(decodeHash('linux+docker+osm+bbox,1,2,3')).toEqual({
 			os: 'linux',
 			method: 'docker',
 			maps: ['osm'],

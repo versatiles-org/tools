@@ -27,7 +27,7 @@ export function generateCode(
 
 	function* runDocker(): Generator<string> {
 		switch (method.key) {
-			case 'docker-nginx':
+			case 'docker_nginx':
 				yield `# 1. Point your domain to the server IP`;
 				yield `# 2. Install Docker on your server,`;
 				yield `#    e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;

@@ -19,7 +19,7 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 		os: ['linux', 'macos', 'windows']
 	},
 	{
-		key: 'docker-nginx',
+		key: 'docker_nginx',
 		label: 'Docker with Nginx+TLS',
 		os: ['linux']
 	},

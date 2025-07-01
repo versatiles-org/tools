@@ -9,6 +9,8 @@ import type {
 
 // utils for (de)serialising the form state into the URL hash
 
+const HASH_SEPARATOR = '+';
+
 export function encodeHash({
 	selectedOS,
 	selectedMethod,
@@ -29,23 +31,23 @@ export function encodeHash({
 	if (!selectedOS) return '';
 	parts.push(selectedOS.key);
 
-	if (!selectedMethod) return parts.join('|');
+	if (!selectedMethod) return parts.join(HASH_SEPARATOR);
 	parts.push(selectedMethod.key);
 
-	if (selectedMaps.length === 0) return parts.join('|');
+	if (selectedMaps.length === 0) return parts.join(HASH_SEPARATOR);
 	parts.push(selectedMaps.map((m) => m.key).join(','));
 
-	if (!selectedCoverage) return parts.join('|');
+	if (!selectedCoverage) return parts.join(HASH_SEPARATOR);
 	if (selectedCoverage.key === 'bbox' && selectedBBox) {
-		parts.push(`bbox:${selectedBBox.join(',')}`);
+		parts.push(`bbox,${selectedBBox.join(',')}`);
 	} else {
 		parts.push('global');
 	}
 
-	if (!selectedFrontend) return parts.join('|');
+	if (!selectedFrontend) return parts.join(HASH_SEPARATOR);
 	parts.push(selectedFrontend.key);
 
-	return parts.join('|');
+	return parts.join(HASH_SEPARATOR);
 }
 
 export function decodeHash(hash: string): {
@@ -60,8 +62,8 @@ export function decodeHash(hash: string): {
 	const raw = hash.replace(/^#/, '');
 	if (!raw) return { maps: [] };
 
-	// Split the top‑level segments (joined by '|')
-	const segments = raw.split('|');
+	// Split the top‑level segments (joined by HASH_SEPARATOR)
+	const segments = raw.split(HASH_SEPARATOR);
 
 	const os = segments[0];
 	const method = segments[1];
@@ -73,7 +75,7 @@ export function decodeHash(hash: string): {
 	let bbox: BBox | undefined;
 
 	if (segments[3]) {
-		if (segments[3].startsWith('bbox:')) {
+		if (segments[3].startsWith('bbox,')) {
 			coverage = 'bbox';
 			const coords = segments[3].slice(5).split(',').map(Number);
 			// Expect exactly four numeric values: minLon, minLat, maxLon, maxLat
