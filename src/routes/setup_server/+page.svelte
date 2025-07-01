@@ -22,46 +22,57 @@
 		OptionOS
 	} from './options';
 
-	let selectedOS: OptionOS | undefined = $state(undefined);
-	let selectedMethod: OptionMethod | undefined = $state(undefined);
-	let selectedMaps: OptionMap[] = $state([]);
-	let selectedCoverage: OptionCoverage | undefined = $state(undefined);
-	let selectedBBox: BBox | undefined = $state(undefined);
-	let selectedFrontend: OptionFrontend | undefined = $state(undefined);
+	type SetupState = {
+		os?: OptionOS;
+		method?: OptionMethod;
+		maps: OptionMap[];
+		coverage?: OptionCoverage;
+		bbox?: BBox;
+		frontend?: OptionFrontend;
+	};
+
+	let selection = $state<SetupState>({
+		os: undefined,
+		method: undefined,
+		maps: [],
+		coverage: undefined,
+		bbox: undefined,
+		frontend: undefined
+	});
 
 	onMount(() => {
 		const { os, method, maps, coverage, frontend } = decodeHash(window.location.hash);
 		if (os) {
-			selectedOS = optionsOS.find((o) => o.key === os);
-			if (selectedOS && method)
-				selectedMethod = optionsMethod(selectedOS.key).find((m) => m.key === method);
+			selection.os = optionsOS.find((o) => o.key === os);
+			if (selection.os && method)
+				selection.method = optionsMethod(selection.os.key).find((m) => m.key === method);
 		}
-		if (maps) selectedMaps = optionsMap.filter((m) => maps.includes(m.key));
-		if (coverage) selectedCoverage = optionsCoverage.find((c) => c.key === coverage);
-		if (frontend) selectedFrontend = optionsFrontend.find((f) => f.key === frontend);
+		if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
+		if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
+		if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
 	});
 
 	let code: string | undefined = $derived(
-		selectedOS && selectedMethod
+		selection.os && selection.method
 			? generateCode(
-					selectedOS,
-					selectedMethod,
-					selectedMaps,
-					selectedCoverage,
-					selectedBBox,
-					selectedFrontend
+					selection.os,
+					selection.method,
+					selection.maps,
+					selection.coverage,
+					selection.bbox,
+					selection.frontend
 				)
 			: undefined
 	);
 
 	$effect(() => {
 		let hash = encodeHash({
-			selectedOS,
-			selectedMethod,
-			selectedMaps,
-			selectedCoverage,
-			selectedBBox,
-			selectedFrontend
+			selectedOS: selection.os,
+			selectedMethod: selection.method,
+			selectedMaps: selection.maps,
+			selectedCoverage: selection.coverage,
+			selectedBBox: selection.bbox,
+			selectedFrontend: selection.frontend
 		});
 		hash = hash ? `#${hash}` : '';
 
@@ -76,27 +87,27 @@
 </script>
 
 <svelte:head>
-	<title>Install VersaTiles</title>
-	<meta name="description" content="How to install VersaTiles?" />
+	<title>Setup a VersaTiles server</title>
+	<meta name="description" content="How to setup a VersaTiles server?" />
 </svelte:head>
 
 <section class="form">
-	<h1>How to install VersaTiles?</h1>
+	<h1>How to setup a VersaTiles server?</h1>
 
 	<h2>1. Select your Operating System</h2>
 	<div class="options">
-		<FormOptionGroup options={optionsOS} bind:value={selectedOS} />
+		<FormOptionGroup options={optionsOS} bind:value={selection.os} />
 	</div>
 
-	{#if selectedOS}
-		{#key selectedOS}
+	{#if selection.os}
+		{#key selection.os}
 			<h2>2. Select an Installation Method</h2>
 			<div class="options">
-				<FormOptionGroup options={optionsMethod(selectedOS.key)} bind:value={selectedMethod} />
+				<FormOptionGroup options={optionsMethod(selection.os.key)} bind:value={selection.method} />
 			</div>
 		{/key}
 
-		{#if selectedMethod}
+		{#if selection.method}
 			<h2>3. Select Map Data</h2>
 			<p class="small">
 				Currently, only OpenStreetMap vector data is available.<br />
@@ -106,28 +117,28 @@
 				<FormOptionGroup
 					options={optionsMap}
 					allowMultiselect={true}
-					bind:valueList={selectedMaps}
+					bind:valueList={selection.maps}
 				/>
 			</div>
 
-			{#if selectedMaps.length > 0}
+			{#if selection.maps.length > 0}
 				<h2>4. Select Coverage Area</h2>
 				<div class="options">
-					<FormOptionGroup options={optionsCoverage} bind:value={selectedCoverage} />
+					<FormOptionGroup options={optionsCoverage} bind:value={selection.coverage} />
 				</div>
 
-				{#if selectedCoverage?.key == 'bbox'}
+				{#if selection.coverage?.key == 'bbox'}
 					<div
 						style="width:80vmin;height:60vmin;max-width:600px;max-height:450px;margin:0.5em auto;color-scheme:dark;"
 					>
-						<BBoxMap bind:selectedBBox />
+						<BBoxMap bind:selectedBBox={selection.bbox} />
 					</div>
 				{/if}
 
-				{#if selectedCoverage}
+				{#if selection.coverage}
 					<h2>5. Add a Frontend?</h2>
 					<div class="options">
-						<FormOptionGroup options={optionsFrontend} bind:value={selectedFrontend} />
+						<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
 					</div>
 				{/if}
 			{/if}
