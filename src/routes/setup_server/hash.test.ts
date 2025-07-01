@@ -3,10 +3,10 @@ import { encodeHash, decodeHash } from './hash';
 import type { OptionCoverage, OptionFrontend, OptionMap, OptionMethod, OptionOS } from './options';
 
 describe('encodeHash', () => {
-	it('returns empty string if selectedOS is missing', () => {
+	it('returns empty string if os is missing', () => {
 		expect(
 			encodeHash({
-				selectedMaps: []
+				maps: []
 			})
 		).toBe('');
 	});
@@ -14,8 +14,8 @@ describe('encodeHash', () => {
 	it('returns only OS key if method is missing', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMaps: []
+				os: { key: 'linux' } as OptionOS,
+				maps: []
 			})
 		).toBe('linux');
 	});
@@ -23,9 +23,9 @@ describe('encodeHash', () => {
 	it('returns OS and method if maps are empty', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMethod: { key: 'docker' } as OptionMethod,
-				selectedMaps: []
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: []
 			})
 		).toBe('linux+docker');
 	});
@@ -33,9 +33,9 @@ describe('encodeHash', () => {
 	it('returns OS, method, and maps', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMethod: { key: 'docker' } as OptionMethod,
-				selectedMaps: [{ key: 'osm' }, { key: 'sat' }] as OptionMap[]
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }, { key: 'sat' }] as OptionMap[]
 			})
 		).toBe('linux+docker+osm,sat');
 	});
@@ -43,10 +43,10 @@ describe('encodeHash', () => {
 	it('returns OS, method, maps, and global coverage', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMethod: { key: 'docker' } as OptionMethod,
-				selectedMaps: [{ key: 'osm' }] as OptionMap[],
-				selectedCoverage: { key: 'global' } as OptionCoverage
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'global' } as OptionCoverage
 			})
 		).toBe('linux+docker+osm+global');
 	});
@@ -54,11 +54,11 @@ describe('encodeHash', () => {
 	it('returns OS, method, maps, bbox coverage, and bbox', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMethod: { key: 'docker' } as OptionMethod,
-				selectedMaps: [{ key: 'osm' }] as OptionMap[],
-				selectedCoverage: { key: 'bbox' } as OptionCoverage,
-				selectedBBox: [1, 2, 3, 4]
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'bbox' } as OptionCoverage,
+				bbox: [1, 2, 3, 4]
 			})
 		).toBe('linux+docker+osm+bbox,1,2,3,4');
 	});
@@ -66,11 +66,11 @@ describe('encodeHash', () => {
 	it('returns full hash with frontend', () => {
 		expect(
 			encodeHash({
-				selectedOS: { key: 'linux' } as OptionOS,
-				selectedMethod: { key: 'docker' } as OptionMethod,
-				selectedMaps: [{ key: 'osm' }] as OptionMap[],
-				selectedCoverage: { key: 'global' } as OptionCoverage,
-				selectedFrontend: { key: 'web' } as OptionFrontend
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'global' } as OptionCoverage,
+				frontend: { key: 'web' } as OptionFrontend
 			})
 		).toBe('linux+docker+osm+global+web');
 	});

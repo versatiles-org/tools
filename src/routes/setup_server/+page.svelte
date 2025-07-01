@@ -5,6 +5,7 @@
 	import { generateCode } from './generate_code';
 	import { onMount } from 'svelte';
 	import { decodeHash, encodeHash } from './hash';
+	import type { SetupState } from './types';
 
 	import {
 		optionsCoverage,
@@ -13,23 +14,6 @@
 		optionsMethod,
 		optionsOS
 	} from './options';
-	import type {
-		BBox,
-		OptionCoverage,
-		OptionFrontend,
-		OptionMap,
-		OptionMethod,
-		OptionOS
-	} from './options';
-
-	type SetupState = {
-		os?: OptionOS;
-		method?: OptionMethod;
-		maps: OptionMap[];
-		coverage?: OptionCoverage;
-		bbox?: BBox;
-		frontend?: OptionFrontend;
-	};
 
 	let selection = $state<SetupState>({
 		os: undefined,
@@ -53,27 +37,11 @@
 	});
 
 	let code: string | undefined = $derived(
-		selection.os && selection.method
-			? generateCode(
-					selection.os,
-					selection.method,
-					selection.maps,
-					selection.coverage,
-					selection.bbox,
-					selection.frontend
-				)
-			: undefined
+		selection.os && selection.method ? generateCode(selection) : undefined
 	);
 
 	$effect(() => {
-		let hash = encodeHash({
-			selectedOS: selection.os,
-			selectedMethod: selection.method,
-			selectedMaps: selection.maps,
-			selectedCoverage: selection.coverage,
-			selectedBBox: selection.bbox,
-			selectedFrontend: selection.frontend
-		});
+		let hash = encodeHash(selection);
 		hash = hash ? `#${hash}` : '';
 
 		if (hash !== window.location.hash.slice(1)) {

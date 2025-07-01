@@ -1,51 +1,31 @@
-import type {
-	BBox,
-	OptionCoverage,
-	OptionFrontend,
-	OptionMap,
-	OptionMethod,
-	OptionOS
-} from './options';
+import type { BBox } from './options';
+import type { SetupState } from './types';
 
 // utils for (de)serialising the form state into the URL hash
 
 const HASH_SEPARATOR = '+';
 
-export function encodeHash({
-	selectedOS,
-	selectedMethod,
-	selectedMaps,
-	selectedCoverage,
-	selectedBBox,
-	selectedFrontend
-}: {
-	selectedOS?: OptionOS;
-	selectedMethod?: OptionMethod;
-	selectedMaps: OptionMap[];
-	selectedCoverage?: OptionCoverage;
-	selectedBBox?: BBox;
-	selectedFrontend?: OptionFrontend;
-}): string {
+export function encodeHash({ os, method, maps, coverage, bbox, frontend }: SetupState): string {
 	const parts = [];
 
-	if (!selectedOS) return '';
-	parts.push(selectedOS.key);
+	if (!os) return '';
+	parts.push(os.key);
 
-	if (!selectedMethod) return parts.join(HASH_SEPARATOR);
-	parts.push(selectedMethod.key);
+	if (!method) return parts.join(HASH_SEPARATOR);
+	parts.push(method.key);
 
-	if (selectedMaps.length === 0) return parts.join(HASH_SEPARATOR);
-	parts.push(selectedMaps.map((m) => m.key).join(','));
+	if (maps.length === 0) return parts.join(HASH_SEPARATOR);
+	parts.push(maps.map((m) => m.key).join(','));
 
-	if (!selectedCoverage) return parts.join(HASH_SEPARATOR);
-	if (selectedCoverage.key === 'bbox' && selectedBBox) {
-		parts.push(`bbox,${selectedBBox.join(',')}`);
+	if (!coverage) return parts.join(HASH_SEPARATOR);
+	if (coverage.key === 'bbox' && bbox) {
+		parts.push(`bbox,${bbox.join(',')}`);
 	} else {
 		parts.push('global');
 	}
 
-	if (!selectedFrontend) return parts.join(HASH_SEPARATOR);
-	parts.push(selectedFrontend.key);
+	if (!frontend) return parts.join(HASH_SEPARATOR);
+	parts.push(frontend.key);
 
 	return parts.join(HASH_SEPARATOR);
 }
