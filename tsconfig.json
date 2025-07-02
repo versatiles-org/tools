@@ -1,7 +1,15 @@
 {
 	"extends": "./.svelte-kit/tsconfig.json",
-	"include": ["./data/**/*.ts", "./scripts/**/*.ts"],
+	"include": [
+		"data/**/*.ts",
+		"scripts/**/*.ts",
+		"src",
+		".svelte-kit/types"
+	],
 	"compilerOptions": {
+		"types": [
+			"svelte"
+		],
 		"target": "ESNext",
 		"module": "ESNext"
 	}

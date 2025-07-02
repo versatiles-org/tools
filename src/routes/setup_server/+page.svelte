@@ -3,9 +3,10 @@
 	import FormOptionGroup from './FormOption/FormOptionGroup.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
-	import { onMount } from 'svelte';
 	import { decodeHash, encodeHash } from './hash';
 	import type { SetupState } from './types';
+	import { afterNavigate, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 
 	import {
 		optionsCoverage,
@@ -24,8 +25,20 @@
 		frontend: undefined
 	});
 
-	onMount(() => {
-		const { os, method, maps, coverage, frontend } = decodeHash(window.location.hash);
+	let routerReady = false;
+
+	$effect(() => {
+		selection.os;
+		selection.method;
+		selection.maps;
+		selection.coverage;
+		selection.bbox;
+		selection.frontend;
+		setHash(selection);
+	});
+
+	afterNavigate(() => {
+		const { os, method, maps, coverage, bbox, frontend } = decodeHash(window.location.hash);
 		if (os) {
 			selection.os = optionsOS.find((o) => o.key === os);
 			if (selection.os && method)
@@ -33,25 +46,28 @@
 		}
 		if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
 		if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
+		if (bbox) selection.bbox = bbox;
 		if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
+
+		setTimeout(() => (routerReady = true), 1);
 	});
+
+	function setHash(selection: SetupState) {
+		if (!routerReady) return; // Avoid setting hash before router is ready
+
+		let hash = encodeHash(selection);
+		hash = hash ? `#${hash}` : '';
+
+		if (hash !== page.url.hash.slice(1)) {
+			let new_url = new URL(hash, page.url.href);
+			if (!hash) new_url.hash = '';
+			replaceState(new_url.href, {});
+		}
+	}
 
 	let code: string | undefined = $derived(
 		selection.os && selection.method ? generateCode(selection) : undefined
 	);
-
-	$effect(() => {
-		let hash = encodeHash(selection);
-		hash = hash ? `#${hash}` : '';
-
-		if (hash !== window.location.hash.slice(1)) {
-			let new_url = new URL(hash, window.location.href);
-			if (!hash) {
-				new_url.hash = '';
-			}
-			history.replaceState(null, '', new_url.href);
-		}
-	});
 </script>
 
 <svelte:head>
