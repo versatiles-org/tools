@@ -28,12 +28,8 @@
 	let routerReady = false;
 
 	$effect(() => {
-		selection.os;
-		selection.method;
-		selection.maps;
-		selection.coverage;
-		selection.bbox;
-		selection.frontend;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { os, method, maps, coverage, bbox, frontend } = selection;
 		setHash(selection);
 	});
 
@@ -65,9 +61,11 @@
 		}
 	}
 
-	let code: string | undefined = $derived(
-		selection.os && selection.method ? generateCode(selection) : undefined
-	);
+	let code: string | undefined = $derived.by(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { os, method, maps, coverage, bbox, frontend } = selection;
+		return selection.os && selection.method ? generateCode(selection) : undefined;
+	});
 </script>
 
 <svelte:head>
@@ -113,7 +111,7 @@
 
 				{#if selection.coverage?.key == 'bbox'}
 					<div class="bbox-map">
-						<BBoxMap bind:selectedBBox={selection.bbox}  />
+						<BBoxMap bind:selectedBBox={selection.bbox} />
 					</div>
 				{/if}
 

@@ -57,7 +57,7 @@ export type KeyCoverage = 'global' | 'bbox';
 export type OptionCoverage = Option & { key: KeyCoverage };
 export const optionsCoverage: OptionCoverage[] = [
 	{ key: 'global', label: 'Entire World' },
-	{ key: 'bbox', label: 'Custom Bounding Box' }
+	{ key: 'bbox', label: 'Custom Region' }
 ];
 
 // ### Frontend Options
