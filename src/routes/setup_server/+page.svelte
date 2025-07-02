@@ -113,7 +113,7 @@
 
 				{#if selection.coverage?.key == 'bbox'}
 					<div class="bbox-map">
-						<BBoxMap bind:selectedBBox={selection.bbox} />
+						<BBoxMap bind:selectedBBox={selection.bbox}  />
 					</div>
 				{/if}
 
@@ -163,5 +163,6 @@
 		max-height: 450px;
 		margin: 0.5em auto;
 		color-scheme: dark;
+		position: relative;
 	}
 </style>
