@@ -69,8 +69,17 @@
 </script>
 
 <svelte:head>
-	<title>Setup a VersaTiles server</title>
-	<meta name="description" content="How to setup a VersaTiles server?" />
+	<title>How to setup a VersaTiles server?</title>
+	<meta name="description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta property="og:title" content="How to setup a VersaTiles server?" />
+	<meta property="og:description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://versatiles.org/tools/setup_server" />
+	<meta property="og:image" content="https://versatiles.org/tools/images/setup_server.png" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="How to setup a VersaTiles server?" />
+	<meta name="twitter:description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta name="twitter:image" content="https://versatiles.org/tools/images/setup_server.png" />
 </svelte:head>
 
 <section class="form">
@@ -144,6 +153,7 @@
 	}
 	.form h2 {
 		margin-bottom: 0;
+		font-size: 1.2rem;
 	}
 	p.small {
 		margin-top: 0.2rem;
