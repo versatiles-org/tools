@@ -38,7 +38,7 @@
 	"dependencies": {
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.22.2",
-		"@sveltejs/vite-plugin-svelte": "^5.1.0",
+		"@sveltejs/vite-plugin-svelte": "^6.1.0",
 		"@versatiles/svelte": "^2.1.2",
 		"cheerio_cms": "^1.0.0",
 		"globals": "^16.3.0",
@@ -47,6 +47,6 @@
 		"svelte-preprocess": "^6.0.3",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.35.1",
-		"vite": "^6.3.5"
+		"vite": "^7.0.6"
 	}
 }
