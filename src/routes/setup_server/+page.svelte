@@ -7,6 +7,7 @@
 	import type { SetupState } from './types';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { SvelteURL } from 'svelte/reactivity';
 
 	import {
 		optionsCoverage,
@@ -55,7 +56,7 @@
 		hash = hash ? `#${hash}` : '';
 
 		if (hash !== page.url.hash.slice(1)) {
-			let new_url = new URL(hash, page.url.href);
+			let new_url = new SvelteURL(hash, page.url.href);
 			if (!hash) new_url.hash = '';
 			replaceState(new_url.href, {});
 		}
@@ -70,15 +71,24 @@
 
 <svelte:head>
 	<title>How to setup a VersaTiles server?</title>
-	<meta name="description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta
+		name="description"
+		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+	/>
 	<meta property="og:title" content="How to setup a VersaTiles server?" />
-	<meta property="og:description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta
+		property="og:description"
+		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://versatiles.org/tools/setup_server" />
 	<meta property="og:image" content="https://versatiles.org/tools/images/setup_server.png" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="How to setup a VersaTiles server?" />
-	<meta name="twitter:description" content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end." />
+	<meta
+		name="twitter:description"
+		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+	/>
 	<meta name="twitter:image" content="https://versatiles.org/tools/images/setup_server.png" />
 </svelte:head>
 
