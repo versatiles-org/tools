@@ -9,6 +9,7 @@
 </script>
 
 <script lang="ts" generics="MyOption extends Option">
+	import '../../../style/button.css';
 	import { SvelteSet } from 'svelte/reactivity';
 	let {
 		options,
@@ -148,30 +149,6 @@
 	div.options.small {
 		margin-top: 1em;
 		font-size: 0.7em;
-	}
-
-	button {
-		cursor: pointer;
-		padding: var(--button-padding);
-		border: 1px solid var(--button-border-color);
-		border-radius: var(--button-border-radius);
-		background-color: var(--button-bg-color);
-		color: var(--button-color);
-		user-select: none;
-		font-size: var(--button-font-size);
-		transition:
-			background-color 0.3s,
-			border-color 0.3s;
-	}
-
-	button.selected {
-		background-color: var(--button-selected-bg-color) !important;
-		color: var(--button-selected-color);
-	}
-
-	button:hover {
-		background-color: var(--button-hover-bg-color);
-		border-color: var(--button-hover-border-color);
 	}
 
 	p.small {

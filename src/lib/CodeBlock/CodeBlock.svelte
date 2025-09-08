@@ -5,6 +5,7 @@
 	import Highlight from 'svelte-highlight';
 	import { bash, json } from 'svelte-highlight/languages';
 	import github from 'svelte-highlight/styles/github-dark';
+	import '../../style/button.css';
 
 	const languages = {
 		bash,
@@ -46,20 +47,12 @@
 	}
 	button {
 		position: absolute;
-		top: 0;
-		right: 0;
-		padding: 0.5em;
-		background: rgba(0, 0, 0, 0.5);
-		color: white;
-		border: none;
-		cursor: pointer;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		border-radius: 5px;
+		top: 0.2em;
+		right: 0.2em;
+		padding: 0.2em 0.4em;
 		opacity: 0.5;
 	}
 	button:hover {
-		background-color: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.8);
 		opacity: 1;
 	}
 </style>

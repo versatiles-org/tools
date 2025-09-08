@@ -144,7 +144,8 @@
 		<hr />
 		<h2>Check and paste these instructions into your shell</h2>
 		<CodeBlock {code} />
-		<p style="text-align:center; margin-top: 5em;">
+		<p style="text-align:center; margin-top: 8em; font-size: 0.8em; opacity: 0.7;">
+			Copy a shareable link of your current selection:<br />
 			<button onclick={copyShareLink}>copy share link</button>
 		</p>
 	{/if}
