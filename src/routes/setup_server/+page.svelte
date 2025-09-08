@@ -56,7 +56,7 @@
 		return selection.os && selection.method ? generateCode(selection) : undefined;
 	});
 
-	function copyShareLink() {
+	function copyShareLink(this: HTMLButtonElement) {
 		const hash = encodeHash(selection);
 		const url = new URL('#' + hash, window.location.href);
 		navigator.clipboard.writeText(url.href);

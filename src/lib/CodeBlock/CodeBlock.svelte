@@ -24,7 +24,7 @@
 		language = languages[languageName];
 	}
 
-	function copyToClipboard() {
+	function copyToClipboard(this: HTMLButtonElement) {
 		navigator.clipboard.writeText(code);
 		this.classList.add('done');
 		setTimeout(() => this.classList.remove('done'), 1000);
