@@ -26,6 +26,8 @@
 
 	function copyToClipboard() {
 		navigator.clipboard.writeText(code);
+		this.classList.add('done');
+		setTimeout(() => this.classList.remove('done'), 1000);
 	}
 </script>
 
@@ -35,7 +37,7 @@
 
 <div class="code-container">
 	<Highlight {language} {code} {style} />
-	<button onclick={copyToClipboard}>copy</button>
+	<button onclick={copyToClipboard} class="check">copy</button>
 </div>
 
 <style>

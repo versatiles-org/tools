@@ -60,6 +60,8 @@
 		const hash = encodeHash(selection);
 		const url = new URL('#' + hash, window.location.href);
 		navigator.clipboard.writeText(url.href);
+		this.classList.add('done');
+		setTimeout(() => this.classList.remove('done'), 1000);
 	}
 </script>
 
@@ -146,7 +148,7 @@
 		<CodeBlock {code} />
 		<p style="text-align:center; margin-top: 8em; font-size: 0.8em; opacity: 0.7;">
 			Copy a shareable link of your current selection:<br />
-			<button onclick={copyShareLink}>copy share link</button>
+			<button onclick={copyShareLink} class="check">copy share link</button>
 		</p>
 	{/if}
 </section>

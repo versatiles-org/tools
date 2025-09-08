@@ -8,8 +8,8 @@ button {
 	user-select: none;
 	font-size: var(--button-font-size);
 	transition:
-		background-color 0.3s,
-		border-color 0.3s;
+		background-color 0.1s,
+		border-color 0.1s;
 }
 
 button.selected {
@@ -20,4 +20,26 @@ button.selected {
 button:hover {
 	background-color: var(--button-hover-bg-color);
 	border-color: var(--button-hover-border-color);
+}
+
+button.check {
+	position: relative;
+}
+
+button.check::after {
+	content: '✓';
+	font-weight: bold;
+	font-size: 1.5em;
+	color: #40ff0d;
+	position: absolute;
+	right: -0.5em;
+	top: -0.6em;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 1s;
+}
+
+button.check.done::after {
+	opacity: 1;
+	transition: opacity 0s;
 }
