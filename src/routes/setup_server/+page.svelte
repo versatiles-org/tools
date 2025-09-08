@@ -7,6 +7,7 @@
 	import type { SetupState } from './types';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 	import { SvelteURL } from 'svelte/reactivity';
 
 	import {
@@ -58,7 +59,7 @@
 		if (hash !== page.url.hash.slice(1)) {
 			let new_url = new SvelteURL(hash, page.url.href);
 			if (!hash) new_url.hash = '';
-			replaceState(new_url.href, {});
+			replaceState(resolve(new_url.href), {});
 		}
 	}
 
