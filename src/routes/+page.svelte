@@ -4,13 +4,13 @@
 
 <h1>VersaTiles Tools</h1>
 <p>We've prepared some tools to help you get started with VersaTiles:</p>
-<a class="tool" href={resolve('setup_server')}>
+<a class="tool" href={resolve('/setup_server')}>
 	<span class="title">Setup a new VersaTiles server</span><br />
 	A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data
 	and front end.
 </a>
 
-<a class="tool" href={resolve('bounding_box')}>
+<a class="tool" href={resolve('/bounding_box')}>
 	<span class="title">Find a bounding box</span>
 </a>
 

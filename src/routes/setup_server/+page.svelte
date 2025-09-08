@@ -5,10 +5,7 @@
 	import { generateCode } from './generate_code';
 	import { decodeHash, encodeHash } from './hash';
 	import type { SetupState } from './types';
-	import { afterNavigate, replaceState } from '$app/navigation';
-	import { page } from '$app/state';
-	import { resolve } from '$app/paths';
-	import { SvelteURL } from 'svelte/reactivity';
+	import { onMount } from 'svelte';
 
 	import {
 		optionsCoverage,
@@ -27,47 +24,43 @@
 		frontend: undefined
 	});
 
-	let routerReady = false;
+	onMount(() => {
+		const applyFromHash = () => {
+			const { os, method, maps, coverage, bbox, frontend } = decodeHash(window.location.hash);
+			if (os) {
+				selection.os = optionsOS.find((o) => o.key === os);
+				if (selection.os && method)
+					selection.method = optionsMethod(selection.os.key).find((m) => m.key === method);
+			}
+			if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
+			if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
+			if (bbox) selection.bbox = bbox;
+			if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
+		};
 
-	$effect(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { os, method, maps, coverage, bbox, frontend } = selection;
-		setHash(selection);
+		// Initialize from current URL hash on first mount
+		applyFromHash();
+
+		// Keep selection in sync when the user navigates back/forward or edits the hash
+		window.addEventListener('hashchange', applyFromHash);
+		window.addEventListener('popstate', applyFromHash);
+		return () => {
+			window.removeEventListener('hashchange', applyFromHash);
+			window.removeEventListener('popstate', applyFromHash);
+		};
 	});
-
-	afterNavigate(() => {
-		const { os, method, maps, coverage, bbox, frontend } = decodeHash(window.location.hash);
-		if (os) {
-			selection.os = optionsOS.find((o) => o.key === os);
-			if (selection.os && method)
-				selection.method = optionsMethod(selection.os.key).find((m) => m.key === method);
-		}
-		if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
-		if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
-		if (bbox) selection.bbox = bbox;
-		if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
-
-		setTimeout(() => (routerReady = true), 1);
-	});
-
-	function setHash(selection: SetupState) {
-		if (!routerReady) return; // Avoid setting hash before router is ready
-
-		let hash = encodeHash(selection);
-		hash = hash ? `#${hash}` : '';
-
-		if (hash !== page.url.hash.slice(1)) {
-			let new_url = new SvelteURL(hash, page.url.href);
-			if (!hash) new_url.hash = '';
-			replaceState(resolve(new_url.href), {});
-		}
-	}
 
 	let code: string | undefined = $derived.by(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { os, method, maps, coverage, bbox, frontend } = selection;
 		return selection.os && selection.method ? generateCode(selection) : undefined;
 	});
+
+	function copyShareLink() {
+		const hash = encodeHash(selection);
+		const url = new URL('#' + hash, window.location.href);
+		navigator.clipboard.writeText(url.href);
+	}
 </script>
 
 <svelte:head>
@@ -151,6 +144,9 @@
 		<hr />
 		<h2>Check and paste these instructions into your shell</h2>
 		<CodeBlock {code} />
+		<p style="text-align:center; margin-top: 5em;">
+			<button onclick={copyShareLink}>copy share link</button>
+		</p>
 	{/if}
 </section>
 
