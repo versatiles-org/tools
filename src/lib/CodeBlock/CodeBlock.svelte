@@ -34,7 +34,7 @@
 
 <div class="code-container">
 	<Highlight {language} {code} {style} />
-	<button on:click={copyToClipboard}>copy</button>
+	<button onclick={copyToClipboard}>copy</button>
 </div>
 
 <style>
