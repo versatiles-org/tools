@@ -24,6 +24,12 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 		os: ['linux']
 	},
 	{
+		key: 'docker',
+		label: 'Docker',
+		small: true,
+		os: ['linux', 'macos']
+	},
+	{
 		key: 'cargo',
 		label: 'Use Cargo',
 		small: true,
