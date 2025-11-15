@@ -87,17 +87,17 @@ export function generateCode({
 		}
 	}
 
-	function* downloadMaps(): Generator<string> {
+	function* downloadMaps(alternateVersatilesBin?: string): Generator<string> {
 		if (maps.length === 0) return;
 
-		yield `\n# Download Maps`;
+		yield `\n# Download Map Data`;
 
 		const bboxArg = coverage?.key === 'bbox' && bbox ? bbox.join(',') : false;
 		for (const map of maps) {
 			const filename = `${map.key}.versatiles`;
 			const url = `https://download.versatiles.org/${filename}`;
 			if (bboxArg) {
-				yield `${versatilesBin} convert --bbox-border 3 --bbox "${bboxArg}" "${url}" "${filename}"`;
+				yield `${alternateVersatilesBin ?? versatilesBin} convert --bbox-border 3 --bbox "${bboxArg}" "${url}" "${filename}"`;
 			} else {
 				if (os!.key === 'windows') {
 					yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
