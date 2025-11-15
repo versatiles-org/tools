@@ -22,12 +22,30 @@ export function generateCode({
 	);
 
 	function* runDocker(): Generator<string> {
+		yield `# Install Docker on your server,`;
+		yield `# e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
 		switch (method!.key) {
+			case 'docker':
+				yield* downloadFrontend();
+				yield* downloadMaps('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest \\\n');
+
+				const serverArgs = []
+				if (frontend?.name) {
+					serverArgs.push(`--static "${frontend.name}.br.tar.gz"`);
+				}
+				for (const map of maps) {
+					serverArgs.push(`"${map.key}.versatiles"`);
+				}
+
+				yield ``;
+				yield `# Configure and run Docker container`;
+				yield `docker run -d --name versatiles -p 80:8080 -v $(pwd):/data versatiles/versatiles:latest \\`;
+				yield `  serve ${serverArgs.join(' ')}`;
+				break;
 			case 'docker_nginx':
-				yield `# 1. Point your domain to the server IP`;
-				yield `# 2. Install Docker on your server,`;
-				yield `#    e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
-				yield `# 3. Configure and run Docker container`;
+				yield `# Point your domain to the server IP`;
+				yield `...`;
+				yield `# Configure and run Docker container`;
 				yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
 				yield `docker run -d --name versatiles \\`;
 				yield `  -p 80:80 -p 443:443 \\`;
