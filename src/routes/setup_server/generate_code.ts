@@ -10,11 +10,12 @@ export function generateCode({
 }: SetupState): string | undefined {
 	if (!os || !method) return undefined;
 
+	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
+
 	if (method.key.startsWith('docker')) {
 		return [...runDocker()].join('\n');
 	}
 
-	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
 
 	return [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()].join(
 		'\n'
