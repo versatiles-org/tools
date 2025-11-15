@@ -102,7 +102,7 @@ export function generateCode({
 				if (os!.key === 'windows') {
 					yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
 				} else {
-					yield `wget -c -O "${filename}" "${url}"`;
+					yield `wget -cO "${filename}" "${url}"`;
 				}
 			}
 		}
@@ -118,7 +118,7 @@ export function generateCode({
 		if (os!.key === 'windows') {
 			yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
 		} else {
-			yield `wget -c -O "${filename}" "${url}"`;
+			yield `wget -cO "${filename}" "${url}"`;
 		}
 	}
 
