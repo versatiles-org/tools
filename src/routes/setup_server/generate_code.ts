@@ -16,7 +16,6 @@ export function generateCode({
 		return [...runDocker()].join('\n');
 	}
 
-
 	return [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()].join(
 		'\n'
 	);
@@ -25,11 +24,13 @@ export function generateCode({
 		yield `# Install Docker on your server,`;
 		yield `# e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
 		switch (method!.key) {
-			case 'docker':
+			case 'docker': {
 				yield* downloadFrontend();
-				yield* downloadMaps('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest \\\n');
+				yield* downloadMaps(
+					'docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest \\\n'
+				);
 
-				const serverArgs = []
+				const serverArgs = [];
 				if (frontend?.name) {
 					serverArgs.push(`--static "${frontend.name}.br.tar.gz"`);
 				}
@@ -42,6 +43,7 @@ export function generateCode({
 				yield `docker run -d --name versatiles -p 80:8080 -v $(pwd):/data versatiles/versatiles:latest \\`;
 				yield `  serve ${serverArgs.join(' ')}`;
 				break;
+			}
 			case 'docker_nginx':
 				yield `# Point your domain to the server IP`;
 				yield `...`;
