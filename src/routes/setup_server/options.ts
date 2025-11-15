@@ -10,7 +10,7 @@ export const optionsOS: OptionOS[] = [
 ];
 
 // ### Method Options
-export type OptionMethod = Option & { key: string };
+export type OptionMethod = Option & { key: 'homebrew' | 'script' | 'docker' | 'docker_nginx' | 'cargo' | 'source' };
 export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 	{ key: 'homebrew', label: 'Homebrew', os: ['macos'] },
 	{
