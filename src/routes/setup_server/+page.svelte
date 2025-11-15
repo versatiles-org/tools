@@ -6,6 +6,7 @@
 	import { decodeHash, encodeHash } from './hash';
 	import type { SetupState } from './types';
 	import { onMount } from 'svelte';
+	import '../../style/default.css';
 
 	import {
 		optionsCoverage,
