@@ -42,6 +42,10 @@ export function generateCode({
 
 				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
 				yield `  versatiles/versatiles-nginx:latest`;
+				break;
+			default:
+				yield `# Unsupported Docker method ${method!.key}`;
+				break;
 		}
 	}
 
