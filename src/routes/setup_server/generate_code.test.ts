@@ -36,7 +36,7 @@ describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {
 		const code = _generateCode(osLinux, methodHomebrew, maps);
 		expect(code).toContain('brew install versatiles');
-		expect(code).toContain('wget -c -O "osm.versatiles"');
+		expect(code).toContain('wget -cO "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -53,7 +53,7 @@ describe('generateCode', () => {
 		const code = _generateCode(osLinux, methodCargo, maps);
 		expect(code).toContain('curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh');
 		expect(code).toContain('cargo install versatiles');
-		expect(code).toContain('wget -c -O "osm.versatiles"');
+		expect(code).toContain('wget -cO "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -73,7 +73,7 @@ describe('generateCode', () => {
 	it('includes frontend download and server static argument', () => {
 		const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, frontend);
 		expect(code).toContain('# Download Frontend');
-		expect(code).toContain('wget -c -O "frontend.br.tar.gz"');
+		expect(code).toContain('wget -cO "frontend.br.tar.gz"');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 	});
 

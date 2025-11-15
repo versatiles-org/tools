@@ -12,12 +12,12 @@ describe('optionsMethod', () => {
 	it('should return correct methods for macos', () => {
 		const result = optionsMethod('macos');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'homebrew', 'script', 'source']);
+		expect(keys).toStrictEqual(['cargo', 'docker', 'homebrew', 'script', 'source']);
 	});
 	it('should return correct methods for linux', () => {
 		const result = optionsMethod('linux');
 		const keys = result.map((opt) => opt.key).sort();
-		expect(keys).toStrictEqual(['cargo', 'docker_nginx', 'script', 'source']);
+		expect(keys).toStrictEqual(['cargo', 'docker', 'docker_nginx', 'script', 'source']);
 	});
 	it('should return correct methods for windows', () => {
 		const result = optionsMethod('windows');
