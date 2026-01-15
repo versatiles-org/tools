@@ -11,6 +11,7 @@
 <script lang="ts" generics="MyOption extends Option">
 	import '../../../style/button.css';
 	import { SvelteSet } from 'svelte/reactivity';
+	import { untrack } from 'svelte';
 	let {
 		options,
 		allowMultiselect = false,
@@ -28,7 +29,7 @@
 	/*───────────────────────────────────────────────────────────────────────
 	 * Guard: `allowMultiselect` must never change after mount
 	 *───────────────────────────────────────────────────────────────────────*/
-	let _lockedAllow = allowMultiselect;
+	let _lockedAllow = untrack(() => allowMultiselect);
 	$effect(() => {
 		if (allowMultiselect !== _lockedAllow) {
 			throw new Error('FormOptionGroup: `allowMultiselect` cannot be changed after mount');
@@ -38,18 +39,18 @@
 	/*───────────────────────────────────────────────────────────────────────
 	 * Internals
 	 *───────────────────────────────────────────────────────────────────────*/
-	const lookup = new Map<string, MyOption>(options.map((o) => [o.key, o]));
+	const lookup = new Map<string, MyOption>(untrack(() => options).map((o) => [o.key, o]));
 	const selection = new SvelteSet<string>();
 
 	// Split big/small options once (assumes `options` is static)
 	const bigOptions: MyOption[] = [];
 	const smallOptions: MyOption[] = [];
-	for (const opt of options) (opt.small ? smallOptions : bigOptions).push(opt);
+	for (const opt of untrack(() => options)) (opt.small ? smallOptions : bigOptions).push(opt);
 
 	/*───────────────────────────────────────────────────────────────────────
 	 * Keep `selection` in sync with the outward binding
 	 *───────────────────────────────────────────────────────────────────────*/
-	if (allowMultiselect) {
+	if (_lockedAllow) {
 		$effect(() => {
 			selection.clear();
 			valueList.forEach((o) => {
@@ -71,7 +72,7 @@
 	 * Click handler – mutates both `selection` and the bindables
 	 *───────────────────────────────────────────────────────────────────────*/
 	function handleClick(option: MyOption) {
-		if (allowMultiselect) {
+		if (_lockedAllow) {
 			// toggle membership
 			if (selection.has(option.key)) {
 				selection.delete(option.key);
