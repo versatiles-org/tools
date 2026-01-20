@@ -21,11 +21,17 @@
 		padding: 2rem;
 		border-radius: 0.5rem;
 		border: 1px solid rgba(255, 255, 255, 0.3);
+		background: rgba(255, 255, 255, 0.05);
 		text-decoration: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
 	}
 
 	a.tool:hover {
 		border-color: rgba(255, 255, 255, 0.6);
+		background: rgba(255, 255, 255, 0.1);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	}
 
 	.title {
