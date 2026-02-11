@@ -15,7 +15,12 @@ export type OptionMethod = Option & {
 	hint: string;
 };
 export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
-	{ key: 'homebrew', label: 'Homebrew', hint: 'The easiest way to install on macOS', os: ['macos'] },
+	{
+		key: 'homebrew',
+		label: 'Homebrew',
+		hint: 'The easiest way to install on macOS',
+		os: ['macos']
+	},
 	{
 		key: 'script',
 		label: 'Use Install Script',
@@ -53,7 +58,7 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 		.map((method) => ({
 			key: method.key,
 			label: method.label,
-			hint: method.hint,
+			hint: method.hint
 		}));
 }
 
@@ -61,7 +66,11 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 export type KeyMap = 'osm' | 'satellite';
 export type OptionMap = Option & { key: KeyMap };
 export const optionsMap: OptionMap[] = [
-	{ key: 'osm', label: 'OpenStreetMap', hint: 'Vector map data with streets, buildings, and labels' },
+	{
+		key: 'osm',
+		label: 'OpenStreetMap',
+		hint: 'Vector map data with streets, buildings, and labels'
+	},
 	{ key: 'satellite', label: 'Satellite Imagery', hint: 'Raster satellite and aerial imagery' }
 ];
 
@@ -70,8 +79,16 @@ export type BBox = [number, number, number, number];
 export type KeyCoverage = 'global' | 'bbox';
 export type OptionCoverage = Option & { key: KeyCoverage };
 export const optionsCoverage: OptionCoverage[] = [
-	{ key: 'global', label: 'Entire World', hint: 'Download the complete dataset for the entire planet' },
-	{ key: 'bbox', label: 'Custom Region', hint: 'Select a specific region to save disk space and bandwidth' }
+	{
+		key: 'global',
+		label: 'Entire World',
+		hint: 'Download the complete dataset for the entire planet'
+	},
+	{
+		key: 'bbox',
+		label: 'Custom Region',
+		hint: 'Select a specific region to save disk space and bandwidth'
+	}
 ];
 
 // ### Frontend Options

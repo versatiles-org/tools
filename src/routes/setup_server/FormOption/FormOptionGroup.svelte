@@ -81,7 +81,6 @@
 			value = option;
 		}
 	}
-
 </script>
 
 {#snippet button(option: MyOption)}
