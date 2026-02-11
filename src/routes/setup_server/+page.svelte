@@ -66,6 +66,15 @@
 		});
 	});
 
+	$effect(() => {
+		if (selection.os && selection.method) {
+			const validMethods = optionsMethod(selection.os.key);
+			if (!validMethods.some((m) => m.key === selection.method!.key)) {
+				selection.method = undefined;
+			}
+		}
+	});
+
 	let code: string | undefined = $derived.by(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { os, method, maps, coverage, bbox, frontend } = selection;
