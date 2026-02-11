@@ -6,4 +6,4 @@ src/app.html
 
 # Integration tests
 tests/integration/*.sh
-tests/integration/generated/
+tests/integration/fixtures/

@@ -11,8 +11,8 @@ set -euo pipefail
 # Example: bash tests/integration/smoke_test.sh linux script
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GENERATED_DIR="$SCRIPT_DIR/generated"
-FIXTURE="$SCRIPT_DIR/tiny.versatiles"
+GENERATED_DIR="$SCRIPT_DIR/fixtures/generated"
+FIXTURE="$SCRIPT_DIR/fixtures/tiny.versatiles"
 
 OS="${1:?Usage: smoke_test.sh <os> <method>}"
 METHOD="${2:?Usage: smoke_test.sh <os> <method>}"
@@ -56,7 +56,7 @@ cp "$FIXTURE" "$WORK_DIR/osm.versatiles"
 
 # Detect if the generated script uses a frontend (--static flag or FRONTEND env)
 HAS_FRONTEND=false
-FRONTEND_FILE="$SCRIPT_DIR/frontend.br.tar.gz"
+FRONTEND_FILE="$SCRIPT_DIR/fixtures/frontend.br.tar.gz"
 if grep -q '\-\-static\|FRONTEND=' "$SCRIPT"; then
 	if [ -f "$FRONTEND_FILE" ] && [ -s "$FRONTEND_FILE" ]; then
 		HAS_FRONTEND=true

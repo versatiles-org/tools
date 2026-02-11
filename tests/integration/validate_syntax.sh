@@ -8,7 +8,7 @@ set -euo pipefail
 # Usage: bash tests/integration/validate_syntax.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GENERATED_DIR="$SCRIPT_DIR/generated"
+GENERATED_DIR="$SCRIPT_DIR/fixtures/generated"
 
 if [ ! -d "$GENERATED_DIR" ]; then
 	echo "ERROR: Generated scripts not found at $GENERATED_DIR"

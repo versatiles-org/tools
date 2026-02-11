@@ -21,7 +21,5 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Integration test generated files
-tests/integration/generated/
-tests/integration/tiny.versatiles
-tests/integration/frontend.br.tar.gz
+# Integration test fixtures
+tests/integration/fixtures/

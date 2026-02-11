@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: generated-scripts
-          path: tests/integration/generated/
+          path: tests/integration/fixtures/generated/
 
   # Tier 2: Smoke tests on Linux (script, docker, docker_nginx)
   smoke-test-linux:
@@ -119,15 +119,17 @@ jobs:
 
       - name: Create fixture
         run: |
-          cd tests/integration
+          mkdir -p tests/integration/fixtures
           versatiles convert \
             --bbox-border 0 \
             --bbox "8.5,47.3,8.6,47.4" \
             "https://download.versatiles.org/osm.versatiles" \
-            "tiny.versatiles"
+            "tests/integration/fixtures/tiny.versatiles"
 
       - name: Download frontend
-        run: curl -sSL -o tests/integration/frontend.br.tar.gz "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar.gz"
+        run: |
+          mkdir -p tests/integration/fixtures
+          curl -sSL -o tests/integration/fixtures/frontend.br.tar.gz "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar.gz"
 
       - name: Run smoke test
         run: bash tests/integration/smoke_test.sh macos homebrew

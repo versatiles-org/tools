@@ -7,7 +7,7 @@ set -euo pipefail
 # Usage: bash tests/integration/create_fixture.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUTPUT="$SCRIPT_DIR/tiny.versatiles"
+OUTPUT="$SCRIPT_DIR/fixtures/tiny.versatiles"
 
 if [ -f "$OUTPUT" ]; then
 	echo "Fixture already exists: $OUTPUT"
@@ -15,10 +15,12 @@ if [ -f "$OUTPUT" ]; then
 	exit 0
 fi
 
+mkdir -p "$SCRIPT_DIR/fixtures"
+
 echo "=== Creating tiny.versatiles fixture ==="
 echo "    bbox: 8.5,47.3,8.6,47.4 (small area around Zurich)"
 
-docker run --rm -v "$SCRIPT_DIR":/data versatiles/versatiles:latest \
+docker run --rm -v "$SCRIPT_DIR/fixtures":/data versatiles/versatiles:latest \
 	convert \
 	--bbox-border 0 \
 	--bbox "8.5,47.3,8.6,47.4" \
@@ -34,7 +36,7 @@ else
 fi
 
 # Also download the frontend tarball for smoke tests that use --static
-FRONTEND="$SCRIPT_DIR/frontend.br.tar.gz"
+FRONTEND="$SCRIPT_DIR/fixtures/frontend.br.tar.gz"
 if [ -f "$FRONTEND" ]; then
 	echo "Frontend already exists: $FRONTEND"
 else

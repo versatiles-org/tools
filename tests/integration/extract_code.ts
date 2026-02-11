@@ -1,6 +1,6 @@
 /**
  * Extracts all generated code snippets from generateCode() for every valid
- * OS/method combination and writes them to tests/integration/generated/.
+ * OS/method combination and writes them to tests/integration/fixtures/generated/.
  *
  * Usage: npx tsx tests/integration/extract_code.ts
  */
@@ -20,7 +20,7 @@ import type { OptionOS, OptionMethod } from '../../src/routes/setup_server/optio
 import type { BBox } from '../../src/routes/setup_server/options.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outDir = join(__dirname, 'generated');
+const outDir = join(__dirname, 'fixtures/generated');
 
 mkdirSync(outDir, { recursive: true });
 
