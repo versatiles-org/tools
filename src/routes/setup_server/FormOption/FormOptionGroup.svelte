@@ -99,6 +99,7 @@
 		aria-pressed={selection.has(option.key)}
 		onclick={() => handleClick(option)}
 	>
+		{#if _lockedAllow}<span class="checkbox">{selection.has(option.key) ? '☑' : '☐'}</span>{/if}
 		{option.label}
 	</button>
 {/snippet}
@@ -137,6 +138,10 @@
 	div.options.small {
 		margin-top: 1em;
 		font-size: 0.7em;
+	}
+
+	.checkbox {
+		margin-right: 0.3em;
 	}
 
 	p.small {
