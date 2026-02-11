@@ -43,3 +43,10 @@ button.check.done::after {
 	opacity: 1;
 	transition: opacity 0s;
 }
+
+button.check.failed::after {
+	content: '✗';
+	color: #ff4040;
+	opacity: 1;
+	transition: opacity 0s;
+}

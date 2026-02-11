@@ -57,12 +57,17 @@
 		return selection.os && selection.method ? generateCode(selection) : undefined;
 	});
 
-	function copyShareLink(this: HTMLButtonElement) {
+	async function copyShareLink(this: HTMLButtonElement) {
 		const hash = encodeHash(selection);
 		const url = new URL('#' + hash, window.location.href);
-		navigator.clipboard.writeText(url.href);
-		this.classList.add('done');
-		setTimeout(() => this.classList.remove('done'), 1000);
+		try {
+			await navigator.clipboard.writeText(url.href);
+			this.classList.add('done');
+			setTimeout(() => this.classList.remove('done'), 1000);
+		} catch {
+			this.classList.add('failed');
+			setTimeout(() => this.classList.remove('failed'), 1000);
+		}
 	}
 </script>
 
