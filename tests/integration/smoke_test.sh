@@ -53,6 +53,7 @@ PORT=8080
 
 # Copy fixture into work dir
 cp "$FIXTURE" "$WORK_DIR/osm.versatiles"
+cp "$FIXTURE" "$WORK_DIR/satellite.versatiles"
 
 # Detect if the generated script uses a frontend (--static flag or FRONTEND env)
 HAS_FRONTEND=false
@@ -86,7 +87,7 @@ script | homebrew | cargo | source)
 #!/usr/bin/env bash
 set -euo pipefail
 cd "\$(dirname "\$0")"
-versatiles serve $SERVE_ARGS "osm.versatiles" &
+versatiles serve $SERVE_ARGS "osm.versatiles" "satellite.versatiles" &
 echo \$! > server.pid
 RUNEOF
 	;;
@@ -104,7 +105,7 @@ cd "\$(dirname "\$0")"
 
 docker rm -f versatiles 2>/dev/null || true
 docker run -d --name versatiles -p ${PORT}:8080 -v "\$(pwd)":/data versatiles/versatiles:latest \\
-  $DOCKER_SERVE_ARGS "osm.versatiles"
+  $DOCKER_SERVE_ARGS "osm.versatiles" "satellite.versatiles"
 RUNEOF
 	;;
 
@@ -117,6 +118,7 @@ cd "\$(dirname "\$0")"
 
 mkdir -p data
 cp osm.versatiles data/osm.versatiles
+cp satellite.versatiles data/satellite.versatiles
 
 docker rm -f versatiles 2>/dev/null || true
 docker run -d --name versatiles \\
@@ -124,7 +126,7 @@ docker run -d --name versatiles \\
   -v "\$(pwd)/data":/data \\
   -e DOMAIN=localhost \\
   -e HTTP_ONLY=true \\
-  -e TILE_SOURCES=osm.versatiles \\
+  -e TILE_SOURCES=osm.versatiles,satellite.versatiles \\
   -e BBOX="8.5,47.3,8.6,47.4" \\
   -e FRONTEND=standard \\
   versatiles/versatiles-nginx:latest

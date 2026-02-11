@@ -55,9 +55,12 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 }
 
 // ### Map Options
-export type KeyMap = 'osm';
+export type KeyMap = 'osm' | 'satellite';
 export type OptionMap = Option & { key: KeyMap };
-export const optionsMap: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap' }];
+export const optionsMap: OptionMap[] = [
+	{ key: 'osm', label: 'OpenStreetMap' },
+	{ key: 'satellite', label: 'Satellite Imagery' }
+];
 
 // ### Coverage Options
 export type BBox = [number, number, number, number];

@@ -35,9 +35,9 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }, { key: 'sat' }] as OptionMap[]
+				maps: [{ key: 'osm' }, { key: 'satellite' }] as OptionMap[]
 			})
-		).toBe('linux+docker+osm,sat');
+		).toBe('linux+docker+osm,satellite');
 	});
 
 	it('returns OS, method, maps, and global coverage', () => {
@@ -98,10 +98,10 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes OS, method, and maps', () => {
-		expect(decodeHash('linux+docker+osm,sat')).toEqual({
+		expect(decodeHash('linux+docker+osm,satellite')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm', 'sat']
+			maps: ['osm', 'satellite']
 		});
 	});
 

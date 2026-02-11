@@ -114,6 +114,21 @@ describe('generateCode', () => {
 		expect(code).toContain('versatiles/versatiles-nginx:latest');
 	});
 
+	it('generates code with satellite map selected', () => {
+		const satelliteMaps: OptionMap[] = [optionsMap.find((opt) => opt.key === 'satellite')!];
+		const code = _generateCode(osLinux, methodScript, satelliteMaps);
+		expect(code).toContain('satellite.versatiles');
+		expect(code).not.toContain('osm.versatiles');
+	});
+
+	it('generates code with both osm and satellite maps selected', () => {
+		const bothMaps: OptionMap[] = optionsMap;
+		const code = _generateCode(osLinux, methodDockerNginx, bothMaps, coverageBbox, bbox, frontend);
+		expect(code).toContain('osm.versatiles');
+		expect(code).toContain('satellite.versatiles');
+		expect(code).toContain('-e TILE_SOURCES=osm.versatiles,satellite.versatiles');
+	});
+
 	it('generates code for docker_nginx without bbox (global coverage)', () => {
 		const coverageGlobal = optionsCoverage.find((opt) => opt.key === 'global')!;
 		const code = _generateCode(

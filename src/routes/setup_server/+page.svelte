@@ -136,10 +136,6 @@
 
 		{#if selection.method}
 			<h2>3. Select Map Data</h2>
-			<p class="small">
-				Currently, only OpenStreetMap vector data is available.<br />
-				More map sources will be added in the future.
-			</p>
 			<div class="options">
 				<FormOptionGroup
 					options={optionsMap}
@@ -194,12 +190,6 @@
 	.form h2 {
 		margin-bottom: 0;
 		font-size: 1.2rem;
-	}
-	p.small {
-		margin-top: 0.2rem;
-		font-size: 0.8rem;
-		text-align: center;
-		opacity: 0.8;
 	}
 	div.options {
 		margin: 1rem 0 0.5rem;

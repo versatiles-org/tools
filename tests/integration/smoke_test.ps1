@@ -51,6 +51,7 @@ function Cleanup {
 try {
 	# Copy fixtures into work dir
 	Copy-Item $Fixture (Join-Path $WorkDir 'osm.versatiles')
+	Copy-Item $Fixture (Join-Path $WorkDir 'satellite.versatiles')
 
 	# Detect frontend usage
 	$HasFrontend = $false
@@ -71,9 +72,9 @@ try {
 	Write-Host "    Frontend: $HasFrontend"
 
 	# Build serve arguments
-	$ServeArgs = @('serve', '--port', "$Port", 'osm.versatiles')
+	$ServeArgs = @('serve', '--port', "$Port", 'osm.versatiles', 'satellite.versatiles')
 	if ($HasFrontend) {
-		$ServeArgs = @('serve', '--port', "$Port", '--static', 'frontend.br.tar.gz', 'osm.versatiles')
+		$ServeArgs = @('serve', '--port', "$Port", '--static', 'frontend.br.tar.gz', 'osm.versatiles', 'satellite.versatiles')
 	}
 
 	# Start the server as a background process

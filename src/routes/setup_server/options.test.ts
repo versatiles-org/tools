@@ -32,8 +32,11 @@ describe('optionsMethod', () => {
 });
 
 describe('optionsMaps', () => {
-	it('should contain OpenStreetMap option', () => {
-		expect(optionsMap).toEqual([expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' })]);
+	it('should contain OpenStreetMap and Satellite options', () => {
+		expect(optionsMap).toEqual([
+			expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' }),
+			expect.objectContaining({ key: 'satellite', label: 'Satellite Imagery' })
+		]);
 	});
 });
 
