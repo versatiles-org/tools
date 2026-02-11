@@ -15,19 +15,18 @@
 	type LanguageName = keyof typeof languages;
 	type LanguageType = (typeof languages)[LanguageName];
 
-	export let code = '';
-	export let style = '';
-	export let languageName: LanguageName = 'bash';
-	let language: LanguageType = bash;
+	let { code = '', style = '', languageName = 'bash' as LanguageName } = $props();
+	let language: LanguageType = $derived(languages[languageName]);
 
-	$: {
-		language = languages[languageName];
-	}
-
-	function copyToClipboard(this: HTMLButtonElement) {
-		navigator.clipboard.writeText(code);
-		this.classList.add('done');
-		setTimeout(() => this.classList.remove('done'), 1000);
+	async function copyToClipboard(this: HTMLButtonElement) {
+		try {
+			await navigator.clipboard.writeText(code);
+			this.classList.add('done');
+			setTimeout(() => this.classList.remove('done'), 1000);
+		} catch {
+			this.classList.add('failed');
+			setTimeout(() => this.classList.remove('failed'), 1000);
+		}
 	}
 </script>
 
