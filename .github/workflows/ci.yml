@@ -2,7 +2,7 @@ name: CI
 
 on:
   workflow_run:
-    workflows: ['Integration Tests']
+    workflows: ['Integration']
     types:
       - completed
     branches:
