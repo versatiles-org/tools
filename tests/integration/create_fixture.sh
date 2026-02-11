@@ -32,3 +32,15 @@ else
 	echo "ERROR: Failed to create fixture"
 	exit 1
 fi
+
+# Also download the frontend tarball for smoke tests that use --static
+FRONTEND="$SCRIPT_DIR/frontend.br.tar.gz"
+if [ -f "$FRONTEND" ]; then
+	echo "Frontend already exists: $FRONTEND"
+else
+	echo ""
+	echo "=== Downloading frontend ==="
+	curl -sSL -o "$FRONTEND" "https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/frontend.br.tar.gz"
+	size=$(du -h "$FRONTEND" | cut -f1)
+	echo "Downloaded frontend: $FRONTEND ($size)"
+fi

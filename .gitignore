@@ -24,3 +24,4 @@ vite.config.ts.timestamp-*
 # Integration test generated files
 tests/integration/generated/
 tests/integration/tiny.versatiles
+tests/integration/frontend.br.tar.gz

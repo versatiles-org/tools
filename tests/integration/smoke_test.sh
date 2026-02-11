@@ -47,57 +47,65 @@ cleanup() {
 
 PORT=8080
 
-# Copy fixture and frontend placeholder into work dir
+# Copy fixture into work dir
 cp "$FIXTURE" "$WORK_DIR/osm.versatiles"
 
-# Create an empty frontend tarball placeholder if needed
-touch "$WORK_DIR/frontend.br.tar.gz"
+# Detect if the generated script uses a frontend (--static flag or FRONTEND env)
+HAS_FRONTEND=false
+FRONTEND_FILE="$SCRIPT_DIR/frontend.br.tar.gz"
+if grep -q '\-\-static\|FRONTEND=' "$SCRIPT"; then
+	if [ -f "$FRONTEND_FILE" ] && [ -s "$FRONTEND_FILE" ]; then
+		HAS_FRONTEND=true
+		cp "$FRONTEND_FILE" "$WORK_DIR/frontend.br.tar.gz"
+	else
+		echo "WARNING: Generated script uses a frontend but $FRONTEND_FILE not found or empty."
+		echo "         Run 'bash tests/integration/create_fixture.sh' to download it."
+		echo "         Falling back to health check on /status."
+	fi
+fi
 
 echo "=== Smoke testing: ${OS}/${METHOD} ==="
 echo "    Work dir: $WORK_DIR"
+echo "    Frontend: $HAS_FRONTEND"
 
-# Read the generated script
-script_content=$(cat "$SCRIPT")
+# Build the serve arguments for non-docker methods
+SERVE_ARGS="--port $PORT"
+if [ "$HAS_FRONTEND" = true ] && [[ "$METHOD" != docker* ]]; then
+	SERVE_ARGS="$SERVE_ARGS --static \"frontend.br.tar.gz\""
+fi
 
 # Post-process the script depending on the method
 case "$METHOD" in
 script | homebrew | cargo | source)
-	# Remove install commands — we assume versatiles is already available or we skip install
-	# Remove download commands — we already have fixture data
-	# Replace server port and background it
-
-	# Build a simplified run script
-	cat >"$WORK_DIR/run.sh" <<'RUNEOF'
+	# Build a simplified run script: skip install/download, just start the server
+	cat >"$WORK_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")"
-RUNEOF
-
-	# For non-docker methods, we just need to start the server
-	# The install/download steps are skipped; the fixture is already in place
-	cat >>"$WORK_DIR/run.sh" <<RUNEOF
-versatiles serve --port $PORT "osm.versatiles" &
+cd "\$(dirname "\$0")"
+versatiles serve $SERVE_ARGS "osm.versatiles" &
 echo \$! > server.pid
 RUNEOF
 	;;
 
 docker)
-	# For docker method: replace the serve container command
-	# The download/convert steps use Docker volumes, so replace with fixture
+	# For docker method: run the versatiles container with fixture data
+	DOCKER_SERVE_ARGS="serve"
+	if [ "$HAS_FRONTEND" = true ]; then
+		DOCKER_SERVE_ARGS="serve --static \"frontend.br.tar.gz\""
+	fi
 	cat >"$WORK_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -euo pipefail
 cd "\$(dirname "\$0")"
 
-# Run the versatiles Docker container with fixture data
 docker rm -f versatiles 2>/dev/null || true
 docker run -d --name versatiles -p ${PORT}:8080 -v "\$(pwd)":/data versatiles/versatiles:latest \\
-  serve "osm.versatiles"
+  $DOCKER_SERVE_ARGS "osm.versatiles"
 RUNEOF
 	;;
 
 docker_nginx)
-	# For docker_nginx: start the container without TLS (will fail Let's Encrypt but container starts)
+	# For docker_nginx: the container handles the frontend internally
 	cat >"$WORK_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -euo pipefail
@@ -106,7 +114,6 @@ cd "\$(dirname "\$0")"
 mkdir -p data
 cp osm.versatiles data/osm.versatiles
 
-# Run the versatiles-nginx Docker container
 docker rm -f versatiles 2>/dev/null || true
 docker run -d --name versatiles \\
   -p ${PORT}:80 \\
@@ -148,9 +155,14 @@ if [[ "$METHOD" == docker* ]]; then
 	echo "    Docker container 'versatiles' is running"
 fi
 
-# Health check: poll for HTTP 200 on /status endpoint
-# (the root path returns 404 when no static frontend is configured)
-HEALTH_URL="http://localhost:$PORT/status"
+# Health check: poll for HTTP 200
+# With frontend: check / to verify the frontend is served
+# Without frontend: check /status (root returns 404 without static content)
+if [ "$HAS_FRONTEND" = true ]; then
+	HEALTH_URL="http://localhost:$PORT/"
+else
+	HEALTH_URL="http://localhost:$PORT/status"
+fi
 echo "=== Health check: polling $HEALTH_URL ==="
 max_attempts=15
 attempt=0
