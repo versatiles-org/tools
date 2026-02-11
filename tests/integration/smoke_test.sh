@@ -160,36 +160,65 @@ if [[ "$METHOD" == docker* ]]; then
 fi
 
 # Health check: poll for HTTP 200
-# With frontend: check / to verify the frontend is served
-# Without frontend: check /status (root returns 404 without static content)
-if [ "$HAS_FRONTEND" = true ]; then
-	HEALTH_URL="http://localhost:$PORT/"
-else
-	HEALTH_URL="http://localhost:$PORT/status"
-fi
-echo "=== Health check: polling $HEALTH_URL ==="
-# docker_nginx needs more time: it downloads frontend + converts tiles on startup
 if [ "$METHOD" = "docker_nginx" ]; then
+	# For docker_nginx: check the backend directly via docker exec.
+	# Nginx's proxy_cache_valid caches ALL responses (including 502) for 5 min,
+	# so if the first request hits nginx before the backend is ready, the cached
+	# 502 persists and all subsequent health checks fail.
+	echo "=== Health check: polling backend via docker exec ==="
 	max_attempts=60
-else
-	max_attempts=15
-fi
-attempt=0
-success=false
+	attempt=0
+	success=false
 
-while [ $attempt -lt $max_attempts ]; do
-	attempt=$((attempt + 1))
-	status=$(curl -sSo /dev/null -w '%{http_code}' "$HEALTH_URL" 2>/dev/null || true)
+	while [ $attempt -lt $max_attempts ]; do
+		attempt=$((attempt + 1))
+		if docker exec versatiles curl -sf http://127.0.0.1:8080/status >/dev/null 2>&1; then
+			echo "    Attempt $attempt: backend OK"
+			success=true
+			break
+		fi
+		echo "    Attempt $attempt: backend not ready — retrying..."
+		sleep 2
+	done
 
-	if [ "$status" = "200" ]; then
-		echo "    Attempt $attempt: HTTP $status — OK"
-		success=true
-		break
+	# Also verify nginx is accepting connections
+	if [ "$success" = true ]; then
+		echo "    Checking nginx on port $PORT..."
+		sleep 1
+		nginx_status=$(curl -sSo /dev/null -w '%{http_code}' "http://localhost:$PORT/" 2>/dev/null || true)
+		if [[ "$nginx_status" =~ ^(200|502)$ ]]; then
+			echo "    nginx responding: HTTP $nginx_status"
+		else
+			echo "    WARNING: nginx returned HTTP $nginx_status"
+		fi
 	fi
+else
+	# With frontend: check / to verify the frontend is served
+	# Without frontend: check /status (root returns 404 without static content)
+	if [ "$HAS_FRONTEND" = true ]; then
+		HEALTH_URL="http://localhost:$PORT/"
+	else
+		HEALTH_URL="http://localhost:$PORT/status"
+	fi
+	echo "=== Health check: polling $HEALTH_URL ==="
+	max_attempts=15
+	attempt=0
+	success=false
 
-	echo "    Attempt $attempt: HTTP ${status:-timeout} — retrying..."
-	sleep 2
-done
+	while [ $attempt -lt $max_attempts ]; do
+		attempt=$((attempt + 1))
+		status=$(curl -sSo /dev/null -w '%{http_code}' "$HEALTH_URL" 2>/dev/null || true)
+
+		if [ "$status" = "200" ]; then
+			echo "    Attempt $attempt: HTTP $status — OK"
+			success=true
+			break
+		fi
+
+		echo "    Attempt $attempt: HTTP ${status:-timeout} — retrying..."
+		sleep 2
+	done
+fi
 
 if [ "$success" = true ]; then
 	echo ""
