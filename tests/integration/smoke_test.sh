@@ -148,15 +148,17 @@ if [[ "$METHOD" == docker* ]]; then
 	echo "    Docker container 'versatiles' is running"
 fi
 
-# Health check: poll for HTTP 200
-echo "=== Health check: polling http://localhost:$PORT/ ==="
-max_attempts=30
+# Health check: poll for HTTP 200 on /status endpoint
+# (the root path returns 404 when no static frontend is configured)
+HEALTH_URL="http://localhost:$PORT/status"
+echo "=== Health check: polling $HEALTH_URL ==="
+max_attempts=15
 attempt=0
 success=false
 
 while [ $attempt -lt $max_attempts ]; do
 	attempt=$((attempt + 1))
-	status=$(curl -sSo /dev/null -w '%{http_code}' "http://localhost:$PORT/" 2>/dev/null || true)
+	status=$(curl -sSo /dev/null -w '%{http_code}' "$HEALTH_URL" 2>/dev/null || true)
 
 	if [ "$status" = "200" ]; then
 		echo "    Attempt $attempt: HTTP $status — OK"
