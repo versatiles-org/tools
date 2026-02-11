@@ -52,12 +52,11 @@
 	});
 
 	let mounted = false;
-	let hash = $derived(encodeHash(selection));
 
 	$effect(() => {
-		hash; // track
+		const h = encodeHash(selection);
 		if (!mounted) return;
-		history.replaceState(null, '', '#' + hash);
+		history.replaceState(null, '', '#' + h);
 	});
 
 	// Allow applyFromHash to run first, then enable hash syncing
