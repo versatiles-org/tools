@@ -88,9 +88,9 @@
 		}
 	}
 
-	function getSingleSelection(): MyOption | undefined {
-		return selection.size === 1 ? lookup.get(selection.values().next().value!) : undefined;
-	}
+	let singleSelection: MyOption | undefined = $derived(
+		selection.size === 1 ? lookup.get(selection.values().next().value!) : undefined
+	);
 </script>
 
 {#snippet button(option: MyOption)}
@@ -120,8 +120,8 @@
 		</div>
 	{/if}
 
-	{#if getSingleSelection()?.hint}
-		<p class="small">{getSingleSelection()!.hint}</p>
+	{#if singleSelection?.hint}
+		<p class="small">{singleSelection.hint}</p>
 	{/if}
 {/key}
 
