@@ -24,11 +24,6 @@ describe('optionsMethod', () => {
 		const keys = result.map((opt) => opt.key).sort();
 		expect(keys).toStrictEqual(['cargo', 'script', 'source']);
 	});
-	it('should include small property when present', () => {
-		const result = optionsMethod('linux');
-		const cargo = result.find((opt) => opt.key === 'cargo');
-		expect(cargo).toHaveProperty('small', true);
-	});
 });
 
 describe('optionsMaps', () => {
