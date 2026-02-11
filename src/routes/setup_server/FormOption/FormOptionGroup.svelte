@@ -99,7 +99,7 @@
 	<div class="option-list">
 		{#each options as option (option.key)}
 			{@render button(option)}
-			<span class="hint">{option.hint ?? ''}</span>
+			<span class="hint" class:selected={selection.has(option.key)}>{option.hint ?? ''}</span>
 		{/each}
 	</div>
 {/key}
@@ -124,6 +124,10 @@
 
 	.hint {
 		font-size: 0.85em;
-		opacity: 0.7;
+		opacity: 0.5;
+	}
+
+	.hint.selected {
+		opacity: 1;
 	}
 </style>
