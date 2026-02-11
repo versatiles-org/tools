@@ -5,7 +5,7 @@
 	import { generateCode } from './generate_code';
 	import { decodeHash, encodeHash } from './hash';
 	import type { SetupState } from './types';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import '../../style/default.css';
 
 	import {
@@ -49,6 +49,22 @@
 			window.removeEventListener('hashchange', applyFromHash);
 			window.removeEventListener('popstate', applyFromHash);
 		};
+	});
+
+	let mounted = false;
+	let hash = $derived(encodeHash(selection));
+
+	$effect(() => {
+		hash; // track
+		if (!mounted) return;
+		history.replaceState(null, '', '#' + hash);
+	});
+
+	// Allow applyFromHash to run first, then enable hash syncing
+	onMount(() => {
+		tick().then(() => {
+			mounted = true;
+		});
 	});
 
 	let code: string | undefined = $derived.by(() => {
