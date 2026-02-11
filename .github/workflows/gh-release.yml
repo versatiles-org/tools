@@ -33,10 +33,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
 
       - name: Install node dependencies
-        run: npm i
+        run: npm ci
 
       - name: Check Format
         if: github.event.workflow_run.head_branch != 'main' && github.ref != 'refs/heads/main'
