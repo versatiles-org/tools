@@ -3,3 +3,7 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 src/app.html
+
+# Integration tests
+tests/integration/*.sh
+tests/integration/generated/
