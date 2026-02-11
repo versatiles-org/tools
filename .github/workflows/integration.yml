@@ -117,8 +117,11 @@ jobs:
       - name: Install VersaTiles
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-windows.ps1" -OutFile "$env:TEMP\install-windows.ps1"
-          . "$env:TEMP\install-windows.ps1"
+          $installDir = "$env:ProgramFiles\versatiles"
+          New-Item -ItemType Directory -Path $installDir -Force
+          Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/versatiles-windows-x86_64.tar.gz" -OutFile "$env:TEMP\versatiles.tar.gz"
+          tar -xzf "$env:TEMP\versatiles.tar.gz" -C $installDir
+          echo $installDir >> $env:GITHUB_PATH
 
       - name: Create fixture
         shell: pwsh
