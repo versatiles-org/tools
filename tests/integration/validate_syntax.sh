@@ -20,22 +20,26 @@ errors=0
 
 # Validate bash scripts with shellcheck
 echo "=== Checking bash scripts with shellcheck ==="
-for script in "$GENERATED_DIR"/*.sh; do
-	[ -f "$script" ] || continue
-	name="$(basename "$script")"
-	echo -n "  $name ... "
-	# SC2086: word splitting (expected in generated install commands)
-	# SC2034: unused variables (comments reference URLs)
-	# SC2164: cd without || exit (generated scripts use set -e)
-	# SC2046: unquoted $(pwd) in docker volume mounts (intentional)
-	# SC2288: literal "..." placeholder in docker_nginx instructions
-	if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC2288 -s bash "$script" 2>&1; then
-		echo "OK"
-	else
-		echo "FAIL"
-		errors=$((errors + 1))
-	fi
-done
+if command -v shellcheck &>/dev/null; then
+	for script in "$GENERATED_DIR"/*.sh; do
+		[ -f "$script" ] || continue
+		name="$(basename "$script")"
+		echo -n "  $name ... "
+		# SC2086: word splitting (expected in generated install commands)
+		# SC2034: unused variables (comments reference URLs)
+		# SC2164: cd without || exit (generated scripts use set -e)
+		# SC2046: unquoted $(pwd) in docker volume mounts (intentional)
+		# SC2288: literal "..." placeholder in docker_nginx instructions
+		if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC2288 -s bash "$script" 2>&1; then
+			echo "OK"
+		else
+			echo "FAIL"
+			errors=$((errors + 1))
+		fi
+	done
+else
+	echo "  shellcheck not found — skipping bash validation"
+fi
 
 # Validate PowerShell scripts with pwsh parser
 echo ""
