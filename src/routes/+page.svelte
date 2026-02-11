@@ -14,6 +14,11 @@
 	<span class="title">Find a bounding box</span>
 </a>
 
+<a class="tool" href="https://tiles.versatiles.org" target="_blank" rel="noopener noreferrer">
+	<span class="title">Build a map style</span><br />
+	Create and export a custom map style using the VersaTiles style editor.
+</a>
+
 <style>
 	a.tool {
 		display: block;
