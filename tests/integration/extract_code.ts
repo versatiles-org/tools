@@ -35,7 +35,7 @@ for (const os of optionsOS) {
 	const validMethods = allMethods.filter((m) => m.os.includes(os.key));
 	for (const method of validMethods) {
 		const osOpt: OptionOS = { key: os.key, label: os.label, hint: os.hint };
-		const methodOpt: OptionMethod = { key: method.key, label: method.label };
+		const methodOpt: OptionMethod = { key: method.key, label: method.label, hint: method.hint };
 
 		const code = generateCode({
 			os: osOpt,
