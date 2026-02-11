@@ -2,6 +2,7 @@
 <script lang="ts">
 	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
+	import '../../style/default.css';
 
 	let selectedBBox = $state<[number, number, number, number] | undefined>(undefined);
 	let code = $derived(selectedBBox ? JSON.stringify(selectedBBox) : '');
