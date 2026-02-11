@@ -17,7 +17,7 @@
 
 <svelte:head>
 	<title>Bounding Box VersaTiles</title>
-	<meta name="description" content="How to install VersaTiles?" />
+	<meta name="description" content="Select a geographic bounding box and get its coordinates." />
 </svelte:head>
 
 <section class="form">
