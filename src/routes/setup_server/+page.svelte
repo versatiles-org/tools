@@ -145,7 +145,7 @@
 					<FormOptionGroup options={optionsCoverage} bind:value={selection.coverage} />
 				</div>
 
-				{#if selection.coverage?.key == 'bbox'}
+				{#if selection.coverage?.key === 'bbox'}
 					<div class="bbox-map">
 						<BBoxMap bind:selectedBBox={selection.bbox} />
 					</div>
