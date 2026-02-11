@@ -49,10 +49,15 @@ if command -v pwsh &>/dev/null; then
 		[ -f "$script" ] || continue
 		name="$(basename "$script")"
 		echo -n "  $name ... "
+		# Convert to Windows path when running in Git Bash on Windows
+		script_path="$script"
+		if command -v cygpath &>/dev/null; then
+			script_path="$(cygpath -w "$script")"
+		fi
 		# Parse-only: use [System.Management.Automation.Language.Parser]
 		if pwsh -NoProfile -NonInteractive -Command "
 			\$errors = \$null
-			\$null = [System.Management.Automation.Language.Parser]::ParseFile('$script', [ref]\$null, [ref]\$errors)
+			\$null = [System.Management.Automation.Language.Parser]::ParseFile('$script_path', [ref]\$null, [ref]\$errors)
 			if (\$errors.Count -gt 0) {
 				\$errors | ForEach-Object { Write-Error \$_.Message }
 				exit 1
