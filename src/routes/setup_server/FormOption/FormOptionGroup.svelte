@@ -2,9 +2,8 @@
 	export type Option = {
 		key: string;
 		label: string;
-		hint?: string;
+		hint: string;
 		selected?: boolean;
-		small?: boolean;
 	};
 </script>
 
@@ -41,11 +40,6 @@
 	 *───────────────────────────────────────────────────────────────────────*/
 	const lookup = new Map<string, MyOption>(untrack(() => options).map((o) => [o.key, o]));
 	const selection = new SvelteSet<string>();
-
-	// Split big/small options once (assumes `options` is static)
-	const bigOptions: MyOption[] = [];
-	const smallOptions: MyOption[] = [];
-	for (const opt of untrack(() => options)) (opt.small ? smallOptions : bigOptions).push(opt);
 
 	/*───────────────────────────────────────────────────────────────────────
 	 * Keep `selection` in sync with the outward binding
@@ -88,9 +82,6 @@
 		}
 	}
 
-	let singleSelection: MyOption | undefined = $derived(
-		selection.size === 1 ? lookup.get(selection.values().next().value!) : undefined
-	);
 </script>
 
 {#snippet button(option: MyOption)}
@@ -105,49 +96,34 @@
 {/snippet}
 
 {#key selection}
-	{#if bigOptions.length > 0}
-		<div class="options">
-			{#each bigOptions as option (option.key)}
-				{@render button(option)}
-			{/each}
-		</div>
-	{/if}
-
-	{#if smallOptions.length > 0}
-		<div class="options small">
-			{#each smallOptions as option (option.key)}
-				{@render button(option)}
-			{/each}
-		</div>
-	{/if}
-
-	{#if singleSelection?.hint}
-		<p class="small">{singleSelection.hint}</p>
-	{/if}
+	<div class="option-list">
+		{#each options as option (option.key)}
+			{@render button(option)}
+			<span class="hint">{option.hint ?? ''}</span>
+		{/each}
+	</div>
 {/key}
 
 <style>
-	div.options {
-		display: flex;
-		justify-content: center;
-		gap: 1rem;
+	.option-list {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.5rem 1rem;
 		align-items: center;
-		flex-wrap: wrap;
+		max-width: 40rem;
+		margin: 0 auto;
 	}
 
-	div.options.small {
-		margin-top: 1em;
-		font-size: 0.7em;
+	.option-list button {
+		text-align: left;
 	}
 
 	.checkbox {
 		margin-right: 0.3em;
 	}
 
-	p.small {
-		margin: 1rem;
-		font-size: 0.8rem;
-		text-align: center;
-		opacity: 0.8;
+	.hint {
+		font-size: 0.85em;
+		opacity: 0.7;
 	}
 </style>
