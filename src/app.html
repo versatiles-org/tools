@@ -24,15 +24,16 @@
 %sveltekit.head%</head>
 
 <body data-color-mode="dark" data-light-theme="dark" data-dark-theme="dark">
+	<a href="https://versatiles.org/tools/#main-content" class="skip-link">Skip to main content</a>
 	<header>
-		<nav>
-			<ul><li><a href="https://versatiles.org/">Overview</a></li><li><a href="https://versatiles.org/playground/">Playground</a></li><li class="selected"><a href="https://versatiles.org/tools/">Tools</a></li><li><a href="https://docs.versatiles.org/">Documentation</a></li><li class="github-icon"><a href="https://github.com/versatiles-org/"></a></li></ul>
+		<nav aria-label="Main navigation">
+			<ul role="list"><li><a href="https://versatiles.org/">Overview</a></li><li><a href="https://versatiles.org/playground/">Playground</a></li><li class="selected"><a href="https://versatiles.org/tools/">Tools</a></li><li><a href="https://docs.versatiles.org/">Documentation</a></li><li class="github-icon"><a href="https://github.com/versatiles-org/"></a></li></ul>
 		</nav>
 	</header>
-	<main>%sveltekit.body%</main>
-	<footer>
-		<div id="github-link">
-			<a target="_blank" href="https://github.com/versatiles-org/tools">Improve this page on GitHub</a>
-		</div>
-	</footer>
+	<main id="main-content" role="main" aria-label="Page content">%sveltekit.body%</main>
+	<footer role="contentinfo" aria-label="Site information">
+	<div id="github-link"><a target="_blank" href="https://github.com/versatiles-org/tools">Improve this page on GitHub</a></div></footer>
+
+
+
 </body></html>
