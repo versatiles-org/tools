@@ -1,0 +1,89 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Tier 1: Validate syntax and URLs
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract generated scripts
+        run: npx tsx tests/integration/extract_code.ts
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Validate script syntax
+        run: bash tests/integration/validate_syntax.sh
+
+      - name: Check URLs
+        run: bash tests/integration/check_urls.sh
+
+      - name: Upload generated scripts
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-scripts
+          path: tests/integration/generated/
+
+  # Tier 2: Fast smoke tests (script, docker, docker_nginx on Linux)
+  smoke-test-fast:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [script, docker, docker_nginx]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract generated scripts
+        run: npx tsx tests/integration/extract_code.ts
+
+      - name: Create fixture
+        run: bash tests/integration/create_fixture.sh
+
+      - name: Install VersaTiles (for script method)
+        if: matrix.method == 'script'
+        run: curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-unix.sh" | sudo sh
+
+      - name: Run smoke test
+        run: bash tests/integration/smoke_test.sh linux ${{ matrix.method }}
