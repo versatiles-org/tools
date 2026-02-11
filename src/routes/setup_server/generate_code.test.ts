@@ -16,6 +16,8 @@ const methodHomebrew: OptionMethod = allMethods.find((opt) => opt.key === 'homeb
 const methodScript: OptionMethod = allMethods.find((opt) => opt.key === 'script')!;
 const methodCargo: OptionMethod = allMethods.find((opt) => opt.key === 'cargo')!;
 const methodSource: OptionMethod = allMethods.find((opt) => opt.key === 'source')!;
+const methodDocker: OptionMethod = allMethods.find((opt) => opt.key === 'docker')!;
+const methodDockerNginx: OptionMethod = allMethods.find((opt) => opt.key === 'docker_nginx')!;
 const maps: OptionMap[] = optionsMap;
 const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
 const bbox: BBox = [1, 2, 3, 4];
@@ -86,5 +88,44 @@ describe('generateCode', () => {
 	it('does not generate frontend download if frontend is not provided', () => {
 		const code = _generateCode(osLinux, methodScript, maps);
 		expect(code).not.toContain('Download Frontend');
+	});
+
+	it('generates code for docker on linux with maps, frontend, and bbox', () => {
+		const code = _generateCode(osLinux, methodDocker, maps, coverageBbox, bbox, frontend);
+		expect(code).toContain('# Install Docker');
+		expect(code).toContain('# Download Frontend');
+		expect(code).toContain('wget -cO "frontend.br.tar.gz"');
+		expect(code).toContain('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest');
+		expect(code).toContain('--bbox "1,2,3,4"');
+		expect(code).toContain('# Configure and run Docker container');
+		expect(code).toContain('--static "frontend.br.tar.gz"');
+		expect(code).toContain('"osm.versatiles"');
+	});
+
+	it('generates code for docker_nginx on linux with maps, bbox, and frontend', () => {
+		const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend);
+		expect(code).toContain('# Install Docker');
+		expect(code).toContain('# Point your domain to the server IP');
+		expect(code).toContain('-e DOMAIN=maps.example.com');
+		expect(code).toContain('-e EMAIL=admin@example.com');
+		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
+		expect(code).toContain('-e BBOX="1,2,3,4"');
+		expect(code).toContain('-e FRONTEND=standard');
+		expect(code).toContain('versatiles/versatiles-nginx:latest');
+	});
+
+	it('generates code for docker_nginx without bbox (global coverage)', () => {
+		const coverageGlobal = optionsCoverage.find((opt) => opt.key === 'global')!;
+		const code = _generateCode(
+			osLinux,
+			methodDockerNginx,
+			maps,
+			coverageGlobal,
+			undefined,
+			frontend
+		);
+		expect(code).not.toContain('BBOX');
+		expect(code).toContain('-e FRONTEND=standard');
+		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
 	});
 });
