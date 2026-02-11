@@ -6,7 +6,7 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/versatiles/tools.git"
+		"url": "git+https://github.com/versatiles-org/tools.git"
 	},
 	"scripts": {
 		"build-html": "tsx ./scripts/update_html.ts",
