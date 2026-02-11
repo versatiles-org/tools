@@ -23,6 +23,3 @@
 		<CodeBlock {code} style="text-align:center" languageName="json" />
 	</div>
 </section>
-
-<style>
-</style>
