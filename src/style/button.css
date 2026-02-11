@@ -25,14 +25,14 @@ button {
 		border-color 0.1s;
 }
 
-button.selected {
-	background-color: var(--button-selected-bg-color) !important;
-	color: var(--button-selected-color);
-}
-
 button:hover {
 	background-color: var(--button-hover-bg-color);
 	border-color: var(--button-hover-border-color);
+}
+
+button.selected {
+	background-color: var(--button-selected-bg-color);
+	color: var(--button-selected-color);
 }
 
 button.check {
