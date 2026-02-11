@@ -27,7 +27,9 @@ for script in "$GENERATED_DIR"/*.sh; do
 	# SC2086: word splitting (expected in generated install commands)
 	# SC2034: unused variables (comments reference URLs)
 	# SC2164: cd without || exit (generated scripts use set -e)
-	if shellcheck -e SC2086,SC2034,SC2164 -s bash "$script" 2>&1; then
+	# SC2046: unquoted $(pwd) in docker volume mounts (intentional)
+	# SC2288: literal "..." placeholder in docker_nginx instructions
+	if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC2288 -s bash "$script" 2>&1; then
 		echo "OK"
 	else
 		echo "FAIL"
@@ -46,7 +48,7 @@ if command -v pwsh &>/dev/null; then
 		# Parse-only: use [System.Management.Automation.Language.Parser]
 		if pwsh -NoProfile -NonInteractive -Command "
 			\$errors = \$null
-			[System.Management.Automation.Language.Parser]::ParseFile('$script', [ref]\$null, [ref]\$errors)
+			\$null = [System.Management.Automation.Language.Parser]::ParseFile('$script', [ref]\$null, [ref]\$errors)
 			if (\$errors.Count -gt 0) {
 				\$errors | ForEach-Object { Write-Error \$_.Message }
 				exit 1
