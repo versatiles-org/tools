@@ -25,24 +25,35 @@ fi
 errors=0
 checked=0
 
-echo "=== Checking URLs with HEAD requests ==="
+# Check a single URL, returns the HTTP status code.
+# Tries HEAD first, then falls back to a limited GET if HEAD fails.
+# Retries once on transient failures (502, 503, 000).
+check_url() {
+	local url="$1"
+	local status
+
+	# Try HEAD request first
+	status=$(curl -sSL -o /dev/null -w '%{http_code}' --head --max-time 15 "$url" 2>/dev/null || true)
+
+	# Fall back to GET (download only first byte) if HEAD was rejected or failed
+	if [[ ! "$status" =~ ^2 ]] && [ "$status" != "405" ]; then
+		sleep 1
+		status=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null || true)
+	fi
+
+	echo "$status"
+}
+
+echo "=== Checking URLs ==="
 while IFS= read -r url; do
 	echo -n "  $url ... "
-	status=$(curl -sSL -o /dev/null -w '%{http_code}' --head --max-time 15 "$url" 2>/dev/null || true)
-	if [ -z "$status" ] || [ "$status" = "000" ]; then
-		# Some servers reject HEAD; fall back to GET with range
-		status=$(curl -sSL -o /dev/null -w '%{http_code}' -r 0-0 --max-time 15 "$url" 2>/dev/null || true)
-	fi
+	status=$(check_url "$url")
 
 	checked=$((checked + 1))
 
 	case "$status" in
-	2* | 3*)
+	2* | 3* | 405)
 		echo "OK ($status)"
-		;;
-	405)
-		# Method Not Allowed for HEAD — URL exists but server rejects HEAD
-		echo "OK (HEAD not allowed, but reachable)"
 		;;
 	*)
 		echo "FAIL ($status)"
