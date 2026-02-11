@@ -21,6 +21,7 @@
 		"preview": "vite preview",
 		"test-coverage": "vitest run --coverage",
 		"test": "vitest run",
+		"test-integration": "bash tests/integration/smoke_test_all.sh",
 		"upgrade": "npm-check-updates -u && rm -f package-lock.json; rm -rf node_modules; npm i"
 	},
 	"devDependencies": {
