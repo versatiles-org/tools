@@ -3,16 +3,8 @@
 	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 
-	let selectedBBox: [number, number, number, number] | undefined = undefined;
-	let code = '';
-
-	$: {
-		if (selectedBBox) updateCode();
-	}
-
-	function updateCode() {
-		code = selectedBBox ? JSON.stringify(selectedBBox) : '';
-	}
+	let selectedBBox = $state<[number, number, number, number] | undefined>(undefined);
+	let code = $derived(selectedBBox ? JSON.stringify(selectedBBox) : '');
 </script>
 
 <svelte:head>
