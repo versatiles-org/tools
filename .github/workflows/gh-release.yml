@@ -5,6 +5,8 @@ on:
     workflows: ['Integration Tests']
     types:
       - completed
+    branches:
+      - main
   workflow_dispatch:
   repository_dispatch:
 
@@ -12,13 +14,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Only run if integration succeeded (or if triggered manually)
+    # Only run if integration succeeded (or if not triggered by workflow_run)
     if: >-
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
@@ -26,8 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -38,7 +38,7 @@ jobs:
         run: npm ci
 
       - name: Check Format
-        if: github.event.workflow_run.head_branch != 'main' && github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main'
         run: npx prettier --check .
 
       - name: Check Lint
@@ -54,18 +54,14 @@ jobs:
         run: npm run build
 
       - name: Upload Artifact
-        if: >-
-          github.event.workflow_run.head_branch == 'main' ||
-          github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./build
 
   deploy:
     needs: build
-    if: >-
-      github.event.workflow_run.head_branch == 'main' ||
-      github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
 
     permissions:
       pages: write
