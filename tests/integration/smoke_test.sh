@@ -42,7 +42,11 @@ cleanup() {
 	fi
 	# Stop docker containers started by docker methods
 	docker rm -f versatiles 2>/dev/null || true
-	rm -rf "$WORK_DIR"
+	# Docker containers may create root-owned files in the work dir
+	if ! rm -rf "$WORK_DIR" 2>/dev/null; then
+		docker run --rm -v "$WORK_DIR":/cleanup alpine rm -rf /cleanup 2>/dev/null || true
+		rm -rf "$WORK_DIR" 2>/dev/null || true
+	fi
 }
 
 PORT=8080
@@ -105,7 +109,7 @@ RUNEOF
 	;;
 
 docker_nginx)
-	# For docker_nginx: the container handles the frontend internally
+	# For docker_nginx: run in HTTP_ONLY mode to skip Let's Encrypt certificates
 	cat >"$WORK_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -euo pipefail
@@ -119,7 +123,7 @@ docker run -d --name versatiles \\
   -p ${PORT}:80 \\
   -v "\$(pwd)/data":/data \\
   -e DOMAIN=localhost \\
-  -e EMAIL=test@example.com \\
+  -e HTTP_ONLY=true \\
   -e TILE_SOURCES=osm.versatiles \\
   -e BBOX="8.5,47.3,8.6,47.4" \\
   -e FRONTEND=standard \\
@@ -164,7 +168,12 @@ else
 	HEALTH_URL="http://localhost:$PORT/status"
 fi
 echo "=== Health check: polling $HEALTH_URL ==="
-max_attempts=15
+# docker_nginx needs more time: it downloads frontend + converts tiles on startup
+if [ "$METHOD" = "docker_nginx" ]; then
+	max_attempts=60
+else
+	max_attempts=15
+fi
 attempt=0
 success=false
 
