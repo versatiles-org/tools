@@ -1,6 +1,9 @@
 node_modules
 scripts/lib/page.ts
 
+# Generated data
+static/data/
+
 # Output
 .output
 .vercel
