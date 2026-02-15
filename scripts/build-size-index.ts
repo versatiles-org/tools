@@ -64,7 +64,9 @@ async function main(url: string, outputPath: string): Promise<void> {
 			completedBlocks++;
 			if (completedBlocks % 100 === 0 || completedBlocks === totalBlocks) {
 				const pct = ((completedBlocks / totalBlocks) * 100).toFixed(1);
-				process.stdout.write(`\r  Fetching tile indices: ${completedBlocks}/${totalBlocks} (${pct}%)`);
+				process.stdout.write(
+					`\r  Fetching tile indices: ${completedBlocks}/${totalBlocks} (${pct}%)`
+				);
 			}
 		});
 

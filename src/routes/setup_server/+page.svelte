@@ -78,7 +78,6 @@
 	});
 
 	let sizeEstimates = $state<SizeEstimate[]>([]);
-	let sizeLoading = $state(false);
 
 	$effect(() => {
 		const maps = selection.maps;
@@ -90,7 +89,6 @@
 			return;
 		}
 
-		sizeLoading = true;
 		const timer = setTimeout(() => {
 			estimateDownloadSizes(maps, coverage.key, base, bbox)
 				.then((estimates) => {
@@ -98,9 +96,6 @@
 				})
 				.catch(() => {
 					sizeEstimates = [];
-				})
-				.finally(() => {
-					sizeLoading = false;
 				});
 		}, 50);
 
@@ -189,12 +184,8 @@
 				{/if}
 
 				{#if selection.coverage}
-					{#if sizeLoading}
-						<div class="size-estimate">
-							<p class="size-loading">Estimating download size…</p>
-						</div>
-					{:else if sizeEstimates.length > 0}
-						<div class="size-estimate">
+					<div class="size-estimate">
+						{#if sizeEstimates.length > 0}
 							{#each sizeEstimates as est (est.mapKey)}
 								<p>{est.mapLabel}: ~{formatBytes(est.bytes)}</p>
 							{/each}
@@ -203,8 +194,8 @@
 									Total: ~{formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
 								</p>
 							{/if}
-						</div>
-					{/if}
+						{/if}
+					</div>
 
 					<h2>5. Add a Frontend?</h2>
 					<div class="options">
@@ -258,9 +249,6 @@
 		margin-top: 0.4rem;
 		padding-top: 0.4rem;
 		border-top: 1px solid rgba(128, 128, 128, 0.3);
-	}
-	.size-estimate .size-loading {
-		opacity: 0.6;
 	}
 	.bbox-map {
 		width: 80vmin;
