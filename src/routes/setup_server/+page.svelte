@@ -184,18 +184,25 @@
 				{/if}
 
 				{#if selection.coverage}
-					<div class="size-estimate">
-						{#if sizeEstimates.length > 0}
+					{#if sizeEstimates.length > 0}
+						<div class="size-estimate">
+							<span class="size-label">Estimated download size:</span>
 							{#each sizeEstimates as est (est.mapKey)}
-								<p>{est.mapLabel}: ~{formatBytes(est.bytes)}</p>
+								<span class="size-row">
+									<span class="size-name">{est.mapLabel}</span>
+									<span class="size-value">~ {formatBytes(est.bytes)}</span>
+								</span>
 							{/each}
 							{#if sizeEstimates.length > 1}
-								<p class="size-total">
-									Total: ~{formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
-								</p>
+								<span class="size-row size-total">
+									<span class="size-name">Total</span>
+									<span class="size-value">
+										~ {formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
+									</span>
+								</span>
 							{/if}
-						{/if}
-					</div>
+						</div>
+					{/if}
 
 					<h2>5. Add a Frontend?</h2>
 					<div class="options">
@@ -235,20 +242,37 @@
 		margin: 1rem 0 0.5rem;
 	}
 	.size-estimate {
-		margin: 0.8rem 0;
-		padding: 0.6rem 1rem;
-		background: rgba(128, 128, 128, 0.1);
-		border-radius: 6px;
-		font-size: 0.95rem;
+		margin: 1rem auto;
+		padding: 0.7rem 1rem;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 0.5em;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		max-width: 400px;
 	}
-	.size-estimate p {
-		margin: 0.2rem 0;
+	.size-estimate .size-label {
+		opacity: 0.5;
+		margin-bottom: 0.15rem;
+	}
+	.size-estimate .size-row {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.size-estimate .size-name {
+		opacity: 0.7;
+	}
+	.size-estimate .size-value {
+		font-variant-numeric: tabular-nums;
 	}
 	.size-estimate .size-total {
+		padding-top: 0.35rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.15);
 		font-weight: bold;
-		margin-top: 0.4rem;
-		padding-top: 0.4rem;
-		border-top: 1px solid rgba(128, 128, 128, 0.3);
+	}
+	.size-estimate .size-total .size-name {
+		opacity: 1;
 	}
 	.bbox-map {
 		width: 80vmin;
