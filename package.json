@@ -11,7 +11,7 @@
 	"scripts": {
 		"build-html": "tsx ./scripts/update_html.ts",
 		"build-svelte": "svelte-kit sync && vite build",
-		"build-size-index": "tsx dev/build-size-index.ts",
+		"build-size-index": "tsx scripts/build-size-index.ts",
 		"build": "npm run build-size-index && npm run build-html && npm run build-svelte",
 		"check-svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
