@@ -31,60 +31,59 @@ const CONCURRENCY = 4; // Number of concurrent tile index fetches
 // --- Main ---
 
 async function main(url: string, outputPath: string): Promise<void> {
-	console.log(`Opening container: ${url}`);
+	console.log(`Building ${outputPath} from ${url}`);
 	const container = new Container(url);
 	const header = await container.getHeader();
-	console.log(`Format: ${header.tileFormat}, Compression: ${header.tileCompression}`);
-	console.log(`Zoom range: ${header.zoomMin} - ${header.zoomMax}`);
 
 	const blockIndex = await container.getBlockIndex();
-	console.log(`Total blocks: ${blockIndex.size}`);
 
-	const levels: Record<string, QuadNode> = {};
-
+	// Group blocks by zoom level and count total
+	const blocksByZoom = new Map<number, Block[]>();
+	let totalBlocks = 0;
 	for (let z = header.zoomMin; z <= header.zoomMax; z++) {
-		console.log(`\nProcessing zoom level ${z}...`);
-
-		// Filter blocks at this zoom level
 		const blocks: Block[] = [];
 		for (const block of blockIndex.values()) {
 			if (block.level === z) blocks.push(block);
 		}
-		console.log(`  Blocks at level ${z}: ${blocks.length}`);
+		blocksByZoom.set(z, blocks);
+		totalBlocks += blocks.length;
+	}
+
+	let completedBlocks = 0;
+	const levels: Record<string, QuadNode> = {};
+
+	for (let z = header.zoomMin; z <= header.zoomMax; z++) {
+		const blocks = blocksByZoom.get(z)!;
 
 		if (blocks.length === 0) {
 			levels[z] = 0;
 			continue;
 		}
 
-		// Fetch all tile indices
-		const blockDataMap = await fetchAllTileIndices(container, blocks);
+		const blockDataMap = await fetchAllTileIndices(container, blocks, () => {
+			completedBlocks++;
+			if (completedBlocks % 100 === 0 || completedBlocks === totalBlocks) {
+				const pct = ((completedBlocks / totalBlocks) * 100).toFixed(1);
+				process.stdout.write(`\r  Fetching tile indices: ${completedBlocks}/${totalBlocks} (${pct}%)`);
+			}
+		});
 
-		// Build quadtree
 		const gridSize = 1 << z;
-		const result = buildNode(blockDataMap, 0, 0, gridSize);
-		levels[z] = result.node;
-
-		// Stats
-		const jsonSize = JSON.stringify(result.node).length;
-		const nodeCount = countNodes(result.node);
-		console.log(`  Quadtree nodes: ${nodeCount}, JSON size: ${formatBytes(jsonSize)}`);
-		console.log(
-			`  Total tile data: ${formatBytes(result.stats.sum)}, tiles with data: ${result.stats.tileCount}`
-		);
+		levels[z] = buildNode(blockDataMap, 0, 0, gridSize).node;
 	}
 
-	const output = { levels };
-	const json = JSON.stringify(output);
+	process.stdout.write('\n');
+	const json = JSON.stringify({ levels });
 	writeFileSync(outputPath, json);
-	console.log(`\nWritten ${formatBytes(json.length)} to ${outputPath}`);
+	console.log(`  Written ${formatBytes(json.length)} to ${outputPath}`);
 }
 
 // --- Fetch tile indices with concurrency limit ---
 
 async function fetchAllTileIndices(
 	container: Container,
-	blocks: Block[]
+	blocks: Block[],
+	onProgress: () => void
 ): Promise<Map<string, BlockData>> {
 	const map = new Map<string, BlockData>();
 	let completed = 0;
@@ -103,11 +102,8 @@ async function fetchAllTileIndices(
 						map.set(key, { block, lengths: tileIndex.lengths });
 						running--;
 						completed++;
-						if (completed % 100 === 0) {
-							process.stdout.write(`  Fetched ${completed}/${blocks.length} tile indices\r`);
-						}
+						onProgress();
 						if (completed === blocks.length) {
-							if (blocks.length >= 100) console.log();
 							resolve();
 						} else {
 							next();
@@ -243,11 +239,6 @@ function collectStats(
 }
 
 // --- Utilities ---
-
-function countNodes(node: QuadNode): number {
-	if (typeof node === 'number') return 1;
-	return 1 + countNodes(node[0]) + countNodes(node[1]) + countNodes(node[2]) + countNodes(node[3]);
-}
 
 function formatBytes(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
