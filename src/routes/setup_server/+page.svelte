@@ -80,7 +80,7 @@
 	let sizeEstimates = $state<SizeEstimate[]>([]);
 
 	$effect(() => {
-		const maps = selection.maps;
+		const maps = selection.maps.slice().sort((a, b) => a.label.localeCompare(b.label));
 		const coverage = selection.coverage;
 		const bbox = selection.bbox;
 
