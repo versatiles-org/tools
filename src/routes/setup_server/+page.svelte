@@ -102,7 +102,7 @@
 				.finally(() => {
 					sizeLoading = false;
 				});
-		}, 300);
+		}, 50);
 
 		return () => clearTimeout(timer);
 	});
