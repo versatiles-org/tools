@@ -11,7 +11,8 @@
 	"scripts": {
 		"build-html": "tsx ./scripts/update_html.ts",
 		"build-svelte": "svelte-kit sync && vite build",
-		"build": "npm run build-html && npm run build-svelte",
+		"build-size-index": "tsx dev/build-size-index.ts",
+		"build": "npm run build-size-index && npm run build-html && npm run build-svelte",
 		"check-svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"check": "npm run format && npm run lint && npm run check-svelte && npm run test",
@@ -32,6 +33,7 @@
 		"@types/eslint": "^9.6.1",
 		"@types/node": "^25.2.1",
 		"@types/prismjs": "^1.26.5",
+		"@versatiles/container": "^1.4.0",
 		"cheerio_cms": "^1.0.1",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",

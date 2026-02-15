@@ -4,7 +4,9 @@
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
 	import { decodeHash, encodeHash } from './hash';
+	import { estimateDownloadSizes, formatBytes, type SizeEstimate } from './estimate_size';
 	import type { SetupState } from './types';
+	import { base } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import '../../style/default.css';
 
@@ -73,6 +75,36 @@
 				selection.method = undefined;
 			}
 		}
+	});
+
+	let sizeEstimates = $state<SizeEstimate[]>([]);
+	let sizeLoading = $state(false);
+
+	$effect(() => {
+		const maps = selection.maps;
+		const coverage = selection.coverage;
+		const bbox = selection.bbox;
+
+		if (!coverage || maps.length === 0) {
+			sizeEstimates = [];
+			return;
+		}
+
+		sizeLoading = true;
+		const timer = setTimeout(() => {
+			estimateDownloadSizes(maps, coverage.key, base, bbox)
+				.then((estimates) => {
+					sizeEstimates = estimates;
+				})
+				.catch(() => {
+					sizeEstimates = [];
+				})
+				.finally(() => {
+					sizeLoading = false;
+				});
+		}, 300);
+
+		return () => clearTimeout(timer);
 	});
 
 	let code: string | undefined = $derived.by(() => {
@@ -157,6 +189,23 @@
 				{/if}
 
 				{#if selection.coverage}
+					{#if sizeLoading}
+						<div class="size-estimate">
+							<p class="size-loading">Estimating download size…</p>
+						</div>
+					{:else if sizeEstimates.length > 0}
+						<div class="size-estimate">
+							{#each sizeEstimates as est (est.mapKey)}
+								<p>{est.mapLabel}: ~{formatBytes(est.bytes)}</p>
+							{/each}
+							{#if sizeEstimates.length > 1}
+								<p class="size-total">
+									Total: ~{formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
+								</p>
+							{/if}
+						</div>
+					{/if}
+
 					<h2>5. Add a Frontend?</h2>
 					<div class="options">
 						<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
@@ -193,6 +242,25 @@
 	}
 	div.options {
 		margin: 1rem 0 0.5rem;
+	}
+	.size-estimate {
+		margin: 0.8rem 0;
+		padding: 0.6rem 1rem;
+		background: rgba(128, 128, 128, 0.1);
+		border-radius: 6px;
+		font-size: 0.95rem;
+	}
+	.size-estimate p {
+		margin: 0.2rem 0;
+	}
+	.size-estimate .size-total {
+		font-weight: bold;
+		margin-top: 0.4rem;
+		padding-top: 0.4rem;
+		border-top: 1px solid rgba(128, 128, 128, 0.3);
+	}
+	.size-estimate .size-loading {
+		opacity: 0.6;
 	}
 	.bbox-map {
 		width: 80vmin;

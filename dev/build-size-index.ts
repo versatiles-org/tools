@@ -1,0 +1,274 @@
+import { Container } from '@versatiles/container';
+import type { Block } from '@versatiles/container';
+import { writeFileSync, mkdirSync } from 'node:fs';
+
+// --- Types ---
+
+type QuadNode = number | [QuadNode, QuadNode, QuadNode, QuadNode];
+
+interface Stats {
+	tileCount: number;
+	sum: number;
+	sumOfSquares: number;
+}
+
+interface BlockData {
+	block: Block;
+	lengths: Float64Array;
+}
+
+interface BuildResult {
+	node: QuadNode;
+	stats: Stats;
+}
+
+// --- Configuration ---
+
+const MIN_NODE_SIZE = 16;
+const CV_THRESHOLD = 0.5; // Coefficient of variation threshold for collapsing to mean
+const CONCURRENCY = 4; // Number of concurrent tile index fetches
+
+// --- Main ---
+
+async function main(url: string, outputPath: string): Promise<void> {
+	console.log(`Opening container: ${url}`);
+	const container = new Container(url);
+	const header = await container.getHeader();
+	console.log(`Format: ${header.tileFormat}, Compression: ${header.tileCompression}`);
+	console.log(`Zoom range: ${header.zoomMin} - ${header.zoomMax}`);
+
+	const blockIndex = await container.getBlockIndex();
+	console.log(`Total blocks: ${blockIndex.size}`);
+
+	const levels: Record<string, QuadNode> = {};
+
+	for (let z = header.zoomMin; z <= header.zoomMax; z++) {
+		console.log(`\nProcessing zoom level ${z}...`);
+
+		// Filter blocks at this zoom level
+		const blocks: Block[] = [];
+		for (const block of blockIndex.values()) {
+			if (block.level === z) blocks.push(block);
+		}
+		console.log(`  Blocks at level ${z}: ${blocks.length}`);
+
+		if (blocks.length === 0) {
+			levels[z] = 0;
+			continue;
+		}
+
+		// Fetch all tile indices
+		const blockDataMap = await fetchAllTileIndices(container, blocks);
+
+		// Build quadtree
+		const gridSize = 1 << z;
+		const result = buildNode(blockDataMap, 0, 0, gridSize);
+		levels[z] = result.node;
+
+		// Stats
+		const jsonSize = JSON.stringify(result.node).length;
+		const nodeCount = countNodes(result.node);
+		console.log(`  Quadtree nodes: ${nodeCount}, JSON size: ${formatBytes(jsonSize)}`);
+		console.log(
+			`  Total tile data: ${formatBytes(result.stats.sum)}, tiles with data: ${result.stats.tileCount}`
+		);
+	}
+
+	const output = { levels };
+	const json = JSON.stringify(output);
+	writeFileSync(outputPath, json);
+	console.log(`\nWritten ${formatBytes(json.length)} to ${outputPath}`);
+}
+
+// --- Fetch tile indices with concurrency limit ---
+
+async function fetchAllTileIndices(
+	container: Container,
+	blocks: Block[]
+): Promise<Map<string, BlockData>> {
+	const map = new Map<string, BlockData>();
+	let completed = 0;
+	let running = 0;
+	let idx = 0;
+
+	await new Promise<void>((resolve, reject) => {
+		function next(): void {
+			while (running < CONCURRENCY && idx < blocks.length) {
+				const block = blocks[idx++];
+				running++;
+				container
+					.getTileIndex(block)
+					.then((tileIndex) => {
+						const key = `${block.column},${block.row}`;
+						map.set(key, { block, lengths: tileIndex.lengths });
+						running--;
+						completed++;
+						if (completed % 100 === 0) {
+							process.stdout.write(`  Fetched ${completed}/${blocks.length} tile indices\r`);
+						}
+						if (completed === blocks.length) {
+							if (blocks.length >= 100) console.log();
+							resolve();
+						} else {
+							next();
+						}
+					})
+					.catch(reject);
+			}
+		}
+		if (blocks.length === 0) resolve();
+		else next();
+	});
+
+	return map;
+}
+
+// --- Quadtree builder ---
+
+function buildNode(
+	blockDataMap: Map<string, BlockData>,
+	xMin: number,
+	yMin: number,
+	size: number
+): BuildResult {
+	if (size <= MIN_NODE_SIZE) {
+		// Leaf: compute stats directly
+		const stats = collectStats(blockDataMap, xMin, yMin, size);
+		const mean = stats.tileCount === 0 ? 0 : stats.sum / (size * size);
+		return { node: Math.round(mean), stats };
+	}
+
+	// Branch: recurse into 4 children
+	const half = size / 2;
+	const nw = buildNode(blockDataMap, xMin, yMin, half);
+	const ne = buildNode(blockDataMap, xMin + half, yMin, half);
+	const sw = buildNode(blockDataMap, xMin, yMin + half, half);
+	const se = buildNode(blockDataMap, xMin + half, yMin + half, half);
+
+	// Merge child stats
+	const mergedStats: Stats = {
+		tileCount: nw.stats.tileCount + ne.stats.tileCount + sw.stats.tileCount + se.stats.tileCount,
+		sum: nw.stats.sum + ne.stats.sum + sw.stats.sum + se.stats.sum,
+		sumOfSquares:
+			nw.stats.sumOfSquares + ne.stats.sumOfSquares + sw.stats.sumOfSquares + se.stats.sumOfSquares
+	};
+
+	// If no tiles at all, collapse to 0
+	if (mergedStats.tileCount === 0) {
+		return { node: 0, stats: mergedStats };
+	}
+
+	// Compute coefficient of variation of non-zero tile sizes
+	const mean = mergedStats.sum / mergedStats.tileCount;
+	const variance = mergedStats.sumOfSquares / mergedStats.tileCount - mean * mean;
+	const stddev = Math.sqrt(Math.max(0, variance));
+	const cv = mean > 0 ? stddev / mean : 0;
+
+	const totalMean = mergedStats.sum / (size * size);
+
+	if (cv < CV_THRESHOLD) {
+		return { node: Math.round(totalMean), stats: mergedStats };
+	}
+
+	// Optimization: if all 4 children are identical leaves, collapse
+	if (
+		typeof nw.node === 'number' &&
+		typeof ne.node === 'number' &&
+		typeof sw.node === 'number' &&
+		typeof se.node === 'number' &&
+		nw.node === ne.node &&
+		nw.node === sw.node &&
+		nw.node === se.node
+	) {
+		return { node: nw.node, stats: mergedStats };
+	}
+
+	return { node: [nw.node, ne.node, sw.node, se.node], stats: mergedStats };
+}
+
+// --- Collect stats from tile data ---
+
+function collectStats(
+	blockDataMap: Map<string, BlockData>,
+	xMin: number,
+	yMin: number,
+	size: number
+): Stats {
+	const xMax = xMin + size;
+	const yMax = yMin + size;
+
+	// Determine overlapping block range
+	const bxMin = xMin >> 8;
+	const bxMax = (xMax - 1) >> 8;
+	const byMin = yMin >> 8;
+	const byMax = (yMax - 1) >> 8;
+
+	let tileCount = 0;
+	let sum = 0;
+	let sumOfSquares = 0;
+
+	for (let bx = bxMin; bx <= bxMax; bx++) {
+		for (let by = byMin; by <= byMax; by++) {
+			const key = `${bx},${by}`;
+			const data = blockDataMap.get(key);
+			if (!data) continue;
+
+			const { block, lengths } = data;
+
+			// Compute tile intersection with query rect
+			const tileXMin = Math.max(xMin - bx * 256, block.colMin);
+			const tileXMax = Math.min(xMax - 1 - bx * 256, block.colMax);
+			const tileYMin = Math.max(yMin - by * 256, block.rowMin);
+			const tileYMax = Math.min(yMax - 1 - by * 256, block.rowMax);
+
+			if (tileXMin > tileXMax || tileYMin > tileYMax) continue;
+
+			const cols = block.colMax - block.colMin + 1;
+
+			for (let ty = tileYMin; ty <= tileYMax; ty++) {
+				for (let tx = tileXMin; tx <= tileXMax; tx++) {
+					const j = (ty - block.rowMin) * cols + (tx - block.colMin);
+					const len = lengths[j];
+					if (len > 0) {
+						tileCount++;
+						sum += len;
+						sumOfSquares += len * len;
+					}
+				}
+			}
+		}
+	}
+
+	return { tileCount, sum, sumOfSquares };
+}
+
+// --- Utilities ---
+
+function countNodes(node: QuadNode): number {
+	if (typeof node === 'number') return 1;
+	return 1 + countNodes(node[0]) + countNodes(node[1]) + countNodes(node[2]) + countNodes(node[3]);
+}
+
+function formatBytes(bytes: number): string {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+	if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+const sources = [
+	{
+		url: 'https://download.versatiles.org/osm.versatiles',
+		output: 'static/data/size-index-osm.json'
+	},
+	{
+		url: 'https://download.versatiles.org/satellite.versatiles',
+		output: 'static/data/size-index-satellite.json'
+	}
+];
+
+mkdirSync('static/data', { recursive: true });
+
+for (const { url, output } of sources) {
+	await main(url, output);
+}
