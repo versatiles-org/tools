@@ -3,12 +3,14 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
 	test: {
 		environment: 'happy-dom',
+		globals: true,
 		coverage: {
 			provider: 'v8',
 			reporter: ['lcov', 'text'],
-			include: ['scripts/**/*.ts', 'src/**/*.ts']
+			include: ['{scripts,src}/**/*.{ts,js}'],
+			exclude: ['src/**/*.d.ts']
 		},
-		include: ['scripts/**/*.test.ts', 'src/**/*.test.ts', '!.svelte-kit/**']
+		include: ['{scripts,src}/**/*.{test,spec}.{js,ts}'],
 	},
 	esbuild: {
 		supported: {
