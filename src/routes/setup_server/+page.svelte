@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
-	import FormOptionGroup from './FormOption/FormOptionGroup.svelte';
+	import FormOptionGroup from './components/FormOptionGroup.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
 	import { decodeHash, encodeHash } from './hash';
-	import SizeEstimate from './SizeEstimate/SizeEstimate.svelte';
+	import SizeEstimate from './components/SizeEstimate.svelte';
 	import type { SetupState } from './types';
 	import { onMount, tick } from 'svelte';
 	import '../../style/default.css';

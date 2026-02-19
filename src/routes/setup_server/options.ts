@@ -1,4 +1,4 @@
-import type { Option } from './FormOption/FormOptionGroup.svelte';
+import type { Option } from './components/FormOptionGroup.svelte';
 
 // ### OS Options
 export type KeyOS = 'linux' | 'macos' | 'windows';
