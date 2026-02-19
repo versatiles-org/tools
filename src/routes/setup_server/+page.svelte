@@ -6,7 +6,7 @@
 	import { decodeHash, encodeHash } from './hash';
 	import SizeEstimate from './components/SizeEstimate.svelte';
 	import type { SetupState } from './types';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import '../../style/default.css';
 
 	import {
@@ -27,7 +27,7 @@
 	});
 
 	onMount(() => {
-		const applyFromHash = () => {
+		if (window.location.hash) {
 			const { os, method, maps, coverage, bbox, frontend } = decodeHash(window.location.hash);
 			if (os) {
 				selection.os = optionsOS.find((o) => o.key === os);
@@ -38,33 +38,7 @@
 			if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
 			if (bbox) selection.bbox = bbox;
 			if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
-		};
-
-		// Initialize from current URL hash on first mount
-		applyFromHash();
-
-		// Keep selection in sync when the user navigates back/forward or edits the hash
-		window.addEventListener('hashchange', applyFromHash);
-		window.addEventListener('popstate', applyFromHash);
-		return () => {
-			window.removeEventListener('hashchange', applyFromHash);
-			window.removeEventListener('popstate', applyFromHash);
-		};
-	});
-
-	let mounted = false;
-
-	$effect(() => {
-		const h = encodeHash(selection);
-		if (!mounted) return;
-		history.replaceState(null, '', '#' + h);
-	});
-
-	// Allow applyFromHash to run first, then enable hash syncing
-	onMount(() => {
-		tick().then(() => {
-			mounted = true;
-		});
+		}
 	});
 
 	$effect(() => {
