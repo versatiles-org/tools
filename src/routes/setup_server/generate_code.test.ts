@@ -45,7 +45,7 @@ describe('generateCode', () => {
 	it('generates code for script on windows', () => {
 		const code = _generateCode(osWindows, methodScript, maps);
 		expect(code).toContain(
-			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-windows.ps1"'
+			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1"'
 		);
 		expect(code).toContain('Invoke-WebRequest -OutFile "osm.versatiles"');
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');

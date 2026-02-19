@@ -89,7 +89,7 @@ jobs:
 
       - name: Install VersaTiles (for script method)
         if: matrix.method == 'script'
-        run: curl -Ls "https://github.com/versatiles-org/versatiles-rs/raw/main/scripts/install-unix.sh" | sudo sh
+        run: curl -Ls "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh" | sudo sh
 
       - name: Run smoke test
         run: bash tests/integration/smoke_test.sh linux ${{ matrix.method }}
