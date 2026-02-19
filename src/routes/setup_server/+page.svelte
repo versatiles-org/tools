@@ -160,57 +160,57 @@
 				<FormOptionGroup options={optionsMethod(selection.os.key)} bind:value={selection.method} />
 			</div>
 		{/key}
+	{/if}
 
-		{#if selection.method}
-			<h2>3. Select Map Data</h2>
-			<div class="options">
-				<FormOptionGroup
-					options={optionsMap}
-					allowMultiselect={true}
-					bind:valueList={selection.maps}
-				/>
+	{#if selection.os && selection.method}
+		<h2>3. Select Map Data</h2>
+		<div class="options">
+			<FormOptionGroup
+				options={optionsMap}
+				allowMultiselect={true}
+				bind:valueList={selection.maps}
+			/>
+		</div>
+	{/if}
+
+	{#if selection.os && selection.method && selection.maps.length > 0}
+		<h2>4. Select Coverage Area</h2>
+		<div class="options">
+			<FormOptionGroup options={optionsCoverage} bind:value={selection.coverage} />
+		</div>
+
+		{#if selection.coverage?.key === 'bbox'}
+			<div class="bbox-map">
+				<BBoxMap bind:selectedBBox={selection.bbox} />
 			</div>
-
-			{#if selection.maps.length > 0}
-				<h2>4. Select Coverage Area</h2>
-				<div class="options">
-					<FormOptionGroup options={optionsCoverage} bind:value={selection.coverage} />
-				</div>
-
-				{#if selection.coverage?.key === 'bbox'}
-					<div class="bbox-map">
-						<BBoxMap bind:selectedBBox={selection.bbox} />
-					</div>
-				{/if}
-
-				{#if selection.coverage}
-					{#if sizeEstimates.length > 0}
-						<div class="size-estimate">
-							<span class="size-label">Estimated download size:</span>
-							{#each sizeEstimates as est (est.mapKey)}
-								<span class="size-row">
-									<span class="size-name">{est.mapLabel}</span>
-									<span class="size-value">~ {formatBytes(est.bytes)}</span>
-								</span>
-							{/each}
-							{#if sizeEstimates.length > 1}
-								<span class="size-row size-total">
-									<span class="size-name">Total</span>
-									<span class="size-value">
-										~ {formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
-									</span>
-								</span>
-							{/if}
-						</div>
-					{/if}
-
-					<h2>5. Add a Frontend?</h2>
-					<div class="options">
-						<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
-					</div>
-				{/if}
-			{/if}
 		{/if}
+	{/if}
+
+	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
+		{#if sizeEstimates.length > 0}
+			<div class="size-estimate">
+				<span class="size-label">Estimated download size:</span>
+				{#each sizeEstimates as est (est.mapKey)}
+					<span class="size-row">
+						<span class="size-name">{est.mapLabel}</span>
+						<span class="size-value">~ {formatBytes(est.bytes)}</span>
+					</span>
+				{/each}
+				{#if sizeEstimates.length > 1}
+					<span class="size-row size-total">
+						<span class="size-name">Total</span>
+						<span class="size-value">
+							~ {formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
+						</span>
+					</span>
+				{/if}
+			</div>
+		{/if}
+
+		<h2>5. Add a Frontend?</h2>
+		<div class="options">
+			<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
+		</div>
 	{/if}
 </section>
 
