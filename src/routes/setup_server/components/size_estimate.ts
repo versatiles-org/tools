@@ -125,6 +125,15 @@ export async function estimateDownloadSizes(
 
 // --- Utility ---
 
-export function formatBytes(bytes: number): string {
-	return `${(bytes / (1024 * 1024 * 1024)).toFixed(0)} GB`;
+const UNITS: [string, number][] = [
+	['GB', 1024 ** 3],
+	['MB', 1024 ** 2],
+	['KB', 1024]
+];
+
+export function createBytesFormatter(totalBytes: number): (bytes: number) => string {
+	const [unit, divisor] = UNITS.find(([, d]) => totalBytes >= d) ?? UNITS[0];
+	const totalInUnit = totalBytes / divisor;
+	const digits = Math.max(0, 2 - Math.floor(Math.log10(Math.max(1, totalInUnit))));
+	return (bytes: number) => `${(bytes / divisor).toFixed(digits)} ${unit}`;
 }

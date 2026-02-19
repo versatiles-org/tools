@@ -5,6 +5,7 @@ import {
 	estimateSize,
 	estimateDownloadSizes,
 	clearIndexCache,
+	createBytesFormatter,
 	BORDER
 } from './size_estimate';
 import type { OptionMap } from '../options';
@@ -92,6 +93,50 @@ describe('estimateSize', () => {
 describe('BORDER', () => {
 	it('equals 3', () => {
 		expect(BORDER).toBe(3);
+	});
+});
+
+describe('createBytesFormatter', () => {
+	it('uses GB with 2 decimals for small GB totals', () => {
+		const fmt = createBytesFormatter(1.5 * 1024 ** 3);
+		expect(fmt(1.5 * 1024 ** 3)).toBe('1.50 GB');
+		expect(fmt(0.25 * 1024 ** 3)).toBe('0.25 GB');
+	});
+
+	it('uses GB with 1 decimal for medium GB totals', () => {
+		const fmt = createBytesFormatter(15 * 1024 ** 3);
+		expect(fmt(15 * 1024 ** 3)).toBe('15.0 GB');
+		expect(fmt(3.2 * 1024 ** 3)).toBe('3.2 GB');
+	});
+
+	it('uses GB with 0 decimals for large GB totals', () => {
+		const fmt = createBytesFormatter(150 * 1024 ** 3);
+		expect(fmt(150 * 1024 ** 3)).toBe('150 GB');
+		expect(fmt(42 * 1024 ** 3)).toBe('42 GB');
+	});
+
+	it('uses MB for totals below 1 GB', () => {
+		const fmt = createBytesFormatter(500 * 1024 ** 2);
+		expect(fmt(500 * 1024 ** 2)).toBe('500 MB');
+		expect(fmt(120 * 1024 ** 2)).toBe('120 MB');
+	});
+
+	it('uses MB with decimals for small MB totals', () => {
+		const fmt = createBytesFormatter(5 * 1024 ** 2);
+		expect(fmt(5 * 1024 ** 2)).toBe('5.00 MB');
+		expect(fmt(1.23 * 1024 ** 2)).toBe('1.23 MB');
+	});
+
+	it('uses KB for totals below 1 MB', () => {
+		const fmt = createBytesFormatter(500 * 1024);
+		expect(fmt(500 * 1024)).toBe('500 KB');
+		expect(fmt(100 * 1024)).toBe('100 KB');
+	});
+
+	it('applies the same unit and precision to all values', () => {
+		const fmt = createBytesFormatter(25 * 1024 ** 3);
+		const results = [5, 8, 12].map((gb) => fmt(gb * 1024 ** 3));
+		expect(results).toEqual(['5.0 GB', '8.0 GB', '12.0 GB']);
 	});
 });
 

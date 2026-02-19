@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { estimateDownloadSizes, formatBytes, type SizeEstimate } from './size_estimate';
+	import { estimateDownloadSizes, createBytesFormatter, type SizeEstimate } from './size_estimate';
 	import type { BBox, OptionCoverage, OptionMap } from '../options';
 
 	let {
@@ -37,6 +37,9 @@
 
 		return () => clearTimeout(timer);
 	});
+
+	let totalBytes = $derived(sizeEstimates.reduce((s, e) => s + e.bytes, 0));
+	let formatBytes = $derived(createBytesFormatter(totalBytes));
 </script>
 
 {#if sizeEstimates.length > 0}
@@ -51,9 +54,7 @@
 		{#if sizeEstimates.length > 1}
 			<span class="size-row size-total">
 				<span class="size-name">Total</span>
-				<span class="size-value">
-					~ {formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
-				</span>
+				<span class="size-value">~ {formatBytes(totalBytes)}</span>
 			</span>
 		{/if}
 	</div>
