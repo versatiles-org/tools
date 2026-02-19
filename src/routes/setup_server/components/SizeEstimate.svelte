@@ -62,26 +62,19 @@
 
 <style>
 	.size-estimate {
-		margin: 1rem auto;
-		padding: 0.7rem 1rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		border-radius: 0.5em;
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
 		max-width: 400px;
+		margin: 0 auto;
 	}
 	.size-estimate .size-label {
-		opacity: 0.5;
 		margin-bottom: 0.15rem;
 	}
 	.size-estimate .size-row {
 		display: flex;
 		justify-content: space-between;
 		gap: 1rem;
-	}
-	.size-estimate .size-name {
-		opacity: 0.7;
 	}
 	.size-estimate .size-value {
 		font-variant-numeric: tabular-nums;
@@ -90,8 +83,5 @@
 		padding-top: 0.35rem;
 		border-top: 1px solid rgba(255, 255, 255, 0.15);
 		font-weight: bold;
-	}
-	.size-estimate .size-total .size-name {
-		opacity: 1;
 	}
 </style>

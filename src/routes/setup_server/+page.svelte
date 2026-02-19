@@ -161,12 +161,21 @@
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
-		<SizeEstimate maps={selection.maps} coverage={selection.coverage} bbox={selection.bbox} />
+		<p class="hint">
+			<SizeEstimate maps={selection.maps} coverage={selection.coverage} bbox={selection.bbox} />
+		</p>
 
 		<h2>5. Add a Frontend?</h2>
 		<div class="options">
 			<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
 		</div>
+		<p class="hint">
+			For an overview of all frontends and their contents, see the <a
+				href="https://github.com/versatiles-org/versatiles-frontend/releases/latest/"
+				target="_blank"
+				rel="noopener noreferrer">latest release</a
+			>.
+		</p>
 	{/if}
 </section>
 
@@ -193,6 +202,12 @@
 	.form h2 {
 		margin-bottom: 0;
 		font-size: 1.2rem;
+	}
+	.hint {
+		text-align: center;
+		font-size: 0.85em;
+		opacity: 0.5;
+		margin: 1rem 0;
 	}
 	div.options {
 		margin: 1rem 0 0.5rem;
