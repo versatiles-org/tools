@@ -18,13 +18,13 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 	{
 		key: 'homebrew',
 		label: 'Homebrew',
-		hint: 'The easiest way to install on macOS',
+		hint: 'Easiest way to install on macOS',
 		os: ['macos']
 	},
 	{
 		key: 'script',
-		label: 'Use Install Script',
-		hint: 'Recommended for most users — downloads a prebuilt binary',
+		label: 'Install script',
+		hint: 'Recommended — downloads a prebuilt binary',
 		os: ['linux', 'macos', 'windows']
 	},
 	{
@@ -36,19 +36,19 @@ export const allMethods: (OptionMethod & { os: KeyOS[] })[] = [
 	{
 		key: 'docker',
 		label: 'Docker',
-		hint: 'Run VersaTiles in an isolated container without installing it',
+		hint: 'Run in an isolated container without installing',
 		os: ['linux', 'macos']
 	},
 	{
 		key: 'cargo',
-		label: 'Use Cargo',
-		hint: 'Install via the Rust package manager — requires Rust toolchain',
+		label: 'Cargo',
+		hint: 'Install via the Rust package manager (requires Rust toolchain)',
 		os: ['linux', 'macos', 'windows']
 	},
 	{
 		key: 'source',
-		label: 'Build from Source',
-		hint: 'Clone the repository and compile manually — requires Rust toolchain',
+		label: 'Build from source',
+		hint: 'Clone and compile manually (requires Rust toolchain)',
 		os: ['linux', 'macos', 'windows']
 	}
 ];
@@ -69,9 +69,13 @@ export const optionsMap: OptionMap[] = [
 	{
 		key: 'osm',
 		label: 'OpenStreetMap',
-		hint: 'Vector map data with streets, buildings, and labels'
+		hint: 'Vector tiles with streets, buildings, and labels'
 	},
-	{ key: 'satellite', label: 'Satellite Imagery', hint: 'Raster satellite and aerial imagery' }
+	{
+		key: 'satellite',
+		label: 'Satellite imagery',
+		hint: 'Raster tiles with satellite and aerial imagery'
+	}
 ];
 
 // ### Coverage Options
@@ -81,13 +85,13 @@ export type OptionCoverage = Option & { key: KeyCoverage };
 export const optionsCoverage: OptionCoverage[] = [
 	{
 		key: 'global',
-		label: 'Entire World',
-		hint: 'Download the complete dataset for the entire planet'
+		label: 'Entire world',
+		hint: 'Download the complete planet dataset'
 	},
 	{
 		key: 'bbox',
-		label: 'Custom Region',
-		hint: 'Select a specific region to save disk space and bandwidth'
+		label: 'Custom region',
+		hint: 'Select a bounding box to reduce download size'
 	}
 ];
 
@@ -102,7 +106,7 @@ export const optionsFrontend: OptionFrontend[] = [
 	{
 		key: 'standard',
 		label: 'Standard',
-		hint: 'The Standard Frontend includes MapLibre-GL-JS, styles, fonts, sprites.',
+		hint: 'Includes MapLibre GL JS, styles, fonts, and sprites',
 		name: 'frontend',
 		selected: true
 	},
@@ -110,13 +114,13 @@ export const optionsFrontend: OptionFrontend[] = [
 		key: 'dev',
 		label: 'Development',
 		name: 'frontend-dev',
-		hint: 'The Development Frontend Includes additional debugging tools and features.'
+		hint: 'Like standard, but with additional debugging tools'
 	},
 	{
 		key: 'min',
 		label: 'Minimal',
 		name: 'frontend-min',
-		hint: 'The Minimal Frontend Includes only the essential libraries and fonts.'
+		hint: 'Only essential libraries and a reduced set of fonts'
 	},
-	{ key: 'none', label: 'None', hint: 'No Frontend will be included.' }
+	{ key: 'none', label: 'None', hint: 'No frontend — serve only tile data' }
 ];

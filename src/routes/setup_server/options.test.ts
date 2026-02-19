@@ -30,7 +30,7 @@ describe('optionsMaps', () => {
 	it('should contain OpenStreetMap and Satellite options', () => {
 		expect(optionsMap).toEqual([
 			expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' }),
-			expect.objectContaining({ key: 'satellite', label: 'Satellite Imagery' })
+			expect.objectContaining({ key: 'satellite', label: 'Satellite imagery' })
 		]);
 	});
 });

@@ -97,39 +97,39 @@
 </script>
 
 <svelte:head>
-	<title>How to setup a VersaTiles server?</title>
+	<title>Set up your own VersaTiles server</title>
 	<meta
 		name="description"
-		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
 	/>
-	<meta property="og:title" content="How to setup a VersaTiles server?" />
+	<meta property="og:title" content="Set up your own VersaTiles server" />
 	<meta
 		property="og:description"
-		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://versatiles.org/tools/setup_server" />
 	<meta property="og:image" content="https://versatiles.org/tools/images/setup_server.png" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="How to setup a VersaTiles server?" />
+	<meta name="twitter:title" content="Set up your own VersaTiles server" />
 	<meta
 		name="twitter:description"
-		content="A quick, interactive guide to installing a VersaTiles map server in seconds, complete with map data and front end."
+		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
 	/>
 	<meta name="twitter:image" content="https://versatiles.org/tools/images/setup_server.png" />
 </svelte:head>
 
 <section class="form">
-	<h1>How to setup a VersaTiles server?</h1>
+	<h1>Set up your own VersaTiles server</h1>
 
-	<h2>1. Select your Operating System</h2>
+	<h2>1. Select your operating system</h2>
 	<div class="options">
 		<FormOptionGroup options={optionsOS} bind:value={selection.os} />
 	</div>
 
 	{#if selection.os}
 		{#key selection.os}
-			<h2>2. Select an Installation Method</h2>
+			<h2>2. Select an installation method</h2>
 			<div class="options">
 				<FormOptionGroup options={optionsMethod(selection.os.key)} bind:value={selection.method} />
 			</div>
@@ -137,7 +137,7 @@
 	{/if}
 
 	{#if selection.os && selection.method}
-		<h2>3. Select Map Data</h2>
+		<h2>3. Select map data</h2>
 		<div class="options">
 			<FormOptionGroup
 				options={optionsMap}
@@ -148,7 +148,7 @@
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0}
-		<h2>4. Select Coverage Area</h2>
+		<h2>4. Select coverage area</h2>
 		<div class="options">
 			<FormOptionGroup options={optionsCoverage} bind:value={selection.coverage} />
 		</div>
@@ -165,7 +165,7 @@
 			<SizeEstimate maps={selection.maps} coverage={selection.coverage} bbox={selection.bbox} />
 		</p>
 
-		<h2>5. Add a Frontend?</h2>
+		<h2>5. Add a frontend</h2>
 		<div class="options">
 			<FormOptionGroup options={optionsFrontend} bind:value={selection.frontend} />
 		</div>
@@ -182,11 +182,11 @@
 <section>
 	{#if code}
 		<hr />
-		<h2>Check and paste these instructions into your shell</h2>
+		<h2>Review and run these commands in your shell</h2>
 		<CodeBlock {code} />
 		<p style="text-align:center; margin-top: 8em; font-size: 0.8em; opacity: 0.7;">
-			Copy a shareable link of your current selection:<br />
-			<button onclick={copyShareLink} class="check">copy share link</button>
+			Share your current selection:<br />
+			<button onclick={copyShareLink} class="check">copy link</button>
 		</p>
 	{/if}
 </section>
