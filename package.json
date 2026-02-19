@@ -9,20 +9,20 @@
 		"url": "git+https://github.com/versatiles-org/tools.git"
 	},
 	"scripts": {
-		"build-html": "tsx ./scripts/update_html.ts",
-		"build-svelte": "svelte-kit sync && vite build",
-		"build-size-index": "tsx scripts/build-size-index.ts",
-		"build": "npm run build-size-index && npm run build-html && npm run build-svelte",
-		"check-svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+		"build:html": "tsx ./scripts/update_html.ts",
+		"build:size-index": "tsx scripts/build-size-index.ts",
+		"build:svelte": "svelte-kit sync && vite build",
+		"build": "npm run build:size-index && npm run build:html && npm run build:svelte",
+		"check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
-		"check": "npm run format && npm run lint && npm run check-svelte && npm run test",
+		"check": "npm run format && npm run lint && npm run check:svelte && npm run test",
 		"dev": "vite dev",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"preview": "vite preview",
-		"test-coverage": "vitest run --coverage",
+		"test:coverage": "vitest run --coverage",
+		"test:integration": "bash tests/integration/smoke_test_all.sh",
 		"test": "vitest run",
-		"test-integration": "bash tests/integration/smoke_test_all.sh",
 		"upgrade": "npm-check-updates -u && rm -f package-lock.json; rm -rf node_modules; npm i"
 	},
 	"devDependencies": {
