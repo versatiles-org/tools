@@ -86,10 +86,9 @@
 {#key selection}
 	<div class="option-list">
 		{#each options as option (option.key)}
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<label class:selected={selection.has(option.key)}>
 				<button
-				 class:selected={selection.has(option.key)}
+					class:selected={selection.has(option.key)}
 					onclick={() => handleClick(option)}
 					aria-pressed={selection.has(option.key)}
 				>
