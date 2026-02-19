@@ -1,13 +1,13 @@
 :root {
 	--button-padding: 0.5em 1em;
 	--button-border-radius: 0.5em;
-	--button-border-color: rgba(255, 255, 255, 0.2);
+	--button-border-color: #fff5;
 	--button-bg-color: transparent;
 	--button-color: #fff;
 	--button-font-size: 1em;
-	--button-hover-bg-color: rgba(255, 255, 255, 0.2);
-	--button-hover-border-color: rgba(255, 255, 255, 0.8);
-	--button-selected-bg-color: rgba(255, 255, 255, 1);
+	--button-hover-bg-color: #fff5;
+	--button-hover-border-color: #fffc;
+	--button-selected-bg-color: #fff;
 	--button-selected-color: #000;
 }
 
@@ -20,13 +20,9 @@ button {
 	color: var(--button-color);
 	user-select: none;
 	font-size: var(--button-font-size);
-	transition:
-		background-color 0.1s,
-		border-color 0.1s;
 }
 
 button:hover {
-	background-color: var(--button-hover-bg-color);
 	border-color: var(--button-hover-border-color);
 }
 

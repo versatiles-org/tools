@@ -10,7 +10,7 @@ export default defineConfig({
 			include: ['{scripts,src}/**/*.{ts,js}'],
 			exclude: ['src/**/*.d.ts']
 		},
-		include: ['{scripts,src}/**/*.{test,spec}.{js,ts}'],
+		include: ['{scripts,src}/**/*.{test,spec}.{js,ts}']
 	},
 	esbuild: {
 		supported: {

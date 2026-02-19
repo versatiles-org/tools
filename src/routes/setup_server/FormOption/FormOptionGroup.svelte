@@ -83,22 +83,22 @@
 	}
 </script>
 
-{#snippet button(option: MyOption)}
-	<button
-		class:selected={selection.has(option.key)}
-		aria-pressed={selection.has(option.key)}
-		onclick={() => handleClick(option)}
-	>
-		{#if _lockedAllow}<span class="checkbox">{selection.has(option.key) ? '☑' : '☐'}</span>{/if}
-		{option.label}
-	</button>
-{/snippet}
-
 {#key selection}
 	<div class="option-list">
 		{#each options as option (option.key)}
-			{@render button(option)}
-			<span class="hint" class:selected={selection.has(option.key)}>{option.hint ?? ''}</span>
+			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+			<label class:selected={selection.has(option.key)}>
+				<button
+				 class:selected={selection.has(option.key)}
+					onclick={() => handleClick(option)}
+					aria-pressed={selection.has(option.key)}
+				>
+					{#if _lockedAllow}<span class="checkbox">{selection.has(option.key) ? '☑' : '☐'}</span
+						>{/if}
+					{option.label}
+				</button>
+				<span class="hint">{option.hint ?? ''}</span>
+			</label>
 		{/each}
 	</div>
 {/key}
@@ -108,13 +108,32 @@
 		display: grid;
 		grid-template-columns: auto 1fr;
 		gap: 0.5rem 1rem;
-		align-items: center;
 		max-width: 40rem;
 		margin: 0 auto;
 	}
 
-	.option-list button {
+	label {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: 1 / -1;
+		align-items: center;
+		cursor: pointer;
+	}
+
+	label button {
 		text-align: left;
+	}
+
+	label:not(.selected):hover button {
+		border-color: var(--button-hover-border-color);
+	}
+
+	label:not(.selected):hover .hint {
+		opacity: 0.7;
+	}
+
+	label.selected .hint {
+		opacity: 1;
 	}
 
 	.checkbox {
@@ -122,11 +141,8 @@
 	}
 
 	.hint {
-		font-size: 0.85em;
-		opacity: 0.5;
-	}
-
-	.hint.selected {
-		opacity: 1;
+		color: var(--button-color);
+		font-size: 0.9em;
+		opacity: 0.3;
 	}
 </style>
