@@ -1,3 +1,6 @@
+[![CI status](https://img.shields.io/github/actions/workflow/status/versatiles-org/tools/ci.yml)](https://github.com/versatiles-org/tools/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 # VersaTiles Tools
 
 This repository contains a collection of tools for working with the VersaTiles
