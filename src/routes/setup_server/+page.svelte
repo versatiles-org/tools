@@ -4,9 +4,8 @@
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
 	import { decodeHash, encodeHash } from './hash';
-	import { estimateDownloadSizes, formatBytes, type SizeEstimate } from './estimate_size';
+	import SizeEstimate from './SizeEstimate/SizeEstimate.svelte';
 	import type { SetupState } from './types';
-	import { base } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import '../../style/default.css';
 
@@ -75,31 +74,6 @@
 				selection.method = undefined;
 			}
 		}
-	});
-
-	let sizeEstimates = $state<SizeEstimate[]>([]);
-
-	$effect(() => {
-		const maps = selection.maps.slice().sort((a, b) => a.label.localeCompare(b.label));
-		const coverage = selection.coverage;
-		const bbox = selection.bbox;
-
-		if (!coverage || maps.length === 0) {
-			sizeEstimates = [];
-			return;
-		}
-
-		const timer = setTimeout(() => {
-			estimateDownloadSizes(maps, coverage.key, base, bbox)
-				.then((estimates) => {
-					sizeEstimates = estimates;
-				})
-				.catch(() => {
-					sizeEstimates = [];
-				});
-		}, 50);
-
-		return () => clearTimeout(timer);
 	});
 
 	let code: string | undefined = $derived.by(() => {
@@ -187,25 +161,7 @@
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
-		{#if sizeEstimates.length > 0}
-			<div class="size-estimate">
-				<span class="size-label">Estimated download size:</span>
-				{#each sizeEstimates as est (est.mapKey)}
-					<span class="size-row">
-						<span class="size-name">{est.mapLabel}</span>
-						<span class="size-value">~ {formatBytes(est.bytes)}</span>
-					</span>
-				{/each}
-				{#if sizeEstimates.length > 1}
-					<span class="size-row size-total">
-						<span class="size-name">Total</span>
-						<span class="size-value">
-							~ {formatBytes(sizeEstimates.reduce((s, e) => s + e.bytes, 0))}
-						</span>
-					</span>
-				{/if}
-			</div>
-		{/if}
+		<SizeEstimate maps={selection.maps} coverage={selection.coverage} bbox={selection.bbox} />
 
 		<h2>5. Add a Frontend?</h2>
 		<div class="options">
@@ -240,39 +196,6 @@
 	}
 	div.options {
 		margin: 1rem 0 0.5rem;
-	}
-	.size-estimate {
-		margin: 1rem auto;
-		padding: 0.7rem 1rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		border-radius: 0.5em;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		max-width: 400px;
-	}
-	.size-estimate .size-label {
-		opacity: 0.5;
-		margin-bottom: 0.15rem;
-	}
-	.size-estimate .size-row {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-	}
-	.size-estimate .size-name {
-		opacity: 0.7;
-	}
-	.size-estimate .size-value {
-		font-variant-numeric: tabular-nums;
-	}
-	.size-estimate .size-total {
-		padding-top: 0.35rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.15);
-		font-weight: bold;
-	}
-	.size-estimate .size-total .size-name {
-		opacity: 1;
 	}
 	.bbox-map {
 		width: 80vmin;
