@@ -6,8 +6,8 @@ import {
 	estimateDownloadSizes,
 	clearIndexCache,
 	BORDER
-} from './estimate_size';
-import type { OptionMap } from './options';
+} from './size_estimate';
+import type { OptionMap } from '../options';
 
 describe('lon2tileX', () => {
 	it('maps -180° to tile 0', () => {

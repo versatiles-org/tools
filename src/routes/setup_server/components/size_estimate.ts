@@ -1,4 +1,4 @@
-import type { BBox, KeyCoverage, KeyMap, OptionMap } from './options';
+import type { BBox, KeyCoverage, KeyMap, OptionMap } from '../options';
 
 // --- Types ---
 

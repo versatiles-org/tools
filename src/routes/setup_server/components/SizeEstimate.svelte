@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { estimateDownloadSizes, formatBytes, type SizeEstimate } from '../estimate_size';
+	import { estimateDownloadSizes, formatBytes, type SizeEstimate } from './size_estimate';
 	import type { BBox, OptionCoverage, OptionMap } from '../options';
 
 	let {
