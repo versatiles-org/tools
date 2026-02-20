@@ -43,7 +43,7 @@ jobs:
         run: npx eslint .
 
       - name: Check Svelte
-        run: npm run check-svelte
+        run: npm run check:svelte
 
       - name: Run Tests
         run: npm run test
