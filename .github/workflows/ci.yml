@@ -36,11 +36,10 @@ jobs:
         run: npm ci
 
       - name: Check Format
-        if: github.ref != 'refs/heads/main'
-        run: npx prettier --check .
+        run: npm run format:check
 
       - name: Check Lint
-        run: npx eslint .
+        run: npm run lint
 
       - name: Check Svelte
         run: npm run check:svelte
@@ -49,6 +48,7 @@ jobs:
         run: npm run test
 
   validate:
+    if: github.ref == 'refs/heads/main'
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +93,7 @@ jobs:
 
   smoke-test-linux:
     needs: [check, validate]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     strategy:
@@ -127,6 +128,7 @@ jobs:
 
   smoke-test-windows:
     needs: [check, validate]
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
 
     steps:
@@ -171,6 +173,7 @@ jobs:
 
   smoke-test-macos:
     needs: [check, validate]
+    if: github.ref == 'refs/heads/main'
     runs-on: macos-latest
 
     steps:
@@ -212,6 +215,7 @@ jobs:
 
   build:
     needs: [smoke-test-linux, smoke-test-windows, smoke-test-macos]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
