@@ -126,7 +126,7 @@ export function generateCode({
 				if (os!.key === 'windows') {
 					yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
 				} else {
-					yield `curl -fsSL -o "${filename}" "${url}"`;
+					yield `curl -fLo "${filename}" "${url}"`;
 				}
 			}
 		}
@@ -142,7 +142,7 @@ export function generateCode({
 		if (os!.key === 'windows') {
 			yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
 		} else {
-			yield `curl -fsSL -o "${filename}" "${url}"`;
+			yield `curl -fLo "${filename}" "${url}"`;
 		}
 	}
 
