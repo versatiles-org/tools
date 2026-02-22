@@ -13,15 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Tier 3: Slow smoke tests (cargo, source on Linux)
   smoke-test-slow:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-
-    strategy:
-      fail-fast: false
-      matrix:
-        method: [cargo, source]
 
     steps:
       - name: Checkout
@@ -36,36 +30,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Extract generated scripts
-        run: npx tsx tests/integration/extract_code.ts
-
-      - name: Create fixture
-        run: bash tests/integration/create_fixture.sh
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache Cargo registry and build
+      - name: Cache Cargo registry
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ matrix.method }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-weekly-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-${{ matrix.method }}-
+            ${{ runner.os }}-cargo-weekly-
             ${{ runner.os }}-cargo-
 
-      - name: Install VersaTiles via ${{ matrix.method }}
-        run: |
-          if [ "${{ matrix.method }}" = "cargo" ]; then
-            cargo install versatiles
-          else
-            git clone https://github.com/versatiles-org/versatiles-rs.git /tmp/versatiles-rs
-            cd /tmp/versatiles-rs
-            cargo build --bin versatiles --release
-            sudo cp target/release/versatiles /usr/local/bin/
-          fi
-
-      - name: Run smoke test
-        run: bash tests/integration/smoke_test.sh linux ${{ matrix.method }}
+      - name: Run smoke tests
+        run: npx tsx tests/integration/smoke_test.ts cargo source
