@@ -53,7 +53,9 @@ describe('generateCode', () => {
 
 	it('generates code for cargo on linux', () => {
 		const code = _generateCode(osLinux, methodCargo, maps);
-		expect(code).toContain('curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y');
+		expect(code).toContain(
+			'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y'
+		);
 		expect(code).toContain('cargo install versatiles');
 		expect(code).toContain('curl -fsSL -o "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
