@@ -38,7 +38,7 @@ describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {
 		const code = _generateCode(osLinux, methodHomebrew, maps);
 		expect(code).toContain('brew install versatiles');
-		expect(code).toContain('wget -cO "osm.versatiles"');
+		expect(code).toContain('curl -fsSL -o "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -53,9 +53,9 @@ describe('generateCode', () => {
 
 	it('generates code for cargo on linux', () => {
 		const code = _generateCode(osLinux, methodCargo, maps);
-		expect(code).toContain('curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh');
+		expect(code).toContain('curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y');
 		expect(code).toContain('cargo install versatiles');
-		expect(code).toContain('wget -cO "osm.versatiles"');
+		expect(code).toContain('curl -fsSL -o "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -75,7 +75,7 @@ describe('generateCode', () => {
 	it('includes frontend download and server static argument', () => {
 		const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, frontend);
 		expect(code).toContain('# Download Frontend');
-		expect(code).toContain('wget -cO "frontend.br.tar.gz"');
+		expect(code).toContain('curl -fsSL -o "frontend.br.tar.gz"');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 	});
 
@@ -94,7 +94,7 @@ describe('generateCode', () => {
 		const code = _generateCode(osLinux, methodDocker, maps, coverageBbox, bbox, frontend);
 		expect(code).toContain('# Install Docker');
 		expect(code).toContain('# Download Frontend');
-		expect(code).toContain('wget -cO "frontend.br.tar.gz"');
+		expect(code).toContain('curl -fsSL -o "frontend.br.tar.gz"');
 		expect(code).toContain('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest');
 		expect(code).toContain('--bbox "1,2,3,4"');
 		expect(code).toContain('# Configure and run Docker container');
