@@ -10,19 +10,15 @@ import {
 	optionsCoverage,
 	optionsFrontend
 } from '../../../src/routes/setup_server/options.js';
-import type { KeyOS, KeyFrontend, BBox } from '../../../src/routes/setup_server/options.js';
+import type { KeyOS, BBox } from '../../../src/routes/setup_server/options.js';
 
 export const TEST_BBOX: BBox = [8.527, 47.362, 8.552, 47.379]; // tiny region in Zurich
 
-export function generateTestCode(
-	osKey: KeyOS,
-	methodKey: string,
-	frontendKey: KeyFrontend
-): string {
+export function generateTestCode(osKey: KeyOS, methodKey: string): string {
 	const os = optionsOS.find((o) => o.key === osKey)!;
 	const method = allMethods.find((m) => m.key === methodKey)!;
 	const coverage = optionsCoverage.find((o) => o.key === 'bbox')!;
-	const frontend = optionsFrontend.find((o) => o.key === frontendKey)!;
+	const frontend = optionsFrontend.find((o) => o.key === 'tiny')!;
 
 	const code = generateCode({
 		os: { key: os.key, label: os.label, hint: os.hint },

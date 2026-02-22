@@ -20,7 +20,7 @@ let count = 0;
 for (const os of optionsOS) {
 	const validMethods = allMethods.filter((m) => m.os.includes(os.key));
 	for (const method of validMethods) {
-		const code = generateTestCode(os.key, method.key, 'min');
+		const code = generateTestCode(os.key, method.key);
 
 		const isWindows = os.key === 'windows';
 		const ext = isWindows ? '.ps1' : '.sh';

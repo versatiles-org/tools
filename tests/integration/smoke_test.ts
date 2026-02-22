@@ -50,7 +50,7 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 	console.log(`=== Smoke testing: ${osKey}/${methodKey} ===`);
 	console.log('='.repeat(60));
 
-	const rawCode = generateTestCode(osKey, methodKey, 'standard');
+	const rawCode = generateTestCode(osKey, methodKey);
 	const code = applyModifications(rawCode, methodKey, osKey);
 
 	console.log('\n--- Modified script ---');
