@@ -12,7 +12,7 @@ import {
 } from '../../../src/routes/setup_server/options.js';
 import type { KeyOS, KeyFrontend, BBox } from '../../../src/routes/setup_server/options.js';
 
-export const TEST_BBOX: BBox = [8.5, 47.3, 8.6, 47.4]; // tiny region around Zurich
+export const TEST_BBOX: BBox = [8.527, 47.362, 8.552, 47.379]; // tiny region in Zurich
 
 export function generateTestCode(
 	osKey: KeyOS,
