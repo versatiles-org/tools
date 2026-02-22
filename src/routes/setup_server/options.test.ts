@@ -45,7 +45,7 @@ describe('optionsCoverage', () => {
 describe('optionsFrontend', () => {
 	it('should contain all frontend options', () => {
 		const keys = optionsFrontend.map((opt) => opt.key);
-		expect(keys).toEqual(['standard', 'dev', 'min', 'none']);
+		expect(keys).toEqual(['standard', 'dev', 'min', 'tiny', 'none']);
 	});
 	it('should have selected true for standard', () => {
 		expect(optionsFrontend.find((opt) => opt.key === 'standard')?.selected).toBe(true);

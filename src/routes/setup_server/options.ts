@@ -96,7 +96,7 @@ export const optionsCoverage: OptionCoverage[] = [
 ];
 
 // ### Frontend Options
-export type KeyFrontend = 'none' | 'standard' | 'dev' | 'min';
+export type KeyFrontend = 'none' | 'standard' | 'dev' | 'min' | 'tiny';
 export type OptionFrontend = Option & {
 	key: KeyFrontend;
 	hint: string;
@@ -106,7 +106,7 @@ export const optionsFrontend: OptionFrontend[] = [
 	{
 		key: 'standard',
 		label: 'Standard',
-		hint: 'Includes MapLibre GL JS, styles, fonts, and sprites',
+		hint: 'All fonts, styles, and sprites (~90 MB)',
 		name: 'frontend',
 		selected: true
 	},
@@ -114,13 +114,19 @@ export const optionsFrontend: OptionFrontend[] = [
 		key: 'dev',
 		label: 'Development',
 		name: 'frontend-dev',
-		hint: 'Like standard, but with additional debugging tools'
+		hint: 'All fonts, styles, and sprites with dev tools (~90 MB)'
 	},
 	{
 		key: 'min',
 		label: 'Minimal',
 		name: 'frontend-min',
-		hint: 'Only essential libraries and a reduced set of fonts'
+		hint: 'Reduced font set (~45 MB)'
+	},
+	{
+		key: 'tiny',
+		label: 'Tiny',
+		name: 'frontend-tiny',
+		hint: 'Latin characters only (~1 MB)'
 	},
 	{ key: 'none', label: 'None', hint: 'No frontend — serve only tile data' }
 ];
