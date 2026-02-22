@@ -87,9 +87,9 @@ export function generateCode({
 			case 'cargo':
 				yield '# install rust, also see: https://www.rust-lang.org/tools/install';
 				if (os!.key === 'windows') {
-					yield 'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe\n.\\rustup-init.exe';
+					yield 'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe\n.\\rustup-init.exe -y';
 				} else {
-					yield 'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh';
+					yield 'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y';
 				}
 				yield '# compile and install versatiles';
 				yield 'cargo install versatiles';
