@@ -13,8 +13,82 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  smoke-test-slow:
+  smoke-test-linux:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-weekly-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-weekly-
+            ${{ runner.os }}-cargo-
+
+      - name: 'Smoke test: cargo'
+        run: npm run test:integration -- cargo
+
+      - name: 'Smoke test: source'
+        run: npm run test:integration -- source
+
+  smoke-test-macos:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-weekly-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-weekly-
+            ${{ runner.os }}-cargo-
+
+      - name: 'Smoke test: cargo'
+        run: npm run test:integration -- cargo
+
+      - name: 'Smoke test: source'
+        run: npm run test:integration -- source
+
+  smoke-test-windows:
+    runs-on: windows-latest
     timeout-minutes: 45
 
     steps:
