@@ -44,5 +44,8 @@ jobs:
             ${{ runner.os }}-cargo-weekly-
             ${{ runner.os }}-cargo-
 
-      - name: Run smoke tests
-        run: npx tsx tests/integration/smoke_test.ts cargo source
+      - name: 'Smoke test: cargo'
+        run: npm run test:integration -- cargo
+
+      - name: 'Smoke test: source'
+        run: npm run test:integration -- source
