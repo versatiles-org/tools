@@ -76,30 +76,30 @@ describe('generateCode', () => {
 
 	it('includes frontend download and server static argument', () => {
 		const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, frontend);
-		expect(code).toContain('# Download Frontend');
+		expect(code).toContain('Downloading frontend...');
 		expect(code).toContain('curl -fLo "frontend.br.tar.gz"');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 	});
 
 	it('does not generate map or server commands if maps is empty', () => {
 		const code = _generateCode(osLinux, methodScript, []);
-		expect(code).not.toContain('Download Maps');
-		expect(code).not.toContain('Start VersaTiles Server');
+		expect(code).not.toContain('Downloading map data...');
+		expect(code).not.toContain('Starting VersaTiles server...');
 	});
 
 	it('does not generate frontend download if frontend is not provided', () => {
 		const code = _generateCode(osLinux, methodScript, maps);
-		expect(code).not.toContain('Download Frontend');
+		expect(code).not.toContain('Downloading frontend...');
 	});
 
 	it('generates code for docker on linux with maps, frontend, and bbox', () => {
 		const code = _generateCode(osLinux, methodDocker, maps, coverageBbox, bbox, frontend);
 		expect(code).toContain('# Install Docker');
-		expect(code).toContain('# Download Frontend');
+		expect(code).toContain('Downloading frontend...');
 		expect(code).toContain('curl -fLo "frontend.br.tar.gz"');
 		expect(code).toContain('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest');
 		expect(code).toContain('--bbox "1,2,3,4"');
-		expect(code).toContain('# Configure and run Docker container');
+		expect(code).toContain('Configuring and running Docker container...');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 		expect(code).toContain('"osm.versatiles"');
 	});

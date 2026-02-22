@@ -80,13 +80,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: "Smoke test: script"
+      - name: 'Smoke test: script'
         run: npm run test:integration -- script
 
-      - name: "Smoke test: docker"
+      - name: 'Smoke test: docker'
         run: npm run test:integration -- docker
 
-      - name: "Smoke test: docker_nginx"
+      - name: 'Smoke test: docker_nginx'
         run: npm run test:integration -- docker_nginx
 
   smoke-test-macos:
@@ -106,10 +106,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: "Smoke test: homebrew"
+      - name: 'Smoke test: homebrew'
         run: npm run test:integration -- homebrew
 
-      - name: "Smoke test: script"
+      - name: 'Smoke test: script'
         run: npm run test:integration -- script
 
   smoke-test-windows:
@@ -129,7 +129,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: "Smoke test: script"
+      - name: 'Smoke test: script'
         run: npm run test:integration -- script
 
   # Phase 3: Build and deploy (needs all smoke tests)
