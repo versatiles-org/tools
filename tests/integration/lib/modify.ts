@@ -20,7 +20,7 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 					const args = match.replace('versatiles.exe ', '');
 					return [
 						`$proc = Start-Process versatiles.exe -ArgumentList '${args}' -PassThru -NoNewWindow`,
-						'$proc.Id | Out-File -Encoding ascii server.pid'
+						'$proc.Id | Out-File -Encoding ascii "$PSScriptRoot\\server.pid"'
 					].join('\n');
 				});
 			} else {
