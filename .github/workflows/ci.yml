@@ -31,6 +31,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install node dependencies
         run: npm ci
@@ -76,6 +77,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -102,6 +104,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -125,6 +128,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -147,6 +151,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install node dependencies
         run: npm ci
