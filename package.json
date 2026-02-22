@@ -23,7 +23,7 @@
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test:coverage": "vitest run --coverage",
-		"test:integration": "bash tests/integration/smoke_test_all.sh",
+		"test:integration": "tsx tests/integration/smoke_test.ts",
 		"test": "vitest run",
 		"upgrade": "vrt deps-upgrade"
 	},
