@@ -127,7 +127,7 @@ jobs:
 
   build:
     needs: [smoke-test-linux, smoke-test-macos, smoke-test-windows]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
 
     steps:
@@ -146,14 +146,13 @@ jobs:
         run: npm run build
 
       - name: Upload Artifact
-        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./build
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
     permissions:
       pages: write
