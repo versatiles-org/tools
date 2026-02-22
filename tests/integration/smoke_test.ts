@@ -32,6 +32,19 @@ function detectOS(): KeyOS {
 	}
 }
 
+let pendingCleanup: (() => void) | null = null;
+
+function handleSignal(): void {
+	if (pendingCleanup) {
+		pendingCleanup();
+		pendingCleanup = null;
+	}
+	process.exit(1);
+}
+
+process.on('SIGINT', handleSignal);
+process.on('SIGTERM', handleSignal);
+
 async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 	console.log(`\n${'='.repeat(60)}`);
 	console.log(`=== Smoke testing: ${osKey}/${methodKey} ===`);
@@ -45,6 +58,7 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 	console.log('--- End of script ---\n');
 
 	const workDir = createWorkDir();
+	pendingCleanup = () => cleanup(methodKey, workDir);
 
 	try {
 		const scriptPath = writeScript(workDir, code, osKey);
@@ -83,6 +97,7 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 		return false;
 	} finally {
 		cleanup(methodKey, workDir);
+		pendingCleanup = null;
 	}
 }
 
