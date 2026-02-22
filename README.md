@@ -22,17 +22,23 @@ npm i
 
 The following NPM scripts are available:
 
-| `npm run ...`  | Description                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **`build`**    | **Runs both the HTML and Svelte build processes.**                                                                                   |
-| `build-html`   | Updates the static HTML files using the `update_html.ts` script so they match the style of [versatiles.org](https://versatiles.org). |
-| `build-svelte` | Synchronizes SvelteKit and builds the Svelte application using Vite.                                                                 |
-| **`preview`**  | **Serves the built application locally for previewing the production build.**                                                        |
-| **`dev`**      | **Starts the development server with hot module reloading.**                                                                         |
-| **`check`**    | **Formats code, lints the project, and runs Svelte type checks.**                                                                    |
-| `format`       | Formats all project files using Prettier.                                                                                            |
-| `lint`         | Checks code formatting with Prettier and runs ESLint for code quality.                                                               |
-| `upgrade`      | Updates dependencies, removes lock files and `node_modules`, and reinstalls packages.                                                |
+| `npm run ...`      | Description                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **`dev`**          | **Starts the development server with hot module reloading.**                                                                         |
+| **`build`**        | **Builds the size index, updates HTML, and builds the Svelte app.**                                                                  |
+| `build:html`       | Updates the static HTML files using the `update_html.ts` script so they match the style of [versatiles.org](https://versatiles.org). |
+| `build:svelte`     | Synchronizes SvelteKit and builds the Svelte application using Vite.                                                                 |
+| `build:size-index` | Generates the size index used for download size estimates.                                                                           |
+| **`preview`**      | **Serves the built application locally for previewing the production build.**                                                        |
+| **`check`**        | **Formats code, checks Svelte types, lints, and runs tests.**                                                                        |
+| `check:svelte`     | Runs Svelte type checking.                                                                                                           |
+| **`test`**         | **Runs unit tests with Vitest.**                                                                                                     |
+| `test:integration` | Runs integration smoke tests against generated install scripts.                                                                      |
+| `test:coverage`    | Runs unit tests with coverage reporting.                                                                                             |
+| `format`           | Formats all project files using Prettier.                                                                                            |
+| `format:check`     | Checks formatting without modifying files.                                                                                           |
+| `lint`             | Runs ESLint for code quality.                                                                                                        |
+| `upgrade`          | Updates dependencies, removes lock files and `node_modules`, and reinstalls packages.                                                |
 
 ## Tools
 
