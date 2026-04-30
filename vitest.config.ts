@@ -11,10 +11,5 @@ export default defineConfig({
 			exclude: ['src/**/*.d.ts']
 		},
 		include: ['{scripts,src}/**/*.{test,spec}.{js,ts}']
-	},
-	esbuild: {
-		supported: {
-			'top-level-await': true
-		}
 	}
 });
