@@ -257,6 +257,10 @@ const sources = [
 	{
 		url: 'https://download.versatiles.org/satellite.versatiles',
 		output: 'static/data/size-index-satellite.json'
+	},
+	{
+		url: 'https://download.versatiles.org/elevation.versatiles',
+		output: 'static/data/size-index-elevation.json'
 	}
 ];
 
