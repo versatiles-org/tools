@@ -63,7 +63,7 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 }
 
 // ### Map Options
-export type KeyMap = 'osm' | 'satellite';
+export type KeyMap = 'osm' | 'satellite' | 'elevation';
 export type OptionMap = Option & { key: KeyMap };
 export const optionsMap: OptionMap[] = [
 	{
@@ -75,6 +75,11 @@ export const optionsMap: OptionMap[] = [
 		key: 'satellite',
 		label: 'Satellite imagery',
 		hint: 'Raster tiles with satellite and aerial imagery'
+	},
+	{
+		key: 'elevation',
+		label: 'Elevation',
+		hint: 'Raster tiles with terrain elevation data'
 	}
 ];
 
