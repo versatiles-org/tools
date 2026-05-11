@@ -51,10 +51,10 @@ jobs:
       - name: Extract generated scripts
         run: npx tsx tests/integration/extract_code.ts
 
-      - name: Verify all 13 scripts were generated
+      - name: Verify all 23 scripts were generated
         run: |
           count=$(ls tests/integration/fixtures/generated/ | wc -l)
-          if [ "$count" -ne 13 ]; then echo "Expected 13 scripts, got $count"; exit 1; fi
+          if [ "$count" -ne 23 ]; then echo "Expected 23 scripts, got $count"; exit 1; fi
 
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
