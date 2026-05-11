@@ -101,7 +101,7 @@ export const optionsCoverage: OptionCoverage[] = [
 ];
 
 // ### Frontend Options
-export type KeyFrontend = 'none' | 'standard' | 'dev' | 'min' | 'tiny';
+export type KeyFrontend = 'none' | 'standard' | 'dev' | 'min' | 'blank' | 'tiny';
 export type OptionFrontend = Option & {
 	key: KeyFrontend;
 	hint: string;
@@ -126,6 +126,12 @@ export const optionsFrontend: OptionFrontend[] = [
 		label: 'Minimal',
 		name: 'frontend-min',
 		hint: 'Reduced font set (~45 MB)'
+	},
+	{
+		key: 'blank',
+		label: 'Blank',
+		name: 'frontend-blank',
+		hint: 'Fonts and sprites only, no styles (~85 MB)'
 	},
 	{
 		key: 'tiny',

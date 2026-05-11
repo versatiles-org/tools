@@ -46,9 +46,28 @@ describe('optionsCoverage', () => {
 describe('optionsFrontend', () => {
 	it('should contain all frontend options', () => {
 		const keys = optionsFrontend.map((opt) => opt.key);
-		expect(keys).toEqual(['standard', 'dev', 'min', 'tiny', 'none']);
+		expect(keys).toEqual(['standard', 'dev', 'min', 'blank', 'tiny', 'none']);
 	});
 	it('should have selected true for standard', () => {
 		expect(optionsFrontend.find((opt) => opt.key === 'standard')?.selected).toBe(true);
+	});
+	it('should define the blank frontend variant', () => {
+		expect(optionsFrontend.find((opt) => opt.key === 'blank')).toEqual({
+			key: 'blank',
+			label: 'Blank',
+			name: 'frontend-blank',
+			hint: expect.any(String)
+		});
+	});
+	it('should give every downloadable frontend a name matching frontend[-key]', () => {
+		for (const opt of optionsFrontend) {
+			if (opt.key === 'none') {
+				expect(opt.name).toBeUndefined();
+			} else if (opt.key === 'standard') {
+				expect(opt.name).toBe('frontend');
+			} else {
+				expect(opt.name).toBe(`frontend-${opt.key}`);
+			}
+		}
 	});
 });

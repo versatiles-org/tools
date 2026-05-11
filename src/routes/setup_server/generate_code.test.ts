@@ -145,4 +145,30 @@ describe('generateCode', () => {
 		expect(code).toContain('-e FRONTEND=standard');
 		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
 	});
+
+	describe('frontend variants', () => {
+		const downloadable = optionsFrontend.filter((f) => f.name);
+		it.each(downloadable)('downloads $name for script install ($key)', (variant) => {
+			const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, variant);
+			expect(code).toContain(`curl -fLo "${variant.name}.br.tar.gz"`);
+			expect(code).toContain(`--static "${variant.name}.br.tar.gz"`);
+		});
+		it.each(downloadable)('wires FRONTEND=$key into docker_nginx', (variant) => {
+			const code = _generateCode(
+				osLinux,
+				methodDockerNginx,
+				maps,
+				coverageBbox,
+				bbox,
+				variant
+			);
+			expect(code).toContain(`-e FRONTEND=${variant.key}`);
+		});
+		it('omits frontend download when none is selected', () => {
+			const none = optionsFrontend.find((f) => f.key === 'none')!;
+			const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, none);
+			expect(code).not.toContain('Downloading frontend...');
+			expect(code).not.toContain('--static');
+		});
+	});
 });

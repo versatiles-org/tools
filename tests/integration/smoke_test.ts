@@ -8,16 +8,18 @@
  * 6. Cleaning up
  *
  * Usage:
- *   npx tsx tests/integration/smoke_test.ts                    # all valid methods for current OS
- *   npx tsx tests/integration/smoke_test.ts script docker      # only specified methods
+ *   npx tsx tests/integration/smoke_test.ts                     # all valid methods, default frontend
+ *   npx tsx tests/integration/smoke_test.ts script docker       # only specified methods
+ *   npx tsx tests/integration/smoke_test.ts script:blank        # method with explicit frontend
+ *   npx tsx tests/integration/smoke_test.ts docker_nginx:standard script:none
  */
 
 import { execSync } from 'child_process';
-import { generateTestCode, allMethods } from './lib/generate.js';
+import { generateTestCode, allMethods, optionsFrontend, DEFAULT_FRONTEND } from './lib/generate.js';
 import { applyModifications } from './lib/modify.js';
 import { createWorkDir, writeScript, runScript, waitForServer, cleanup } from './lib/server.js';
 import { checkEndpoints } from './lib/endpoints.js';
-import type { KeyOS } from '../../src/routes/setup_server/options.js';
+import type { KeyOS, KeyFrontend } from '../../src/routes/setup_server/options.js';
 
 function detectOS(): KeyOS {
 	switch (process.platform) {
@@ -45,12 +47,17 @@ function handleSignal(): void {
 process.on('SIGINT', handleSignal);
 process.on('SIGTERM', handleSignal);
 
-async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
+async function runSmokeTest(
+	osKey: KeyOS,
+	methodKey: string,
+	frontendKey: KeyFrontend
+): Promise<boolean> {
+	const label = `${osKey}/${methodKey}/${frontendKey}`;
 	console.log(`\n${'='.repeat(60)}`);
-	console.log(`=== Smoke testing: ${osKey}/${methodKey} ===`);
+	console.log(`=== Smoke testing: ${label} ===`);
 	console.log('='.repeat(60));
 
-	const rawCode = generateTestCode(osKey, methodKey);
+	const rawCode = generateTestCode(osKey, methodKey, frontendKey);
 	const code = applyModifications(rawCode, methodKey, osKey);
 
 	console.log('\n--- Modified script ---');
@@ -70,9 +77,9 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 		const passed = await checkEndpoints();
 
 		if (passed) {
-			console.log(`\nPASSED: ${osKey}/${methodKey}`);
+			console.log(`\nPASSED: ${label}`);
 		} else {
-			console.log(`\nFAILED: ${osKey}/${methodKey} — endpoint checks failed`);
+			console.log(`\nFAILED: ${label} — endpoint checks failed`);
 			if (methodKey.startsWith('docker')) {
 				console.log('--- Docker logs ---');
 				try {
@@ -85,7 +92,7 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 
 		return passed;
 	} catch (e) {
-		console.log(`\nFAILED: ${osKey}/${methodKey} — ${e}`);
+		console.log(`\nFAILED: ${label} — ${e}`);
 		if (methodKey.startsWith('docker')) {
 			console.log('--- Docker logs ---');
 			try {
@@ -101,38 +108,59 @@ async function runSmokeTest(osKey: KeyOS, methodKey: string): Promise<boolean> {
 	}
 }
 
+type Task = { method: string; frontend: KeyFrontend };
+
+function parseTasks(cliArgs: string[], validMethodKeys: Set<string>): Task[] {
+	const validFrontendKeys = new Set(optionsFrontend.map((f) => f.key));
+	const tasks: Task[] = [];
+	for (const arg of cliArgs) {
+		const [method, frontend = DEFAULT_FRONTEND] = arg.split(':') as [string, KeyFrontend];
+		if (!validMethodKeys.has(method)) {
+			console.error(`Unknown method "${method}". Available: ${[...validMethodKeys].join(', ')}`);
+			process.exit(1);
+		}
+		if (!validFrontendKeys.has(frontend)) {
+			console.error(
+				`Unknown frontend "${frontend}". Available: ${[...validFrontendKeys].join(', ')}`
+			);
+			process.exit(1);
+		}
+		tasks.push({ method, frontend });
+	}
+	return tasks;
+}
+
 async function main(): Promise<void> {
 	const osKey = detectOS();
 	const cliArgs = process.argv.slice(2);
 
 	const validMethods = allMethods.filter((m) => m.os.includes(osKey));
+	const validMethodKeys = new Set(validMethods.map((m) => m.key));
 
-	let methods: typeof validMethods;
-	if (cliArgs.length > 0) {
-		methods = validMethods.filter((m) => cliArgs.includes(m.key));
-		if (methods.length === 0) {
-			console.error(`No valid methods found for OS "${osKey}" matching: ${cliArgs.join(', ')}`);
-			console.error(`Available methods: ${validMethods.map((m) => m.key).join(', ')}`);
-			process.exit(1);
-		}
-	} else {
-		methods = validMethods;
+	const tasks: Task[] =
+		cliArgs.length > 0
+			? parseTasks(cliArgs, validMethodKeys)
+			: validMethods.map((m) => ({ method: m.key, frontend: DEFAULT_FRONTEND }));
+
+	if (tasks.length === 0) {
+		console.error(`No tasks to run for OS "${osKey}"`);
+		process.exit(1);
 	}
 
 	console.log(`Platform: ${osKey}`);
-	console.log(`Methods to test: ${methods.map((m) => m.key).join(', ')}`);
+	console.log(`Tasks to run: ${tasks.map((t) => `${t.method}:${t.frontend}`).join(', ')}`);
 
-	const results: { method: string; passed: boolean }[] = [];
+	const results: { label: string; passed: boolean }[] = [];
 
-	for (const method of methods) {
-		const passed = await runSmokeTest(osKey, method.key);
-		results.push({ method: method.key, passed });
+	for (const task of tasks) {
+		const passed = await runSmokeTest(osKey, task.method, task.frontend);
+		results.push({ label: `${task.method}:${task.frontend}`, passed });
 	}
 
 	console.log(`\n${'='.repeat(60)}`);
 	console.log('=== Results ===');
 	for (const r of results) {
-		console.log(`  ${r.passed ? 'PASSED' : 'FAILED'}: ${r.method}`);
+		console.log(`  ${r.passed ? 'PASSED' : 'FAILED'}: ${r.label}`);
 	}
 
 	const failed = results.filter((r) => !r.passed);
