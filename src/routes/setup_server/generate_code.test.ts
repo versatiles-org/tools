@@ -154,14 +154,7 @@ describe('generateCode', () => {
 			expect(code).toContain(`--static "${variant.name}.br.tar.gz"`);
 		});
 		it.each(downloadable)('wires FRONTEND=$key into docker_nginx', (variant) => {
-			const code = _generateCode(
-				osLinux,
-				methodDockerNginx,
-				maps,
-				coverageBbox,
-				bbox,
-				variant
-			);
+			const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, variant);
 			expect(code).toContain(`-e FRONTEND=${variant.key}`);
 		});
 		it('omits frontend download when none is selected', () => {
