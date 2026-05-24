@@ -5,7 +5,7 @@
  * Usage: npx tsx tests/integration/extract_code.ts
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -20,6 +20,7 @@ import type { KeyOS, KeyFrontend } from '../../src/routes/setup_server/options.j
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, 'fixtures/generated');
 
+rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
 // Methods whose generated output varies with the frontend choice.
@@ -57,6 +58,11 @@ for (const frontend of optionsFrontend) {
 		write('linux', methodKey, frontend.key, `linux_${methodKey}_${frontend.key}.sh`);
 		count++;
 	}
+}
+
+const onDisk = readdirSync(outDir).length;
+if (onDisk !== count) {
+	throw new Error(`Expected to write ${count} scripts, but found ${onDisk} in ${outDir}`);
 }
 
 console.log(`\nExtracted ${count} scripts to ${outDir}`);
