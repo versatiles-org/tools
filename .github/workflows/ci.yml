@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - '**'
-    tags:
+    tags: 
       - '!**'
+  schedule:
+    - cron: '0 6 * * 0' # Weekly on Sunday at 06:00 UTC
   pull_request:
   workflow_dispatch:
   repository_dispatch:
@@ -140,7 +142,7 @@ jobs:
 
   build:
     needs: [smoke-test-linux, smoke-test-macos, smoke-test-windows]
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
 
     steps:
@@ -166,7 +168,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
 
     permissions:
       pages: write
