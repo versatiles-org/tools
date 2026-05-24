@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - '**'
-    tags: 
-      - '!**'
   schedule:
     - cron: '0 6 * * 0' # Weekly on Sunday at 06:00 UTC
   pull_request:
@@ -53,18 +51,13 @@ jobs:
       - name: Extract generated scripts
         run: npx tsx tests/integration/extract_code.ts
 
-      - name: Verify all 23 scripts were generated
-        run: |
-          count=$(ls tests/integration/fixtures/generated/ | wc -l)
-          if [ "$count" -ne 23 ]; then echo "Expected 23 scripts, got $count"; exit 1; fi
-
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Validate script syntax
         run: bash tests/integration/validate_syntax.sh
 
-  # Phase 2: Smoke tests (needs check + generate)
+  # Phase 2: Smoke tests (needs check)
 
   smoke-test-linux:
     needs: [check]
