@@ -74,6 +74,44 @@ describe('encodeHash', () => {
 			})
 		).toBe('linux+docker+osm+global+web');
 	});
+
+	it('encodes both minZoom and maxZoom', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'global' } as OptionCoverage,
+				minZoom: 3,
+				maxZoom: 12,
+				frontend: { key: 'web' } as OptionFrontend
+			})
+		).toBe('linux+docker+osm+global+z,3,12+web');
+	});
+
+	it('encodes only minZoom', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'global' } as OptionCoverage,
+				minZoom: 5
+			})
+		).toBe('linux+docker+osm+global+z,5,');
+	});
+
+	it('encodes only maxZoom', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'global' } as OptionCoverage,
+				maxZoom: 10
+			})
+		).toBe('linux+docker+osm+global+z,,10');
+	});
 });
 
 describe('decodeHash', () => {
@@ -140,6 +178,48 @@ describe('decodeHash', () => {
 			method: 'docker',
 			maps: ['osm'],
 			coverage: 'bbox'
+		});
+	});
+
+	it('decodes zoom range with both bounds and trailing frontend', () => {
+		expect(decodeHash('linux+docker+osm+global+z,3,12+web')).toEqual({
+			os: 'linux',
+			method: 'docker',
+			maps: ['osm'],
+			coverage: 'global',
+			minZoom: 3,
+			maxZoom: 12,
+			frontend: 'web'
+		});
+	});
+
+	it('decodes zoom range with only minZoom', () => {
+		expect(decodeHash('linux+docker+osm+global+z,5,')).toEqual({
+			os: 'linux',
+			method: 'docker',
+			maps: ['osm'],
+			coverage: 'global',
+			minZoom: 5
+		});
+	});
+
+	it('decodes zoom range with only maxZoom', () => {
+		expect(decodeHash('linux+docker+osm+global+z,,10')).toEqual({
+			os: 'linux',
+			method: 'docker',
+			maps: ['osm'],
+			coverage: 'global',
+			maxZoom: 10
+		});
+	});
+
+	it('treats segment without z, prefix as frontend, not zoom', () => {
+		expect(decodeHash('linux+docker+osm+global+standard')).toEqual({
+			os: 'linux',
+			method: 'docker',
+			maps: ['osm'],
+			coverage: 'global',
+			frontend: 'standard'
 		});
 	});
 });

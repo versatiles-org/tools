@@ -6,11 +6,15 @@ export function generateCode({
 	maps,
 	coverage,
 	bbox,
+	minZoom,
+	maxZoom,
 	frontend
 }: SetupState): string | undefined {
 	if (!os || !method) return undefined;
 
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
+	const bboxArg = coverage?.key === 'bbox' && bbox ? bbox.join(',') : undefined;
+	const needsConvert = bboxArg !== undefined || minZoom !== undefined || maxZoom !== undefined;
 
 	if (method.key.startsWith('docker')) {
 		return [...runDocker()].join('\n');
@@ -55,8 +59,14 @@ export function generateCode({
 				yield `  -e EMAIL=admin@example.com \\`;
 				yield `  -e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')} \\`;
 
-				if (coverage?.key === 'bbox' && bbox) {
-					yield `  -e BBOX="${bbox.join(',')}" \\`;
+				if (bboxArg) {
+					yield `  -e BBOX="${bboxArg}" \\`;
+				}
+				if (minZoom !== undefined) {
+					yield `  -e MIN_ZOOM=${minZoom} \\`;
+				}
+				if (maxZoom !== undefined) {
+					yield `  -e MAX_ZOOM=${maxZoom} \\`;
 				}
 
 				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
@@ -114,12 +124,15 @@ export function generateCode({
 
 		yield `\necho "Downloading map data..."`;
 
-		const bboxArg = coverage?.key === 'bbox' && bbox ? bbox.join(',') : false;
 		for (const map of maps) {
 			const filename = `${map.key}.versatiles`;
 			const url = `https://download.versatiles.org/${filename}`;
-			if (bboxArg) {
-				yield `${alternateVersatilesBin ?? versatilesBin} convert --bbox-border 3 --bbox "${bboxArg}" "${url}" "${filename}"`;
+			if (needsConvert) {
+				const flags: string[] = [];
+				if (bboxArg) flags.push(`--bbox-border 3`, `--bbox "${bboxArg}"`);
+				if (minZoom !== undefined) flags.push(`--min-zoom ${minZoom}`);
+				if (maxZoom !== undefined) flags.push(`--max-zoom ${maxZoom}`);
+				yield `${alternateVersatilesBin ?? versatilesBin} convert ${flags.join(' ')} "${url}" "${filename}"`;
 			} else {
 				if (os!.key === 'windows') {
 					yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;

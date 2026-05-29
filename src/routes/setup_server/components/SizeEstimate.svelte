@@ -6,11 +6,15 @@
 	let {
 		maps,
 		coverage,
-		bbox
+		bbox,
+		minZoom,
+		maxZoom
 	}: {
 		maps: OptionMap[];
 		coverage: OptionCoverage;
 		bbox?: BBox;
+		minZoom?: number;
+		maxZoom?: number;
 	} = $props();
 
 	let sizeEstimates = $state<SizeEstimate[]>([]);
@@ -19,6 +23,8 @@
 		const sortedMaps = maps.slice().sort((a, b) => a.label.localeCompare(b.label));
 		const coverageKey = coverage.key;
 		const currentBbox = bbox;
+		const currentMinZoom = minZoom;
+		const currentMaxZoom = maxZoom;
 
 		if (sortedMaps.length === 0) {
 			sizeEstimates = [];
@@ -26,7 +32,14 @@
 		}
 
 		const timer = setTimeout(() => {
-			estimateDownloadSizes(sortedMaps, coverageKey, base, currentBbox)
+			estimateDownloadSizes(
+				sortedMaps,
+				coverageKey,
+				base,
+				currentBbox,
+				currentMinZoom,
+				currentMaxZoom
+			)
 				.then((estimates) => {
 					sizeEstimates = estimates;
 				})

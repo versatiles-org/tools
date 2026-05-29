@@ -23,12 +23,16 @@
 		maps: [],
 		coverage: undefined,
 		bbox: undefined,
+		minZoom: undefined,
+		maxZoom: undefined,
 		frontend: undefined
 	});
 
 	onMount(() => {
 		if (window.location.hash) {
-			const { os, method, maps, coverage, bbox, frontend } = decodeHash(window.location.hash);
+			const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = decodeHash(
+				window.location.hash
+			);
 			if (os) {
 				selection.os = optionsOS.find((o) => o.key === os);
 				if (selection.os && method)
@@ -37,6 +41,8 @@
 			if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
 			if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
 			if (bbox) selection.bbox = bbox;
+			if (minZoom !== undefined) selection.minZoom = minZoom;
+			if (maxZoom !== undefined) selection.maxZoom = maxZoom;
 			if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
 		}
 	});
@@ -50,11 +56,41 @@
 		}
 	});
 
+	$effect(() => {
+		if (selection.coverage?.key !== 'bbox') {
+			selection.minZoom = undefined;
+			selection.maxZoom = undefined;
+		}
+	});
+
 	let code: string | undefined = $derived.by(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { os, method, maps, coverage, bbox, frontend } = selection;
+		const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = selection;
 		return selection.os && selection.method ? generateCode(selection) : undefined;
 	});
+
+	function clampZoom(value: number | undefined): number | undefined {
+		if (value === undefined || Number.isNaN(value)) return undefined;
+		return Math.min(15, Math.max(0, Math.trunc(value)));
+	}
+
+	function onMinZoomInput(event: Event) {
+		const raw = (event.target as HTMLInputElement).value;
+		selection.minZoom = raw === '' ? undefined : clampZoom(Number(raw));
+	}
+
+	function onMaxZoomInput(event: Event) {
+		const raw = (event.target as HTMLInputElement).value;
+		selection.maxZoom = raw === '' ? undefined : clampZoom(Number(raw));
+	}
+
+	let zoomError = $derived(
+		selection.minZoom !== undefined &&
+			selection.maxZoom !== undefined &&
+			selection.minZoom > selection.maxZoom
+			? 'Min zoom must be ≤ max zoom'
+			: undefined
+	);
 
 	async function copyShareLink(this: HTMLButtonElement) {
 		const hash = encodeHash(selection);
@@ -135,8 +171,47 @@
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
+		{#if selection.coverage.key === 'bbox'}
+			<h3 class="subheading">Zoom range <span class="optional">(optional)</span></h3>
+			<div class="zoom-range">
+				<label>
+					<span>Min zoom</span>
+					<input
+						type="number"
+						min="0"
+						max="15"
+						step="1"
+						placeholder="auto"
+						value={selection.minZoom ?? ''}
+						oninput={onMinZoomInput}
+					/>
+				</label>
+				<label>
+					<span>Max zoom</span>
+					<input
+						type="number"
+						min="0"
+						max="15"
+						step="1"
+						placeholder="auto"
+						value={selection.maxZoom ?? ''}
+						oninput={onMaxZoomInput}
+					/>
+				</label>
+			</div>
+			{#if zoomError}
+				<p class="hint zoom-error">{zoomError}</p>
+			{/if}
+		{/if}
+
 		<p class="hint">
-			<SizeEstimate maps={selection.maps} coverage={selection.coverage} bbox={selection.bbox} />
+			<SizeEstimate
+				maps={selection.maps}
+				coverage={selection.coverage}
+				bbox={selection.bbox}
+				minZoom={selection.minZoom}
+				maxZoom={selection.maxZoom}
+			/>
 		</p>
 
 		<h2>5. Add a frontend</h2>
@@ -177,6 +252,13 @@
 		margin-bottom: 0;
 		font-size: 1.2rem;
 	}
+	.subheading {
+		margin: 1.25rem 0 0;
+		font-size: 1rem;
+		font-weight: normal;
+		text-align: center;
+		opacity: 0.85;
+	}
 	.hint {
 		text-align: center;
 		font-size: 0.85em;
@@ -194,5 +276,37 @@
 		margin: 0.5em auto;
 		color-scheme: dark;
 		position: relative;
+	}
+	.zoom-range {
+		display: flex;
+		gap: 1.5rem;
+		justify-content: center;
+		margin: 1rem 0 0.5rem;
+	}
+	.zoom-range label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: 0.9em;
+		align-items: center;
+	}
+	.zoom-range input {
+		width: 5rem;
+		padding: 0.3rem 0.5rem;
+		background: transparent;
+		color: inherit;
+		border: 1px solid #888;
+		border-radius: 4px;
+		font: inherit;
+		text-align: center;
+	}
+	.optional {
+		font-weight: normal;
+		font-size: 0.85em;
+		opacity: 0.6;
+	}
+	.zoom-error {
+		color: #e88;
+		opacity: 1;
 	}
 </style>

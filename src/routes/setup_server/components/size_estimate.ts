@@ -92,7 +92,9 @@ export async function estimateDownloadSizes(
 	maps: OptionMap[],
 	coverage: KeyCoverage,
 	basePath: string,
-	bbox?: BBox
+	bbox?: BBox,
+	minZoom?: number,
+	maxZoom?: number
 ): Promise<SizeEstimate[]> {
 	const results: SizeEstimate[] = [];
 
@@ -102,6 +104,8 @@ export async function estimateDownloadSizes(
 
 		for (const [zStr, root] of Object.entries(index.levels)) {
 			const z = parseInt(zStr, 10);
+			if (minZoom !== undefined && z < minZoom) continue;
+			if (maxZoom !== undefined && z > maxZoom) continue;
 			const gridSize = 1 << z;
 
 			if (coverage === 'global' || !bbox) {

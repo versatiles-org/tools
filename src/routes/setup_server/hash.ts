@@ -5,7 +5,16 @@ import type { SetupState } from './types';
 
 const HASH_SEPARATOR = '+';
 
-export function encodeHash({ os, method, maps, coverage, bbox, frontend }: SetupState): string {
+export function encodeHash({
+	os,
+	method,
+	maps,
+	coverage,
+	bbox,
+	minZoom,
+	maxZoom,
+	frontend
+}: SetupState): string {
 	const parts = [];
 
 	if (!os) return '';
@@ -24,6 +33,10 @@ export function encodeHash({ os, method, maps, coverage, bbox, frontend }: Setup
 		parts.push('global');
 	}
 
+	if (minZoom !== undefined || maxZoom !== undefined) {
+		parts.push(`z,${minZoom ?? ''},${maxZoom ?? ''}`);
+	}
+
 	if (!frontend) return parts.join(HASH_SEPARATOR);
 	parts.push(frontend.key);
 
@@ -36,6 +49,8 @@ export function decodeHash(hash: string): {
 	maps: string[];
 	coverage?: string;
 	bbox?: BBox;
+	minZoom?: number;
+	maxZoom?: number;
 	frontend?: string;
 } {
 	// Strip leading '#' and bail early if nothing follows
@@ -67,7 +82,20 @@ export function decodeHash(hash: string): {
 		}
 	}
 
-	const frontend = segments[4];
+	let cursor = 4;
+	let minZoom: number | undefined;
+	let maxZoom: number | undefined;
 
-	return { os, method, maps, coverage, bbox, frontend };
+	if (segments[cursor]?.startsWith('z,')) {
+		const [, minRaw, maxRaw] = segments[cursor].split(',');
+		const parsedMin = minRaw === '' || minRaw === undefined ? NaN : Number(minRaw);
+		const parsedMax = maxRaw === '' || maxRaw === undefined ? NaN : Number(maxRaw);
+		if (!Number.isNaN(parsedMin)) minZoom = parsedMin;
+		if (!Number.isNaN(parsedMax)) maxZoom = parsedMax;
+		cursor++;
+	}
+
+	const frontend = segments[cursor];
+
+	return { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend };
 }

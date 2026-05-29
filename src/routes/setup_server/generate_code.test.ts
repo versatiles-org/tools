@@ -29,9 +29,11 @@ function _generateCode(
 	maps: OptionMap[],
 	coverage?: OptionCoverage,
 	bbox?: BBox,
-	frontend?: OptionFrontend
+	frontend?: OptionFrontend,
+	minZoom?: number,
+	maxZoom?: number
 ): string | undefined {
-	return generateCode({ os, method, maps, coverage, bbox, frontend });
+	return generateCode({ os, method, maps, coverage, bbox, frontend, minZoom, maxZoom });
 }
 
 describe('generateCode', () => {
@@ -144,6 +146,79 @@ describe('generateCode', () => {
 		expect(code).not.toContain('BBOX');
 		expect(code).toContain('-e FRONTEND=standard');
 		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
+	});
+
+	describe('zoom range', () => {
+		const coverageGlobal = optionsCoverage.find((opt) => opt.key === 'global')!;
+
+		it('switches global download to versatiles convert when minZoom is set', () => {
+			const code = _generateCode(
+				osLinux,
+				methodScript,
+				maps,
+				coverageGlobal,
+				undefined,
+				undefined,
+				3
+			);
+			expect(code).toContain('versatiles convert --min-zoom 3 "https://download.versatiles.org/');
+			expect(code).not.toContain('curl -fLo "osm.versatiles"');
+		});
+
+		it('adds --min-zoom and --max-zoom alongside --bbox when both are set', () => {
+			const code = _generateCode(osLinux, methodScript, maps, coverageBbox, bbox, undefined, 5, 12);
+			expect(code).toContain(
+				'versatiles convert --bbox-border 3 --bbox "1,2,3,4" --min-zoom 5 --max-zoom 12'
+			);
+		});
+
+		it('omits --max-zoom when only minZoom is set with bbox', () => {
+			const code = _generateCode(osLinux, methodScript, maps, coverageBbox, bbox, undefined, 5);
+			expect(code).toContain('--min-zoom 5');
+			expect(code).not.toContain('--max-zoom');
+		});
+
+		it('keeps curl path when no bbox and no zoom is set', () => {
+			const code = _generateCode(osLinux, methodScript, maps, coverageGlobal);
+			expect(code).toContain('curl -fLo "osm.versatiles"');
+			expect(code).not.toContain('versatiles convert');
+		});
+
+		it('emits MIN_ZOOM and MAX_ZOOM env vars for docker_nginx', () => {
+			const code = _generateCode(
+				osLinux,
+				methodDockerNginx,
+				maps,
+				coverageBbox,
+				bbox,
+				frontend,
+				4,
+				11
+			);
+			expect(code).toContain('-e BBOX="1,2,3,4"');
+			expect(code).toContain('-e MIN_ZOOM=4');
+			expect(code).toContain('-e MAX_ZOOM=11');
+		});
+
+		it('omits MIN_ZOOM/MAX_ZOOM for docker_nginx when not set', () => {
+			const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend);
+			expect(code).not.toContain('MIN_ZOOM');
+			expect(code).not.toContain('MAX_ZOOM');
+		});
+
+		it('uses convert in docker (non-nginx) when only zoom is set', () => {
+			const code = _generateCode(
+				osLinux,
+				methodDocker,
+				maps,
+				coverageGlobal,
+				undefined,
+				frontend,
+				undefined,
+				10
+			);
+			expect(code).toContain('convert --max-zoom 10 "https://download.versatiles.org/');
+		});
 	});
 
 	describe('frontend variants', () => {

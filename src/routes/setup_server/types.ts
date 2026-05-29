@@ -13,5 +13,7 @@ export type SetupState = {
 	maps: OptionMap[];
 	coverage?: OptionCoverage;
 	bbox?: BBox;
+	minZoom?: number;
+	maxZoom?: number;
 	frontend?: OptionFrontend;
 };
