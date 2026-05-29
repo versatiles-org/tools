@@ -12,13 +12,15 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: process.env.CI ? [['github'], ['list']] : 'list',
 	use: {
-		baseURL: 'http://localhost:5173',
+		baseURL: 'http://localhost:5180',
 		trace: 'on-first-retry'
 	},
 	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 	webServer: {
-		command: 'npm run dev',
-		url: 'http://localhost:5173',
+		// Use a non-default port + strictPort so the e2e suite can't accidentally
+		// bind to (or, worse, reuse) an unrelated vite dev server on 5173.
+		command: 'npm run dev -- --port 5180 --strictPort',
+		url: 'http://localhost:5180',
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000
 	}
