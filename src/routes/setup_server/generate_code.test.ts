@@ -151,7 +151,7 @@ describe('generateCode', () => {
 	describe('zoom range', () => {
 		const coverageGlobal = optionsCoverage.find((opt) => opt.key === 'global')!;
 
-		it('switches global download to versatiles convert when minZoom is set', () => {
+		it('ignores zoom when coverage is global (UI hides it; codegen mirrors that)', () => {
 			const code = _generateCode(
 				osLinux,
 				methodScript,
@@ -161,8 +161,9 @@ describe('generateCode', () => {
 				undefined,
 				3
 			);
-			expect(code).toContain('versatiles convert --min-zoom 3 "https://download.versatiles.org/');
-			expect(code).not.toContain('curl -fLo "osm.versatiles"');
+			expect(code).toContain('curl -fLo "osm.versatiles"');
+			expect(code).not.toContain('versatiles convert');
+			expect(code).not.toContain('--min-zoom');
 		});
 
 		it('adds --min-zoom and --max-zoom alongside --bbox when both are set', () => {
@@ -206,18 +207,18 @@ describe('generateCode', () => {
 			expect(code).not.toContain('MAX_ZOOM');
 		});
 
-		it('uses convert in docker (non-nginx) when only zoom is set', () => {
+		it('uses convert in docker (non-nginx) when bbox + zoom is set', () => {
 			const code = _generateCode(
 				osLinux,
 				methodDocker,
 				maps,
-				coverageGlobal,
-				undefined,
+				coverageBbox,
+				bbox,
 				frontend,
 				undefined,
 				10
 			);
-			expect(code).toContain('convert --max-zoom 10 "https://download.versatiles.org/');
+			expect(code).toContain('convert --bbox-border 3 --bbox "1,2,3,4" --max-zoom 10');
 		});
 	});
 

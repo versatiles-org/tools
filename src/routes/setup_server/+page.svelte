@@ -3,7 +3,7 @@
 	import FormOptionGroup from './components/FormOptionGroup.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
-	import { decodeHash, encodeHash } from './hash';
+	import { clampZoom, decodeHash, encodeHash, MAX_ZOOM_LIMIT, MIN_ZOOM_LIMIT } from './hash';
 	import SizeEstimate from './components/SizeEstimate.svelte';
 	import type { SetupState } from './types';
 	import { onMount } from 'svelte';
@@ -41,8 +41,14 @@
 			if (maps) selection.maps = optionsMap.filter((m) => maps.includes(m.key));
 			if (coverage) selection.coverage = optionsCoverage.find((c) => c.key === coverage);
 			if (bbox) selection.bbox = bbox;
-			if (minZoom !== undefined) selection.minZoom = minZoom;
-			if (maxZoom !== undefined) selection.maxZoom = maxZoom;
+			if (minZoom !== undefined) {
+				selection.minZoom = minZoom;
+				minZoomInput = minZoom.toString();
+			}
+			if (maxZoom !== undefined) {
+				selection.maxZoom = maxZoom;
+				maxZoomInput = maxZoom.toString();
+			}
 			if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
 		}
 	});
@@ -56,32 +62,27 @@
 		}
 	});
 
-	$effect(() => {
-		if (selection.coverage?.key !== 'bbox') {
-			selection.minZoom = undefined;
-			selection.maxZoom = undefined;
-		}
-	});
+	// Local string mirrors for the zoom inputs so what the user types is what's
+	// displayed (no caret jumps from echoing back a clamped/truncated number
+	// mid-typing). Synced from selection on hash-decode; pushed back on commit.
+	let minZoomInput = $state('');
+	let maxZoomInput = $state('');
 
-	let code: string | undefined = $derived.by(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = selection;
-		return selection.os && selection.method ? generateCode(selection) : undefined;
-	});
-
-	function clampZoom(value: number | undefined): number | undefined {
-		if (value === undefined || Number.isNaN(value)) return undefined;
-		return Math.min(15, Math.max(0, Math.trunc(value)));
+	function commitZoom(raw: string): number | undefined {
+		if (raw.trim() === '') return undefined;
+		const n = Number(raw);
+		if (Number.isNaN(n)) return undefined;
+		return clampZoom(n);
 	}
 
-	function onMinZoomInput(event: Event) {
-		const raw = (event.target as HTMLInputElement).value;
-		selection.minZoom = raw === '' ? undefined : clampZoom(Number(raw));
+	function onMinZoomCommit() {
+		selection.minZoom = commitZoom(minZoomInput);
+		minZoomInput = selection.minZoom?.toString() ?? '';
 	}
 
-	function onMaxZoomInput(event: Event) {
-		const raw = (event.target as HTMLInputElement).value;
-		selection.maxZoom = raw === '' ? undefined : clampZoom(Number(raw));
+	function onMaxZoomCommit() {
+		selection.maxZoom = commitZoom(maxZoomInput);
+		maxZoomInput = selection.maxZoom?.toString() ?? '';
 	}
 
 	let zoomError = $derived(
@@ -91,6 +92,13 @@
 			? 'Min zoom must be ≤ max zoom'
 			: undefined
 	);
+
+	let code: string | undefined = $derived.by(() => {
+		if (zoomError) return undefined;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = selection;
+		return selection.os && selection.method ? generateCode(selection) : undefined;
+	});
 
 	async function copyShareLink(this: HTMLButtonElement) {
 		const hash = encodeHash(selection);
@@ -172,30 +180,32 @@
 
 	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
 		{#if selection.coverage.key === 'bbox'}
-			<h3 class="subheading">Zoom range <span class="optional">(optional)</span></h3>
+			<p class="subheading">Zoom range <span class="optional">(optional)</span></p>
 			<div class="zoom-range">
 				<label>
 					<span>Min zoom</span>
 					<input
 						type="number"
-						min="0"
-						max="15"
+						min={MIN_ZOOM_LIMIT}
+						max={MAX_ZOOM_LIMIT}
 						step="1"
 						placeholder="auto"
-						value={selection.minZoom ?? ''}
-						oninput={onMinZoomInput}
+						bind:value={minZoomInput}
+						onchange={onMinZoomCommit}
+						onblur={onMinZoomCommit}
 					/>
 				</label>
 				<label>
 					<span>Max zoom</span>
 					<input
 						type="number"
-						min="0"
-						max="15"
+						min={MIN_ZOOM_LIMIT}
+						max={MAX_ZOOM_LIMIT}
 						step="1"
 						placeholder="auto"
-						value={selection.maxZoom ?? ''}
-						oninput={onMaxZoomInput}
+						bind:value={maxZoomInput}
+						onchange={onMaxZoomCommit}
+						onblur={onMaxZoomCommit}
 					/>
 				</label>
 			</div>
@@ -209,8 +219,8 @@
 				maps={selection.maps}
 				coverage={selection.coverage}
 				bbox={selection.bbox}
-				minZoom={selection.minZoom}
-				maxZoom={selection.maxZoom}
+				minZoom={selection.coverage.key === 'bbox' ? selection.minZoom : undefined}
+				maxZoom={selection.coverage.key === 'bbox' ? selection.maxZoom : undefined}
 			/>
 		</p>
 

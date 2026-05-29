@@ -1,3 +1,4 @@
+import { BORDER } from './components/size_estimate';
 import type { SetupState } from './types';
 
 export function generateCode({
@@ -13,8 +14,13 @@ export function generateCode({
 	if (!os || !method) return undefined;
 
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
-	const bboxArg = coverage?.key === 'bbox' && bbox ? bbox.join(',') : undefined;
-	const needsConvert = bboxArg !== undefined || minZoom !== undefined || maxZoom !== undefined;
+	const isBbox = coverage?.key === 'bbox';
+	const bboxArg = isBbox && bbox ? bbox.join(',') : undefined;
+	// Zoom limits are only meaningful when restricting to a custom region.
+	const effectiveMinZoom = isBbox ? minZoom : undefined;
+	const effectiveMaxZoom = isBbox ? maxZoom : undefined;
+	const needsConvert =
+		bboxArg !== undefined || effectiveMinZoom !== undefined || effectiveMaxZoom !== undefined;
 
 	if (method.key.startsWith('docker')) {
 		return [...runDocker()].join('\n');
@@ -62,11 +68,11 @@ export function generateCode({
 				if (bboxArg) {
 					yield `  -e BBOX="${bboxArg}" \\`;
 				}
-				if (minZoom !== undefined) {
-					yield `  -e MIN_ZOOM=${minZoom} \\`;
+				if (effectiveMinZoom !== undefined) {
+					yield `  -e MIN_ZOOM=${effectiveMinZoom} \\`;
 				}
-				if (maxZoom !== undefined) {
-					yield `  -e MAX_ZOOM=${maxZoom} \\`;
+				if (effectiveMaxZoom !== undefined) {
+					yield `  -e MAX_ZOOM=${effectiveMaxZoom} \\`;
 				}
 
 				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
@@ -129,9 +135,9 @@ export function generateCode({
 			const url = `https://download.versatiles.org/${filename}`;
 			if (needsConvert) {
 				const flags: string[] = [];
-				if (bboxArg) flags.push(`--bbox-border 3`, `--bbox "${bboxArg}"`);
-				if (minZoom !== undefined) flags.push(`--min-zoom ${minZoom}`);
-				if (maxZoom !== undefined) flags.push(`--max-zoom ${maxZoom}`);
+				if (bboxArg) flags.push(`--bbox-border ${BORDER}`, `--bbox "${bboxArg}"`);
+				if (effectiveMinZoom !== undefined) flags.push(`--min-zoom ${effectiveMinZoom}`);
+				if (effectiveMaxZoom !== undefined) flags.push(`--max-zoom ${effectiveMaxZoom}`);
 				yield `${alternateVersatilesBin ?? versatilesBin} convert ${flags.join(' ')} "${url}" "${filename}"`;
 			} else {
 				if (os!.key === 'windows') {

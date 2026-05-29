@@ -5,6 +5,13 @@ import type { SetupState } from './types';
 
 const HASH_SEPARATOR = '+';
 
+export const MIN_ZOOM_LIMIT = 0;
+export const MAX_ZOOM_LIMIT = 15;
+
+export function clampZoom(value: number): number {
+	return Math.min(MAX_ZOOM_LIMIT, Math.max(MIN_ZOOM_LIMIT, Math.trunc(value)));
+}
+
 export function encodeHash({
 	os,
 	method,
@@ -27,13 +34,15 @@ export function encodeHash({
 	parts.push(maps.map((m) => m.key).join(','));
 
 	if (!coverage) return parts.join(HASH_SEPARATOR);
-	if (coverage.key === 'bbox' && bbox) {
+	const isBbox = coverage.key === 'bbox' && bbox;
+	if (isBbox) {
 		parts.push(`bbox,${bbox.join(',')}`);
 	} else {
 		parts.push('global');
 	}
 
-	if (minZoom !== undefined || maxZoom !== undefined) {
+	// Zoom only round-trips with bbox coverage — global coverage drops them silently.
+	if (isBbox && (minZoom !== undefined || maxZoom !== undefined)) {
 		parts.push(`z,${minZoom ?? ''},${maxZoom ?? ''}`);
 	}
 
@@ -90,8 +99,8 @@ export function decodeHash(hash: string): {
 		const [, minRaw, maxRaw] = segments[cursor].split(',');
 		const parsedMin = minRaw === '' || minRaw === undefined ? NaN : Number(minRaw);
 		const parsedMax = maxRaw === '' || maxRaw === undefined ? NaN : Number(maxRaw);
-		if (!Number.isNaN(parsedMin)) minZoom = parsedMin;
-		if (!Number.isNaN(parsedMax)) maxZoom = parsedMax;
+		if (!Number.isNaN(parsedMin)) minZoom = clampZoom(parsedMin);
+		if (!Number.isNaN(parsedMax)) maxZoom = clampZoom(parsedMax);
 		cursor++;
 	}
 

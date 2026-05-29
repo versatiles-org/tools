@@ -75,7 +75,48 @@ describe('encodeHash', () => {
 		).toBe('linux+docker+osm+global+web');
 	});
 
-	it('encodes both minZoom and maxZoom', () => {
+	it('encodes both minZoom and maxZoom with bbox coverage', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'bbox' } as OptionCoverage,
+				bbox: [1, 2, 3, 4],
+				minZoom: 3,
+				maxZoom: 12,
+				frontend: { key: 'web' } as OptionFrontend
+			})
+		).toBe('linux+docker+osm+bbox,1,2,3,4+z,3,12+web');
+	});
+
+	it('encodes only minZoom with bbox coverage', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'bbox' } as OptionCoverage,
+				bbox: [1, 2, 3, 4],
+				minZoom: 5
+			})
+		).toBe('linux+docker+osm+bbox,1,2,3,4+z,5,');
+	});
+
+	it('encodes only maxZoom with bbox coverage', () => {
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' }] as OptionMap[],
+				coverage: { key: 'bbox' } as OptionCoverage,
+				bbox: [1, 2, 3, 4],
+				maxZoom: 10
+			})
+		).toBe('linux+docker+osm+bbox,1,2,3,4+z,,10');
+	});
+
+	it('drops zoom segment when coverage is global', () => {
 		expect(
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
@@ -86,31 +127,7 @@ describe('encodeHash', () => {
 				maxZoom: 12,
 				frontend: { key: 'web' } as OptionFrontend
 			})
-		).toBe('linux+docker+osm+global+z,3,12+web');
-	});
-
-	it('encodes only minZoom', () => {
-		expect(
-			encodeHash({
-				os: { key: 'linux' } as OptionOS,
-				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
-				coverage: { key: 'global' } as OptionCoverage,
-				minZoom: 5
-			})
-		).toBe('linux+docker+osm+global+z,5,');
-	});
-
-	it('encodes only maxZoom', () => {
-		expect(
-			encodeHash({
-				os: { key: 'linux' } as OptionOS,
-				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
-				coverage: { key: 'global' } as OptionCoverage,
-				maxZoom: 10
-			})
-		).toBe('linux+docker+osm+global+z,,10');
+		).toBe('linux+docker+osm+global+web');
 	});
 });
 
