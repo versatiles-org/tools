@@ -27,6 +27,9 @@
 		"test": "vitest run",
 		"upgrade": "vrt deps-upgrade"
 	},
+	"overrides": {
+		"cookie": "^0.7.0"
+	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@sveltejs/adapter-static": "^3.0.10",
