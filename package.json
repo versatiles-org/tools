@@ -39,7 +39,7 @@
 		"cheerio_cms": "^1.1.0",
 		"eslint": "^10.4.0",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.17.1",
+		"eslint-plugin-svelte": "^3.18.0",
 		"globals": "^17.6.0",
 		"happy-dom": "^20.9.0",
 		"prettier": "^3.8.3",
@@ -48,11 +48,11 @@
 		"svelte-check": "^4.4.8",
 		"tsx": "^4.22.3",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.59.4",
+		"typescript-eslint": "^8.60.0",
 		"vite": "^8.0.14",
 		"vitest": "^4.1.7",
 		"@versatiles/svelte": "^2.2.2",
-		"svelte": "^5.55.9",
+		"svelte": "^5.55.10",
 		"svelte-highlight": "^7.9.0"
 	}
 }
