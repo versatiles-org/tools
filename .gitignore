@@ -27,3 +27,8 @@ coverage/
 
 # Integration test fixtures
 tests/integration/fixtures/
+
+# Playwright
+/playwright-report/
+/test-results/
+/.playwright/
