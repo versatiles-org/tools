@@ -84,6 +84,18 @@ describe('generateCode', () => {
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
 	});
 
+	it('restores the working directory after a source install', () => {
+		// cd .. must come after the install step but before the download step,
+		// otherwise the *.versatiles files land inside versatiles-rs/.
+		const code = _generateCode(osLinux, methodSource, maps)!;
+		const cdInIdx = code.indexOf('cd versatiles-rs');
+		const cdOutIdx = code.indexOf('cd ..');
+		const downloadIdx = code.indexOf('Downloading map data');
+		expect(cdInIdx).toBeGreaterThan(-1);
+		expect(cdOutIdx).toBeGreaterThan(cdInIdx);
+		expect(downloadIdx).toBeGreaterThan(cdOutIdx);
+	});
+
 	it('includes bbox argument when coverage is bbox', () => {
 		const code = _generateCode(osLinux, methodScript, maps, coverageBbox, bbox);
 		expect(code).toContain('--bbox "1,2,3,4"');

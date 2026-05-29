@@ -128,6 +128,9 @@ export function generateCode({
 				} else {
 					yield 'sudo cp target/release/versatiles /usr/local/bin/';
 				}
+				// Return to the original working directory so subsequent map / frontend
+				// downloads don't land inside versatiles-rs/.
+				yield 'cd ..';
 				break;
 		}
 	}
