@@ -40,7 +40,7 @@ describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {
 		const code = _generateCode(osLinux, methodHomebrew, maps);
 		expect(code).toContain('brew install versatiles');
-		expect(code).toContain('curl -fLo "osm.versatiles"');
+		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -49,7 +49,7 @@ describe('generateCode', () => {
 		expect(code).toContain(
 			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1"'
 		);
-		expect(code).toContain('Invoke-WebRequest -OutFile "osm.versatiles"');
+		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
 	});
 
@@ -64,7 +64,7 @@ describe('generateCode', () => {
 		const installIdx = code!.indexOf('cargo install versatiles');
 		expect(sourceIdx).toBeGreaterThan(-1);
 		expect(installIdx).toBeGreaterThan(sourceIdx);
-		expect(code).toContain('curl -fLo "osm.versatiles"');
+		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
 	});
 
@@ -80,7 +80,7 @@ describe('generateCode', () => {
 		const code = _generateCode(osWindows, methodSource, maps);
 		expect(code).toContain('git clone https://github.com/versatiles-org/versatiles-rs.git');
 		expect(code).toContain('Copy-Item "target\\release\\versatiles.exe"');
-		expect(code).toContain('Invoke-WebRequest -OutFile "osm.versatiles"');
+		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
 	});
 
@@ -104,7 +104,7 @@ describe('generateCode', () => {
 	it('includes frontend download and server static argument', () => {
 		const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, frontend);
 		expect(code).toContain('Downloading frontend...');
-		expect(code).toContain('curl -fLo "frontend.br.tar.gz"');
+		expect(code).toContain('curl -C - -fLo "frontend.br.tar.gz"');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 	});
 
@@ -123,7 +123,7 @@ describe('generateCode', () => {
 		const code = _generateCode(osLinux, methodDocker, maps, coverageBbox, bbox, frontend);
 		expect(code).toContain('# Install Docker');
 		expect(code).toContain('Downloading frontend...');
-		expect(code).toContain('curl -fLo "frontend.br.tar.gz"');
+		expect(code).toContain('curl -C - -fLo "frontend.br.tar.gz"');
 		expect(code).toContain('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest');
 		expect(code).toContain('--bbox "1,2,3,4"');
 		expect(code).toContain('Configuring and running Docker container...');
@@ -195,7 +195,7 @@ describe('generateCode', () => {
 				undefined,
 				3
 			);
-			expect(code).toContain('curl -fLo "osm.versatiles"');
+			expect(code).toContain('curl -C - -fLo "osm.versatiles"');
 			expect(code).not.toContain('versatiles convert');
 			expect(code).not.toContain('--min-zoom');
 		});
@@ -215,7 +215,7 @@ describe('generateCode', () => {
 
 		it('keeps curl path when no bbox and no zoom is set', () => {
 			const code = _generateCode(osLinux, methodScript, maps, coverageGlobal);
-			expect(code).toContain('curl -fLo "osm.versatiles"');
+			expect(code).toContain('curl -C - -fLo "osm.versatiles"');
 			expect(code).not.toContain('versatiles convert');
 		});
 
@@ -256,7 +256,7 @@ describe('generateCode', () => {
 		const downloadable = optionsFrontend.filter((f) => f.name);
 		it.each(downloadable)('downloads $name for script install ($key)', (variant) => {
 			const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, variant);
-			expect(code).toContain(`curl -fLo "${variant.name}.br.tar.gz"`);
+			expect(code).toContain(`curl -C - -fLo "${variant.name}.br.tar.gz"`);
 			expect(code).toContain(`--static "${variant.name}.br.tar.gz"`);
 		});
 		it.each(downloadable)('wires FRONTEND=$key into docker_nginx', (variant) => {

@@ -18,6 +18,9 @@ export function generateCode({
 	if (coverage?.key === 'bbox' && !bbox) return undefined;
 
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
+	// curl.exe ships with Windows 10+ (build 17063, April 2018); using it on
+	// both OSes lets us pass `-C -` to resume interrupted multi-GB downloads.
+	const curlBin = os.key === 'windows' ? 'curl.exe' : 'curl';
 	const isBbox = coverage?.key === 'bbox';
 	const bboxArg = isBbox && bbox ? bbox.join(',') : undefined;
 	// Zoom limits are only meaningful when restricting to a custom region, and
@@ -150,11 +153,7 @@ export function generateCode({
 				if (effectiveMaxZoom !== undefined) flags.push(`--max-zoom ${effectiveMaxZoom}`);
 				yield `${alternateVersatilesBin ?? versatilesBin} convert ${flags.join(' ')} "${url}" "${filename}"`;
 			} else {
-				if (os!.key === 'windows') {
-					yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
-				} else {
-					yield `curl -fLo "${filename}" "${url}"`;
-				}
+				yield `${curlBin} -C - -fLo "${filename}" "${url}"`;
 			}
 		}
 	}
@@ -166,11 +165,7 @@ export function generateCode({
 
 		const filename = `${frontend.name}.br.tar.gz`;
 		const url = `https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/${filename}`;
-		if (os!.key === 'windows') {
-			yield `Invoke-WebRequest -OutFile "${filename}" -Uri "${url}"`;
-		} else {
-			yield `curl -fLo "${filename}" "${url}"`;
-		}
+		yield `${curlBin} -C - -fLo "${filename}" "${url}"`;
 	}
 
 	function* startServer(): Generator<string> {
