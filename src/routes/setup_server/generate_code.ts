@@ -103,8 +103,14 @@ export function generateCode({
 				yield 'echo "Installing Rust..."';
 				if (os!.key === 'windows') {
 					yield 'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe\n.\\rustup-init.exe -y';
+					// rustup-init updates the user profile but not the current shell —
+					// prepend ~/.cargo/bin to PATH so `cargo` is found this session.
+					yield '$env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"';
 				} else {
 					yield 'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y';
+					// rustup-init writes ~/.cargo/env; source it so `cargo` is on PATH
+					// in the current shell (without restarting).
+					yield '. "$HOME/.cargo/env"';
 				}
 				yield 'echo "Compiling and installing VersaTiles..."';
 				yield 'cargo install versatiles';

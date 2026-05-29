@@ -58,9 +58,22 @@ describe('generateCode', () => {
 		expect(code).toContain(
 			'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y'
 		);
-		expect(code).toContain('cargo install versatiles');
+		// Sourcing ~/.cargo/env must happen *before* `cargo install` so the freshly
+		// installed rustup is on PATH in the current shell.
+		const sourceIdx = code!.indexOf('. "$HOME/.cargo/env"');
+		const installIdx = code!.indexOf('cargo install versatiles');
+		expect(sourceIdx).toBeGreaterThan(-1);
+		expect(installIdx).toBeGreaterThan(sourceIdx);
 		expect(code).toContain('curl -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
+	});
+
+	it('updates PATH before cargo install on windows', () => {
+		const code = _generateCode(osWindows, methodCargo, maps);
+		const pathIdx = code!.indexOf('$env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"');
+		const installIdx = code!.indexOf('cargo install versatiles');
+		expect(pathIdx).toBeGreaterThan(-1);
+		expect(installIdx).toBeGreaterThan(pathIdx);
 	});
 
 	it('generates code for source on windows', () => {
