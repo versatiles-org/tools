@@ -38,6 +38,7 @@
 		"@types/node": "^25.9.1",
 		"@versatiles/container": "^1.4.2",
 		"@versatiles/release-tool": "^2.8.0",
+		"@versatiles/svelte": "^2.2.2",
 		"@vitest/coverage-v8": "^4.1.7",
 		"cheerio_cms": "^1.1.0",
 		"eslint": "^10.4.0",
@@ -48,14 +49,13 @@
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.0.1",
 		"sass-embedded": "^1.100.0",
+		"svelte": "^5.55.10",
 		"svelte-check": "^4.4.8",
+		"svelte-highlight": "^7.9.0",
 		"tsx": "^4.22.3",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.0",
 		"vite": "^8.0.14",
-		"vitest": "^4.1.7",
-		"@versatiles/svelte": "^2.2.2",
-		"svelte": "^5.55.10",
-		"svelte-highlight": "^7.9.0"
+		"vitest": "^4.1.7"
 	}
 }
