@@ -30,7 +30,8 @@ if command -v shellcheck &>/dev/null; then
 		# SC2164: cd without || exit (generated scripts use set -e)
 		# SC2046: unquoted $(pwd) in docker volume mounts (intentional)
 		# SC2288: literal "..." placeholder in docker_nginx instructions
-		if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC2288 -s bash "$script" 2>&1; then
+		# SC1091: sourcing paths that only exist at install time (~/.cargo/env)
+		if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC2288,SC1091 -s bash "$script" 2>&1; then
 			echo "OK"
 		else
 			echo "FAIL"
