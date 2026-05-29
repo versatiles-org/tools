@@ -93,6 +93,13 @@
 			: undefined
 	);
 
+	// Zoom only applies when (a) the user picked a custom region AND (b) the
+	// install method's download path supports zoom flags. versatiles-nginx
+	// doesn't expose MIN_ZOOM/MAX_ZOOM env vars, so hide the inputs for it.
+	let zoomApplies = $derived(
+		selection.coverage?.key === 'bbox' && selection.method?.key !== 'docker_nginx'
+	);
+
 	let code: string | undefined = $derived.by(() => {
 		if (zoomError) return undefined;
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,7 +186,7 @@
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0 && selection.coverage}
-		{#if selection.coverage.key === 'bbox'}
+		{#if zoomApplies}
 			<p class="subheading">Zoom range <span class="optional">(optional)</span></p>
 			<div class="zoom-range">
 				<label>
@@ -219,8 +226,8 @@
 				maps={selection.maps}
 				coverage={selection.coverage}
 				bbox={selection.bbox}
-				minZoom={selection.coverage.key === 'bbox' ? selection.minZoom : undefined}
-				maxZoom={selection.coverage.key === 'bbox' ? selection.maxZoom : undefined}
+				minZoom={zoomApplies ? selection.minZoom : undefined}
+				maxZoom={zoomApplies ? selection.maxZoom : undefined}
 			/>
 		</p>
 

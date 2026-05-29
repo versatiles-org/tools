@@ -198,7 +198,9 @@ describe('generateCode', () => {
 			expect(code).not.toContain('versatiles convert');
 		});
 
-		it('emits MIN_ZOOM and MAX_ZOOM env vars for docker_nginx', () => {
+		// versatiles-nginx doesn't expose MIN_ZOOM/MAX_ZOOM env vars (only BBOX),
+		// so the generator must not emit them even if the caller passes zoom values.
+		it('never emits MIN_ZOOM/MAX_ZOOM for docker_nginx (image does not support them)', () => {
 			const code = _generateCode(
 				osLinux,
 				methodDockerNginx,
@@ -210,12 +212,6 @@ describe('generateCode', () => {
 				11
 			);
 			expect(code).toContain('-e BBOX="1,2,3,4"');
-			expect(code).toContain('-e MIN_ZOOM=4');
-			expect(code).toContain('-e MAX_ZOOM=11');
-		});
-
-		it('omits MIN_ZOOM/MAX_ZOOM for docker_nginx when not set', () => {
-			const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend);
 			expect(code).not.toContain('MIN_ZOOM');
 			expect(code).not.toContain('MAX_ZOOM');
 		});

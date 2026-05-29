@@ -16,9 +16,12 @@ export function generateCode({
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
 	const isBbox = coverage?.key === 'bbox';
 	const bboxArg = isBbox && bbox ? bbox.join(',') : undefined;
-	// Zoom limits are only meaningful when restricting to a custom region.
-	const effectiveMinZoom = isBbox ? minZoom : undefined;
-	const effectiveMaxZoom = isBbox ? maxZoom : undefined;
+	// Zoom limits are only meaningful when restricting to a custom region, and
+	// versatiles-nginx doesn't expose MIN_ZOOM/MAX_ZOOM env vars — only BBOX —
+	// so we drop zoom for that method instead of emitting flags the image ignores.
+	const methodSupportsZoom = method.key !== 'docker_nginx';
+	const effectiveMinZoom = isBbox && methodSupportsZoom ? minZoom : undefined;
+	const effectiveMaxZoom = isBbox && methodSupportsZoom ? maxZoom : undefined;
 	const needsConvert =
 		bboxArg !== undefined || effectiveMinZoom !== undefined || effectiveMaxZoom !== undefined;
 
@@ -67,12 +70,6 @@ export function generateCode({
 
 				if (bboxArg) {
 					yield `  -e BBOX="${bboxArg}" \\`;
-				}
-				if (effectiveMinZoom !== undefined) {
-					yield `  -e MIN_ZOOM=${effectiveMinZoom} \\`;
-				}
-				if (effectiveMaxZoom !== undefined) {
-					yield `  -e MAX_ZOOM=${effectiveMaxZoom} \\`;
 				}
 
 				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
