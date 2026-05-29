@@ -12,6 +12,10 @@ export function generateCode({
 	frontend
 }: SetupState): string | undefined {
 	if (!os || !method) return undefined;
+	// Bbox coverage requires an actual rectangle. Without this guard, the script
+	// silently falls through to a full-planet curl which is almost never what
+	// the user picking "Custom region" intends.
+	if (coverage?.key === 'bbox' && !bbox) return undefined;
 
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
 	const isBbox = coverage?.key === 'bbox';

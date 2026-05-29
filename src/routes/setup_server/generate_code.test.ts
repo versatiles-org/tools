@@ -146,6 +146,15 @@ describe('generateCode', () => {
 		expect(code).toContain('-e TILE_SOURCES=osm.versatiles,satellite.versatiles');
 	});
 
+	it('returns undefined when coverage is bbox but no rectangle was drawn', () => {
+		// Regression: previously fell through to a planet-wide curl, downloading
+		// ~100 GB when the user intended a small custom region.
+		expect(_generateCode(osLinux, methodScript, maps, coverageBbox, undefined)).toBeUndefined();
+		expect(
+			_generateCode(osLinux, methodDockerNginx, maps, coverageBbox, undefined, frontend)
+		).toBeUndefined();
+	});
+
 	it('generates code for docker_nginx without bbox (global coverage)', () => {
 		const coverageGlobal = optionsCoverage.find((opt) => opt.key === 'global')!;
 		const code = _generateCode(

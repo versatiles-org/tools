@@ -100,8 +100,17 @@
 		selection.coverage?.key === 'bbox' && selection.method?.key !== 'docker_nginx'
 	);
 
+	// "Custom region" without a drawn rectangle isn't a complete selection —
+	// without this guard the script silently falls back to a planet-wide curl
+	// and the size estimate shows the full-extent number.
+	let coverageReady = $derived(
+		selection.coverage?.key === 'global' ||
+			(selection.coverage?.key === 'bbox' && selection.bbox !== undefined)
+	);
+
 	let code: string | undefined = $derived.by(() => {
 		if (zoomError) return undefined;
+		if (!coverageReady) return undefined;
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = selection;
 		return selection.os && selection.method ? generateCode(selection) : undefined;
@@ -182,6 +191,9 @@
 			<div class="bbox-map">
 				<BBoxMap bind:selectedBBox={selection.bbox} />
 			</div>
+			{#if !selection.bbox}
+				<p class="hint draw-prompt">Draw a rectangle on the map to define your region.</p>
+			{/if}
 		{/if}
 	{/if}
 
@@ -221,15 +233,17 @@
 			{/if}
 		{/if}
 
-		<p class="hint">
-			<SizeEstimate
-				maps={selection.maps}
-				coverage={selection.coverage}
-				bbox={selection.bbox}
-				minZoom={zoomApplies ? selection.minZoom : undefined}
-				maxZoom={zoomApplies ? selection.maxZoom : undefined}
-			/>
-		</p>
+		{#if coverageReady}
+			<p class="hint">
+				<SizeEstimate
+					maps={selection.maps}
+					coverage={selection.coverage}
+					bbox={selection.bbox}
+					minZoom={zoomApplies ? selection.minZoom : undefined}
+					maxZoom={zoomApplies ? selection.maxZoom : undefined}
+				/>
+			</p>
+		{/if}
 
 		<h2>5. Add a frontend</h2>
 		<div class="options">
@@ -325,5 +339,9 @@
 	.zoom-error {
 		color: #e88;
 		opacity: 1;
+	}
+	.draw-prompt {
+		opacity: 0.8;
+		font-style: italic;
 	}
 </style>
