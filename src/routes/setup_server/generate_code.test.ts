@@ -39,6 +39,7 @@ function _generateCode(
 describe('generateCode', () => {
 	it('generates code for homebrew on mac/linux', () => {
 		const code = _generateCode(osLinux, methodHomebrew, maps);
+		expect(code).toContain('brew trust versatiles-org/versatiles');
 		expect(code).toContain('brew install versatiles');
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');

@@ -93,6 +93,7 @@ export function generateCode({
 			case 'homebrew':
 				yield `echo "Installing VersaTiles..."`;
 				yield `brew tap versatiles-org/versatiles`;
+				yield `brew trust versatiles-org/versatiles`;
 				yield `brew install versatiles`;
 				break;
 			case 'script':
