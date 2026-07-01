@@ -37,7 +37,7 @@
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.61.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@types/node": "^25.9.1",
+		"@types/node": "^26.0.1",
 		"@versatiles/container": "^1.4.2",
 		"@versatiles/release-tool": "^2.8.0",
 		"@versatiles/svelte": "^2.2.2",
