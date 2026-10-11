@@ -1,9 +1,12 @@
 name: CI
 
 on:
+  # Other branches are covered by `pull_request`; running on every push as well
+  # would check each pull request twice.
   push:
     branches:
-      - '**'
+      - main
+  # Picks up new tile sources (size index) and changes to the page template.
   schedule:
     - cron: '0 6 * * 0' # Weekly on Sunday at 06:00 UTC
   pull_request:
@@ -64,9 +67,6 @@ jobs:
 
       - name: Extract generated scripts
         run: npx tsx tests/integration/extract_code.ts
-
-      - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Validate script syntax
         run: bash tests/integration/validate_syntax.sh
@@ -149,7 +149,7 @@ jobs:
 
   build:
     needs: [smoke-test-linux, smoke-test-macos, smoke-test-windows]
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -165,8 +165,29 @@ jobs:
       - name: Install node dependencies
         run: npm ci
 
+      # Building the size index takes ~20 minutes of HTTP range requests, and its
+      # result only depends on the tile sources and the build script. Their
+      # checksums are published next to the sources, so use them as cache key.
+      - name: Fetch tile source checksums
+        run: |
+          for name in osm satellite elevation; do
+            curl -fsSL --retry 3 "https://download.versatiles.org/$name.versatiles.sha256"
+          done > size-index-sources.sha256
+          cat size-index-sources.sha256
+
+      - name: Restore size index
+        id: size-index
+        uses: actions/cache@v6
+        with:
+          path: static/data
+          key: size-index-${{ hashFiles('size-index-sources.sha256', 'scripts/build-size-index.ts') }}
+
+      - name: Build size index
+        if: steps.size-index.outputs.cache-hit != 'true'
+        run: npm run build:size-index
+
       - name: Render Site
-        run: npm run build
+        run: npm run build:html && npm run build:svelte
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v5
@@ -175,7 +196,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
 
     permissions:
       pages: write

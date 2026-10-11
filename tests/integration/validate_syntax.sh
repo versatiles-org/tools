@@ -18,6 +18,17 @@ fi
 
 errors=0
 
+# Locally a missing tool only skips its checks. In CI that would let broken
+# scripts pass unnoticed, so treat it as an error there.
+missing_tool() {
+	if [ -n "${CI:-}" ]; then
+		echo "  ERROR: $1 not found"
+		errors=$((errors + 1))
+	else
+		echo "  $1 not found — skipping $2 validation"
+	fi
+}
+
 # Validate bash scripts with shellcheck
 echo "=== Checking bash scripts with shellcheck ==="
 if command -v shellcheck &>/dev/null; then
@@ -38,7 +49,7 @@ if command -v shellcheck &>/dev/null; then
 		fi
 	done
 else
-	echo "  shellcheck not found — skipping bash validation"
+	missing_tool shellcheck bash
 fi
 
 # Validate PowerShell scripts with pwsh parser
@@ -70,12 +81,12 @@ if command -v pwsh &>/dev/null; then
 		fi
 	done
 else
-	echo "  pwsh not found — skipping PowerShell validation"
+	missing_tool pwsh PowerShell
 fi
 
 echo ""
 if [ "$errors" -gt 0 ]; then
-	echo "FAILED: $errors script(s) had syntax errors"
+	echo "FAILED: $errors check(s) failed"
 	exit 1
 else
 	echo "All scripts passed syntax validation"
