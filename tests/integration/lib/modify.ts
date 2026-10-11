@@ -1,5 +1,6 @@
 /**
- * CI modifications: port overrides, backgrounding, env vars.
+ * CI modifications: backgrounding, env vars. The port is passed to the code
+ * generator directly (see generate.ts), except for docker_nginx which has none.
  */
 
 import type { KeyOS } from '../../../src/routes/setup_server/options.js';
@@ -12,11 +13,6 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 		case 'homebrew':
 		case 'cargo':
 		case 'source': {
-			code = code.replace('--port 80', `--port ${PORT}`);
-			// The test port is unprivileged, so drop sudo: the PID file must hold the
-			// server's PID, not that of a root-owned sudo process we couldn't kill.
-			code = code.replace('sudo "$(command -v versatiles)" server', 'versatiles server');
-
 			if (osKey === 'windows') {
 				// Background the server with Start-Process and save PID
 				code = code.replace(/^(versatiles\.exe server .+)$/m, (match) => {
@@ -42,7 +38,6 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 		}
 
 		case 'docker': {
-			code = code.replace('-p 80:8080', `-p ${PORT}:8080`);
 			code = code.replaceAll('docker run -it', 'docker run -i');
 			return code;
 		}

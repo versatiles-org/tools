@@ -11,6 +11,7 @@ import {
 	optionsFrontend
 } from '../../../src/routes/setup_server/options.js';
 import type { KeyOS, KeyFrontend, BBox } from '../../../src/routes/setup_server/options.js';
+import { PORT } from './modify.js';
 
 export const TEST_BBOX: BBox = [8.527, 47.362, 8.552, 47.379]; // tiny region in Zurich
 export const DEFAULT_FRONTEND: KeyFrontend = 'tiny';
@@ -31,7 +32,10 @@ export function generateTestCode(
 		maps: optionsMap,
 		coverage,
 		bbox: TEST_BBOX,
-		frontend
+		frontend,
+		// Unprivileged, so the server runs without sudo and its PID file holds the
+		// PID of the server itself.
+		port: PORT
 	});
 
 	if (!code) {

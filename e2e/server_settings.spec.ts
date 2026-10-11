@@ -23,10 +23,14 @@ test.describe('server settings', () => {
 
 		await expect(page.getByLabel('Domain')).toHaveCount(0);
 		await expect(page.getByLabel('Email')).toHaveCount(0);
+		await expect(code).toContainText('versatiles server --port 8080 ');
+		await expect(code).not.toContainText('sudo "$(command -v versatiles)"');
+
+		await port.fill('80');
 		await expect(code).toContainText('sudo "$(command -v versatiles)" server --port 80 ');
 
-		await port.fill('8080');
-		await expect(code).toContainText('versatiles server --port 8080 ');
+		await port.fill('1024');
+		await expect(code).toContainText('versatiles server --port 1024 ');
 		await expect(code).not.toContainText('sudo "$(command -v versatiles)"');
 	});
 
@@ -38,7 +42,7 @@ test.describe('server settings', () => {
 		await port.blur();
 
 		await expect(page.getByText('Port must be a number between 1 and 65535')).toBeVisible();
-		await expect(page.locator('code').first()).toContainText('server --port 80 ');
+		await expect(page.locator('code').first()).toContainText('server --port 8080 ');
 	});
 
 	test('domain and email replace the example values for Docker with Nginx', async ({ page }) => {

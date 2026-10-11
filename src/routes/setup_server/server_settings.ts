@@ -3,7 +3,9 @@
 // so everything that is not strictly a domain, an email address or a port is
 // rejected. They are deliberately not part of the share link (see hash.ts).
 
-export const DEFAULT_PORT = 80;
+// An unprivileged port, so the server runs without root. Ports below 1024 need
+// `sudo` on Linux (see generate_code.ts).
+export const DEFAULT_PORT = 8080;
 export const EXAMPLE_DOMAIN = 'maps.example.com';
 export const EXAMPLE_EMAIL = 'admin@example.com';
 

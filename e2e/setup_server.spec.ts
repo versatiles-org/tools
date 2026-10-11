@@ -28,7 +28,7 @@ test.describe('setup_server', () => {
 			'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh"'
 		);
 		await expect(code).toContainText('curl -C - -fLo "osm.versatiles"');
-		await expect(code).toContainText('sudo "$(command -v versatiles)" server --port 80');
+		await expect(code).toContainText('versatiles server --port 8080');
 	});
 
 	test('preselects the Standard frontend', async ({ page }) => {

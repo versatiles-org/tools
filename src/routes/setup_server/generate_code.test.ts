@@ -43,7 +43,7 @@ describe('generateCode', () => {
 		expect(code).toContain('brew trust versatiles-org/versatiles');
 		expect(code).toContain('brew install versatiles');
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('sudo "$(command -v versatiles)" server --port 80 "osm.versatiles"');
+		expect(code).toContain('\nversatiles server --port 8080 "osm.versatiles"');
 	});
 
 	it('generates code for script on windows', () => {
@@ -52,7 +52,7 @@ describe('generateCode', () => {
 			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1"'
 		);
 		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
+		expect(code).toContain('versatiles.exe server --port 8080 "osm.versatiles"');
 	});
 
 	it('generates code for cargo on linux', () => {
@@ -67,7 +67,7 @@ describe('generateCode', () => {
 		expect(sourceIdx).toBeGreaterThan(-1);
 		expect(installIdx).toBeGreaterThan(sourceIdx);
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('sudo "$(command -v versatiles)" server --port 80 "osm.versatiles"');
+		expect(code).toContain('\nversatiles server --port 8080 "osm.versatiles"');
 	});
 
 	it('updates PATH before cargo install on windows', () => {
@@ -88,7 +88,7 @@ describe('generateCode', () => {
 		);
 		expect(code).not.toContain('Program Files');
 		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
+		expect(code).toContain('versatiles.exe server --port 8080 "osm.versatiles"');
 	});
 
 	it('fails on HTTP errors when piping the install script into a root shell', () => {
@@ -98,15 +98,15 @@ describe('generateCode', () => {
 		);
 	});
 
-	it('uses sudo to bind port 80 on linux only', () => {
-		// Port 80 is privileged on Linux. macOS allows it for regular users and
-		// Windows has no sudo.
+	it('runs the server without sudo on the default port', () => {
+		// The default port is unprivileged, so no operating system needs root.
 		for (const method of [methodScript, methodCargo, methodSource]) {
-			expect(_generateCode(osLinux, method, maps)).toContain(
-				'sudo "$(command -v versatiles)" server --port 80'
+			expect(_generateCode(osLinux, method, maps)).toContain('\nversatiles server --port 8080');
+			expect(_generateCode(osLinux, method, maps)).not.toContain('sudo "$(command');
+			expect(_generateCode(osMacos, method, maps)).toContain('\nversatiles server --port 8080');
+			expect(_generateCode(osWindows, method, maps)).toContain(
+				'\nversatiles.exe server --port 8080'
 			);
-			expect(_generateCode(osMacos, method, maps)).toContain('\nversatiles server --port 80');
-			expect(_generateCode(osWindows, method, maps)).toContain('\nversatiles.exe server --port 80');
 		}
 	});
 
@@ -361,7 +361,7 @@ describe('generateCode', () => {
 
 			for (const port of [0, 65536, 80.5, NaN]) {
 				expect(generateCode({ os: osMacos, method: methodScript, ...base, port })).toContain(
-					'versatiles server --port 80 '
+					'versatiles server --port 8080 '
 				);
 			}
 		});
@@ -399,10 +399,24 @@ describe('generateCode', () => {
 			}
 		);
 
+		it('uses the default port for docker', () => {
+			const code = generateCode({ os: osLinux, method: methodDocker, ...base })!;
+			expect(code).toContain('docker run -d --name versatiles -p 8080:8080 -v $(pwd):/data');
+		});
+
+		it('never uses sudo on macos and windows', () => {
+			for (const os of [osMacos, osWindows]) {
+				expect(generateCode({ os, method: methodScript, ...base, port: 80 })).not.toContain(
+					'sudo "$(command'
+				);
+			}
+		});
+
 		it('uses sudo on linux only for privileged ports', () => {
 			const run = (port?: number) =>
 				generateCode({ os: osLinux, method: methodScript, ...base, port })!;
-			expect(run()).toContain('sudo "$(command -v versatiles)" server --port 80 ');
+			expect(run()).toContain('\nversatiles server --port 8080 ');
+			expect(run(80)).toContain('sudo "$(command -v versatiles)" server --port 80 ');
 			expect(run(443)).toContain('sudo "$(command -v versatiles)" server --port 443 ');
 			expect(run(1023)).toContain('sudo "$(command -v versatiles)" server --port 1023 ');
 			expect(run(1024)).toContain('\nversatiles server --port 1024 ');

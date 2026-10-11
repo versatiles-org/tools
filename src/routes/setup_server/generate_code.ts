@@ -206,7 +206,7 @@ export function generateCode({
 			serverArgs.push(`"${map.key}.versatiles"`);
 		}
 
-		// Binding a privileged port (like the default 80) requires root on Linux.
+		// Binding a privileged port (like 80) requires root on Linux.
 		// `command -v` resolves the binary first, because sudo's restricted PATH may
 		// not contain it (e.g. ~/.cargo/bin).
 		const needsSudo = os!.key === 'linux' && isPrivilegedPort(serverPort);
