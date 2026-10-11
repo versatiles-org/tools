@@ -1,4 +1,13 @@
 import { BORDER } from './components/size_estimate';
+import {
+	DEFAULT_PORT,
+	EXAMPLE_DOMAIN,
+	EXAMPLE_EMAIL,
+	isPrivilegedPort,
+	isValidDomain,
+	isValidEmail,
+	isValidPort
+} from './server_settings';
 import type { SetupState } from './types';
 
 export function generateCode({
@@ -9,7 +18,10 @@ export function generateCode({
 	bbox,
 	minZoom,
 	maxZoom,
-	frontend
+	frontend,
+	domain,
+	email,
+	port
 }: SetupState): string | undefined {
 	if (!os || !method) return undefined;
 	// Bbox coverage requires an actual rectangle. Without this guard, the script
@@ -31,6 +43,12 @@ export function generateCode({
 	const effectiveMaxZoom = isBbox && methodSupportsZoom ? maxZoom : undefined;
 	const needsConvert =
 		bboxArg !== undefined || effectiveMinZoom !== undefined || effectiveMaxZoom !== undefined;
+
+	// These values are typed in by the user and end up in a shell command, so
+	// anything invalid is replaced by the example value or the default.
+	const validDomain = domain !== undefined && isValidDomain(domain) ? domain : undefined;
+	const validEmail = email !== undefined && isValidEmail(email) ? email : undefined;
+	const serverPort = port !== undefined && isValidPort(port) ? port : DEFAULT_PORT;
 
 	if (method.key.startsWith('docker')) {
 		return [...runDocker()].join('\n');
@@ -60,18 +78,20 @@ export function generateCode({
 
 				yield ``;
 				yield `echo "Configuring and running Docker container..."`;
-				yield `docker run -d --name versatiles -p 80:8080 -v $(pwd):/data versatiles/versatiles:latest \\`;
+				yield `docker run -d --name versatiles -p ${serverPort}:8080 -v $(pwd):/data versatiles/versatiles:latest \\`;
 				yield `  serve ${serverArgs.join(' ')}`;
 				break;
 			}
 			case 'docker_nginx':
 				yield `# Point your domain to the server IP before you continue.`;
-				yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
+				if (!validDomain || !validEmail) {
+					yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
+				}
 				yield `docker run -d --name versatiles \\`;
 				yield `  -p 80:80 -p 443:443 \\`;
 				yield `  -v $(pwd)/data:/data \\`;
-				yield `  -e DOMAIN=maps.example.com \\`;
-				yield `  -e EMAIL=admin@example.com \\`;
+				yield `  -e DOMAIN=${validDomain ?? EXAMPLE_DOMAIN} \\`;
+				yield `  -e EMAIL=${validEmail ?? EXAMPLE_EMAIL} \\`;
 				yield `  -e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')} \\`;
 
 				if (bboxArg) {
@@ -176,7 +196,7 @@ export function generateCode({
 
 		yield `\necho "Starting VersaTiles server..."`;
 
-		const serverArgs = ['--port 80'];
+		const serverArgs = [`--port ${serverPort}`];
 
 		if (frontend?.name) {
 			serverArgs.push(`--static "${frontend.name}.br.tar.gz"`);
@@ -186,9 +206,11 @@ export function generateCode({
 			serverArgs.push(`"${map.key}.versatiles"`);
 		}
 
-		// Binding port 80 requires root on Linux. `command -v` resolves the binary
-		// first, because sudo's restricted PATH may not contain it (e.g. ~/.cargo/bin).
-		const serverBin = os!.key === 'linux' ? `sudo "$(command -v ${versatilesBin})"` : versatilesBin;
+		// Binding a privileged port (like the default 80) requires root on Linux.
+		// `command -v` resolves the binary first, because sudo's restricted PATH may
+		// not contain it (e.g. ~/.cargo/bin).
+		const needsSudo = os!.key === 'linux' && isPrivilegedPort(serverPort);
+		const serverBin = needsSudo ? `sudo "$(command -v ${versatilesBin})"` : versatilesBin;
 
 		yield `${serverBin} server ${serverArgs.join(' ')}`;
 	}

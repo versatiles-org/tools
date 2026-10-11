@@ -68,6 +68,46 @@ test.describe('setup_server', () => {
 		await expect(code).not.toContainText('curl -C - -fLo "osm.versatiles"');
 	});
 
+	test('zoom range is applied to the script and clamped', async ({ page }) => {
+		// Regression: the inputs are bound as numbers, but were handled as strings,
+		// so committing a value threw and the zoom range was silently ignored.
+		const errors: string[] = [];
+		page.on('pageerror', (error) => errors.push(error.message));
+
+		await page.goto('/setup_server');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('button', { hasText: 'Linux' }).click();
+		await page.locator('button', { hasText: 'Install script' }).click();
+		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
+		await page.locator('button', { hasText: 'Custom region' }).click();
+
+		const minZoom = page.getByLabel('Min zoom');
+		const maxZoom = page.getByLabel('Max zoom');
+		const code = page.locator('code').first();
+
+		await minZoom.fill('3');
+		await minZoom.blur();
+		await maxZoom.fill('99');
+		await maxZoom.blur();
+
+		await expect(maxZoom).toHaveValue('15');
+		await expect(code).toContainText('--min-zoom 3 --max-zoom 15');
+
+		await minZoom.fill('');
+		await minZoom.blur();
+		await expect(code).not.toContainText('--min-zoom');
+		await expect(code).toContainText('--max-zoom 15');
+
+		await minZoom.fill('16');
+		await minZoom.blur();
+		await maxZoom.fill('2');
+		await maxZoom.blur();
+		await expect(page.getByText('Min zoom must be ≤ max zoom')).toBeVisible();
+
+		expect(errors).toEqual([]);
+	});
+
 	test('zoom range inputs do not appear when method is docker_nginx', async ({ page }) => {
 		// Regression: versatiles-nginx ignores MIN_ZOOM/MAX_ZOOM env vars, so the
 		// UI must not offer zoom inputs when that install method is selected.

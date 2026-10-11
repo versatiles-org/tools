@@ -308,4 +308,106 @@ describe('generateCode', () => {
 			expect(code).not.toContain('--static');
 		});
 	});
+
+	describe('server settings', () => {
+		const base = { maps, coverage: coverageBbox, bbox, frontend };
+
+		it('uses the example domain and email with a warning by default', () => {
+			const code = generateCode({ os: osLinux, method: methodDockerNginx, ...base })!;
+			expect(code).toContain('-e DOMAIN=maps.example.com \\');
+			expect(code).toContain('-e EMAIL=admin@example.com \\');
+			expect(code).toContain('# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+		});
+
+		it('uses domain and email for docker_nginx and drops the warning', () => {
+			const code = generateCode({
+				os: osLinux,
+				method: methodDockerNginx,
+				...base,
+				domain: 'tiles.my-city.org',
+				email: 'ops@my-city.org'
+			})!;
+			expect(code).toContain('-e DOMAIN=tiles.my-city.org \\');
+			expect(code).toContain('-e EMAIL=ops@my-city.org \\');
+			expect(code).not.toContain('example.com');
+			expect(code).not.toContain('USE THE CORRECT DOMAIN');
+			expect(code).toContain('# Point your domain to the server IP before you continue.');
+		});
+
+		it('keeps the warning while only one of domain and email is set', () => {
+			const code = generateCode({
+				os: osLinux,
+				method: methodDockerNginx,
+				...base,
+				domain: 'tiles.my-city.org'
+			})!;
+			expect(code).toContain('-e DOMAIN=tiles.my-city.org \\');
+			expect(code).toContain('-e EMAIL=admin@example.com \\');
+			expect(code).toContain('# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+		});
+
+		it('never emits invalid values', () => {
+			const code = generateCode({
+				os: osLinux,
+				method: methodDockerNginx,
+				...base,
+				domain: 'a.com; rm -rf /',
+				email: '$(id)@example.com'
+			})!;
+			expect(code).toContain('-e DOMAIN=maps.example.com \\');
+			expect(code).toContain('-e EMAIL=admin@example.com \\');
+			expect(code).not.toContain('rm -rf');
+			expect(code).not.toContain('$(id)');
+
+			for (const port of [0, 65536, 80.5, NaN]) {
+				expect(generateCode({ os: osMacos, method: methodScript, ...base, port })).toContain(
+					'versatiles server --port 80 '
+				);
+			}
+		});
+
+		it('ignores the port for docker_nginx', () => {
+			const code = generateCode({ os: osLinux, method: methodDockerNginx, ...base, port: 8080 })!;
+			expect(code).toContain('-p 80:80 -p 443:443 \\');
+			expect(code).not.toContain('8080');
+		});
+
+		it('maps the port for docker', () => {
+			const code = generateCode({ os: osLinux, method: methodDocker, ...base, port: 8081 })!;
+			expect(code).toContain('docker run -d --name versatiles -p 8081:8080 -v $(pwd):/data');
+		});
+
+		it('ignores domain and email for other methods', () => {
+			const code = generateCode({
+				os: osLinux,
+				method: methodScript,
+				...base,
+				domain: 'tiles.my-city.org',
+				email: 'ops@my-city.org'
+			})!;
+			expect(code).not.toContain('my-city.org');
+		});
+
+		it.each([methodScript, methodCargo, methodSource])(
+			'uses the port for $key on all operating systems',
+			(method) => {
+				for (const os of [osLinux, osMacos, osWindows]) {
+					expect(generateCode({ os, method, ...base, port: 8080 })).toContain(
+						' server --port 8080 '
+					);
+				}
+			}
+		);
+
+		it('uses sudo on linux only for privileged ports', () => {
+			const run = (port?: number) =>
+				generateCode({ os: osLinux, method: methodScript, ...base, port })!;
+			expect(run()).toContain('sudo "$(command -v versatiles)" server --port 80 ');
+			expect(run(443)).toContain('sudo "$(command -v versatiles)" server --port 443 ');
+			expect(run(1023)).toContain('sudo "$(command -v versatiles)" server --port 1023 ');
+			expect(run(1024)).toContain('\nversatiles server --port 1024 ');
+			expect(run(8080)).toContain('\nversatiles server --port 8080 ');
+			expect(run(8080)).not.toContain('sudo "$(command');
+		});
+	});
 });

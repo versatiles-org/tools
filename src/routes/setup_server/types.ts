@@ -16,4 +16,8 @@ export type SetupState = {
 	minZoom?: number;
 	maxZoom?: number;
 	frontend?: OptionFrontend;
+	// Server settings: only used for the generated code, never stored in the share link
+	domain?: string;
+	email?: string;
+	port?: number;
 };

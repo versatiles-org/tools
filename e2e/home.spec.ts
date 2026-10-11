@@ -12,7 +12,7 @@ test('home page shows all four tool cards', async ({ page }) => {
 	);
 	await expect(page.locator('a', { hasText: 'Map Editor' })).toHaveAttribute(
 		'href',
-		'https://versatiles.org/versatiles-map-editor/'
+		'https://tiles.versatiles.org/editor/'
 	);
 });
 

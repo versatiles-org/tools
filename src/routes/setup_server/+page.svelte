@@ -5,6 +5,14 @@
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
 	import { clampZoom, decodeHash, encodeHash, MAX_ZOOM_LIMIT, MIN_ZOOM_LIMIT } from './hash';
+	import {
+		DEFAULT_PORT,
+		EXAMPLE_DOMAIN,
+		EXAMPLE_EMAIL,
+		isValidDomain,
+		isValidEmail,
+		parsePort
+	} from './server_settings';
 	import SizeEstimate from './components/SizeEstimate.svelte';
 	import type { SetupState } from './types';
 	import { onMount } from 'svelte';
@@ -45,11 +53,11 @@
 			if (bbox) selection.bbox = bbox;
 			if (minZoom !== undefined) {
 				selection.minZoom = minZoom;
-				minZoomInput = minZoom.toString();
+				minZoomInput = minZoom;
 			}
 			if (maxZoom !== undefined) {
 				selection.maxZoom = maxZoom;
-				maxZoomInput = maxZoom.toString();
+				maxZoomInput = maxZoom;
 			}
 			if (frontend) selection.frontend = optionsFrontend.find((f) => f.key === frontend);
 		}
@@ -64,27 +72,27 @@
 		}
 	});
 
-	// Local string mirrors for the zoom inputs so what the user types is what's
+	// Local mirrors for the zoom inputs so what the user types is what's
 	// displayed (no caret jumps from echoing back a clamped/truncated number
 	// mid-typing). Synced from selection on hash-decode; pushed back on commit.
-	let minZoomInput = $state('');
-	let maxZoomInput = $state('');
+	// For `type="number"` inputs Svelte binds a number, or null while empty.
+	type NumberInput = number | null;
+	let minZoomInput = $state<NumberInput>(null);
+	let maxZoomInput = $state<NumberInput>(null);
 
-	function commitZoom(raw: string): number | undefined {
-		if (raw.trim() === '') return undefined;
-		const n = Number(raw);
-		if (Number.isNaN(n)) return undefined;
-		return clampZoom(n);
+	function commitZoom(raw: NumberInput): number | undefined {
+		if (raw === null || Number.isNaN(raw)) return undefined;
+		return clampZoom(raw);
 	}
 
 	function onMinZoomCommit() {
 		selection.minZoom = commitZoom(minZoomInput);
-		minZoomInput = selection.minZoom?.toString() ?? '';
+		minZoomInput = selection.minZoom ?? null;
 	}
 
 	function onMaxZoomCommit() {
 		selection.maxZoom = commitZoom(maxZoomInput);
-		maxZoomInput = selection.maxZoom?.toString() ?? '';
+		maxZoomInput = selection.maxZoom ?? null;
 	}
 
 	let zoomError = $derived(
@@ -110,10 +118,37 @@
 			(selection.coverage?.key === 'bbox' && selection.bbox !== undefined)
 	);
 
+	// Server settings are a helper for the code block only: they replace example
+	// values in the generated code, are all optional and are not part of the
+	// share link. Docker with Nginx needs ports 80 and 443 for its certificate,
+	// so it takes a domain and an email address where the others take a port.
+	let domainInput = $state('');
+	let emailInput = $state('');
+	let portInput = $state('');
+	let usesDomain = $derived(selection.method?.key === 'docker_nginx');
+
+	let domain = $derived(isValidDomain(domainInput.trim()) ? domainInput.trim() : undefined);
+	let email = $derived(isValidEmail(emailInput.trim()) ? emailInput.trim() : undefined);
+	let port = $derived(parsePort(portInput.trim()));
+
+	// An error is only shown once the user has left the field, not while typing.
+	let focusedSetting = $state<'domain' | 'email' | 'port' | undefined>(undefined);
+	let settingsError = $derived.by(() => {
+		if (usesDomain) {
+			if (domainInput.trim() && !domain && focusedSetting !== 'domain')
+				return `Enter a domain name like ${EXAMPLE_DOMAIN}`;
+			if (emailInput.trim() && !email && focusedSetting !== 'email')
+				return `Enter an email address like ${EXAMPLE_EMAIL}`;
+		} else if (portInput.trim() && !port && focusedSetting !== 'port') {
+			return 'Port must be a number between 1 and 65535';
+		}
+		return undefined;
+	});
+
 	let code: string | undefined = $derived.by(() => {
 		if (zoomError) return undefined;
 		if (!coverageReady) return undefined;
-		return generateCode(selection);
+		return generateCode({ ...selection, domain, email, port });
 	});
 
 	async function copyShareLink(this: HTMLButtonElement) {
@@ -213,7 +248,7 @@
 				</label>
 			</div>
 			{#if zoomError}
-				<p class="hint zoom-error">{zoomError}</p>
+				<p class="hint input-error">{zoomError}</p>
 			{/if}
 		{/if}
 
@@ -247,6 +282,54 @@
 	{#if code}
 		<hr />
 		<h2>Review and run these commands in your shell</h2>
+		<div class="server-settings">
+			{#if usesDomain}
+				<label>
+					<span>Domain <span class="optional">(optional)</span></span>
+					<input
+						type="text"
+						class="wide"
+						placeholder={EXAMPLE_DOMAIN}
+						autocomplete="off"
+						autocapitalize="off"
+						spellcheck="false"
+						bind:value={domainInput}
+						onfocus={() => (focusedSetting = 'domain')}
+						onblur={() => (focusedSetting = undefined)}
+					/>
+				</label>
+				<label>
+					<span>Email <span class="optional">(optional)</span></span>
+					<input
+						type="email"
+						class="wide"
+						placeholder={EXAMPLE_EMAIL}
+						autocomplete="off"
+						autocapitalize="off"
+						spellcheck="false"
+						bind:value={emailInput}
+						onfocus={() => (focusedSetting = 'email')}
+						onblur={() => (focusedSetting = undefined)}
+					/>
+				</label>
+			{:else}
+				<label>
+					<span>Port <span class="optional">(optional)</span></span>
+					<input
+						type="text"
+						inputmode="numeric"
+						placeholder={DEFAULT_PORT.toString()}
+						autocomplete="off"
+						bind:value={portInput}
+						onfocus={() => (focusedSetting = 'port')}
+						onblur={() => (focusedSetting = undefined)}
+					/>
+				</label>
+			{/if}
+		</div>
+		{#if settingsError}
+			<p class="hint input-error">{settingsError}</p>
+		{/if}
 		<CodeBlock {code} />
 		<p style="text-align:center; margin-top: 8em; font-size: 0.8em; opacity: 0.7;">
 			Share your current selection:<br />
@@ -292,20 +375,27 @@
 		color-scheme: dark;
 		position: relative;
 	}
-	.zoom-range {
+	.zoom-range,
+	.server-settings {
 		display: flex;
-		gap: 1.5rem;
+		flex-wrap: wrap;
+		gap: 1rem 1.5rem;
 		justify-content: center;
 		margin: 1rem 0 0.5rem;
 	}
-	.zoom-range label {
+	.server-settings {
+		margin-bottom: 1.5rem;
+	}
+	.zoom-range label,
+	.server-settings label {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
 		font-size: 0.9em;
 		align-items: center;
 	}
-	.zoom-range input {
+	.zoom-range input,
+	.server-settings input {
 		width: 5rem;
 		padding: 0.3rem 0.5rem;
 		background: transparent;
@@ -320,7 +410,11 @@
 		font-size: 0.85em;
 		opacity: 0.6;
 	}
-	.zoom-error {
+	.server-settings input.wide {
+		width: 14rem;
+		max-width: 100%;
+	}
+	.input-error {
 		color: #e88;
 		opacity: 1;
 	}

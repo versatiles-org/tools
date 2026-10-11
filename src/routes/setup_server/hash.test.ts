@@ -75,6 +75,23 @@ describe('encodeHash', () => {
 		).toBe('linux+docker+osm+global+web');
 	});
 
+	it('does not encode the server settings', () => {
+		// Domain, email and port are a helper for the code block only. An email
+		// address in particular must not end up in a link that gets shared.
+		expect(
+			encodeHash({
+				os: { key: 'linux' } as OptionOS,
+				method: { key: 'docker' } as OptionMethod,
+				maps: [{ key: 'osm' } as OptionMap],
+				coverage: { key: 'global' } as OptionCoverage,
+				frontend: { key: 'standard' } as OptionFrontend,
+				domain: 'tiles.my-city.org',
+				email: 'ops@my-city.org',
+				port: 8080
+			})
+		).toBe('linux+docker+osm+global+standard');
+	});
+
 	it('encodes both minZoom and maxZoom with bbox coverage', () => {
 		expect(
 			encodeHash({

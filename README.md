@@ -72,6 +72,7 @@ VersaTiles server. It is implemented in
 - Options are defined in [options.ts](./src/routes/setup_server/options.ts).
 - The shell code is generated in [generate_code.ts](./src/routes/setup_server/generate_code.ts).
 - The current selection is stored in the URL hash by [hash.ts](./src/routes/setup_server/hash.ts), which is what the "copy link" button shares.
+- Domain, email address and port can be filled in above the generated code. They are validated in [server_settings.ts](./src/routes/setup_server/server_settings.ts) and are not part of the shared link.
 - The tool uses [components/FormOptionGroup.svelte](./src/routes/setup_server/components/FormOptionGroup.svelte) to render the button groups.
 - Download sizes are estimated by [components/SizeEstimate.svelte](./src/routes/setup_server/components/SizeEstimate.svelte) and [components/size_estimate.ts](./src/routes/setup_server/components/size_estimate.ts) from the size indices. An index is a quadtree of average tile sizes per zoom level, built by [scripts/build-size-index.ts](./scripts/build-size-index.ts).
 
@@ -86,8 +87,7 @@ The start page also links to two tools that are not part of this repository:
 
 - the map style editor at https://versatiles.org/maplibre-versatiles-styler/
   ([maplibre-versatiles-styler](https://github.com/versatiles-org/maplibre-versatiles-styler))
-- the map editor at https://versatiles.org/versatiles-map-editor/
-  ([versatiles-map-editor](https://github.com/versatiles-org/versatiles-map-editor))
+- the map editor at https://tiles.versatiles.org/editor/
 
 ## Testing
 
