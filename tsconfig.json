@@ -1,9 +1,9 @@
 {
 	"extends": "$app/tsconfig",
-	"include": ["scripts/**/*.ts", "src", "tests", "*"],
+	"include": ["src", "tests", "e2e", "scripts", "*"],
 	"exclude": ["src/service-worker"],
 	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext"
+		"strict": true,
+		"sourceMap": true
 	}
 }

@@ -1,5 +1,5 @@
 import { Container } from '@versatiles/container';
-import type { Block } from '@versatiles/container';
+import type { Block, TileIndex } from '@versatiles/container';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
 // --- Types ---
@@ -22,6 +22,20 @@ interface BuildResult {
 	stats: Stats;
 }
 
+// --- Container with index access ---
+
+// The block and tile indices are `protected` in `Container`: reading them is
+// all this script needs, so expose them through a subclass.
+class IndexContainer extends Container {
+	readBlockIndex(): Promise<Map<string, Block>> {
+		return this.getBlockIndex();
+	}
+
+	readTileIndex(block: Block): Promise<TileIndex> {
+		return this.getTileIndex(block);
+	}
+}
+
 // --- Configuration ---
 
 const MIN_NODE_SIZE = 16;
@@ -34,10 +48,10 @@ const RETRY_DELAY = 2000; // Delay before the first retry, doubled on each furth
 
 async function main(url: string, outputPath: string): Promise<void> {
 	console.log(`Building ${outputPath} from ${url}`);
-	const container = new Container(url);
+	const container = new IndexContainer(url);
 	const header = await withRetry('header', () => container.getHeader());
 
-	const blockIndex = await withRetry('block index', () => container.getBlockIndex());
+	const blockIndex = await withRetry('block index', () => container.readBlockIndex());
 
 	// Group blocks by zoom level and count total
 	const blocksByZoom = new Map<number, Block[]>();
@@ -85,7 +99,7 @@ async function main(url: string, outputPath: string): Promise<void> {
 // --- Fetch tile indices with concurrency limit ---
 
 async function fetchAllTileIndices(
-	container: Container,
+	container: IndexContainer,
 	blocks: Block[],
 	onProgress: () => void
 ): Promise<Map<string, BlockData>> {
@@ -100,7 +114,7 @@ async function fetchAllTileIndices(
 				const block = blocks[idx++];
 				running++;
 				withRetry(`tile index ${block.level}/${block.column}/${block.row}`, () =>
-					container.getTileIndex(block)
+					container.readTileIndex(block)
 				)
 					.then((tileIndex) => {
 						const key = `${block.column},${block.row}`;

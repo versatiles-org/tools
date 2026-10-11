@@ -4,7 +4,11 @@
 	"description": "VersaTiles tools",
 	"homepage": "https://versatiles.org/tools/",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
+	"engines": {
+		"node": ">=22.17"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/versatiles-org/tools.git"
@@ -14,8 +18,8 @@
 		"build:size-index": "tsx scripts/build-size-index.ts",
 		"build:svelte": "svelte-kit sync && vite build",
 		"build": "npm run build:size-index && npm run build:html && npm run build:svelte",
-		"check:svelte": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
+		"check:svelte": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"check": "npm run format && npm run check:svelte && npm run lint && npm run test && npm run test:e2e",
 		"dev": "vite dev",
 		"format:check": "prettier --log-level=warn --check .",
