@@ -28,9 +28,6 @@
 		"test": "vitest run",
 		"upgrade": "vrt deps-upgrade"
 	},
-	"overrides": {
-		"cookie": "^0.7.0"
-	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.64.0",
