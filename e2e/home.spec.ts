@@ -1,12 +1,19 @@
 import { test, expect } from '@playwright/test';
 
-test('home page shows all three tool cards', async ({ page }) => {
+test('home page shows all four tool cards', async ({ page }) => {
 	await page.goto('/');
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByRole('heading', { name: 'VersaTiles Tools' })).toBeVisible();
 	await expect(page.locator('a', { hasText: 'Server Setup Guide' })).toBeVisible();
 	await expect(page.locator('a', { hasText: 'Bounding Box Picker' })).toBeVisible();
-	await expect(page.locator('a', { hasText: 'Map Style Editor' })).toBeVisible();
+	await expect(page.locator('a', { hasText: 'Map Style Editor' })).toHaveAttribute(
+		'href',
+		'https://versatiles.org/maplibre-versatiles-styler/'
+	);
+	await expect(page.locator('a', { hasText: 'Map Editor' })).toHaveAttribute(
+		'href',
+		'https://versatiles.org/versatiles-map-editor/'
+	);
 });
 
 test('clicking the Server Setup card navigates to the setup_server page', async ({ page }) => {

@@ -40,7 +40,12 @@
 		>
 	</a>
 
-	<a class="tool" href="https://tiles.versatiles.org" target="_blank" rel="noopener noreferrer">
+	<a
+		class="tool"
+		href="https://versatiles.org/maplibre-versatiles-styler/"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
 		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 			<path d="M12 2L2 7l10 5 10-5-10-5z" />
 			<path d="M2 17l10 5 10-5" />
@@ -49,6 +54,24 @@
 		<span class="title">Map Style Editor</span>
 		<span class="description"
 			>Build, preview and export a custom map style for your VersaTiles server.</span
+		>
+	</a>
+
+	<a
+		class="tool"
+		href="https://tiles.versatiles.org/editor/"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+			<path d="M12 21s-6-5.2-6-10a6 6 0 0 1 12 0c0 4.8-6 10-6 10z" />
+			<circle cx="12" cy="11" r="2" />
+			<path d="M3 21h18" />
+		</svg>
+		<span class="title">Map Editor</span>
+		<span class="description"
+			>Draw and style markers, lines and areas on a map, then share it as a link or embed it in a
+			website.</span
 		>
 	</a>
 </div>
@@ -66,7 +89,7 @@
 
 	.tools {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
 		gap: 1.5rem;
 	}
 

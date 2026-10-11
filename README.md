@@ -80,10 +80,14 @@ VersaTiles server. It is implemented in
 A map for selecting a geographic region and copying its bounding box. It is
 implemented in [src/routes/bounding_box](./src/routes/bounding_box).
 
-### Map Style Editor
+### External Tools
 
-The start page also links to the map style editor at
-https://tiles.versatiles.org, which is not part of this repository.
+The start page also links to two tools that are not part of this repository:
+
+- the map style editor at https://versatiles.org/maplibre-versatiles-styler/
+  ([maplibre-versatiles-styler](https://github.com/versatiles-org/maplibre-versatiles-styler))
+- the map editor at https://versatiles.org/versatiles-map-editor/
+  ([versatiles-map-editor](https://github.com/versatiles-org/versatiles-map-editor))
 
 ## Testing
 
