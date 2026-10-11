@@ -1,8 +1,8 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
-	"include": ["data/**/*.ts", "scripts/**/*.ts", "src", ".svelte-kit/types"],
+	"extends": "$app/tsconfig",
+	"include": ["scripts/**/*.ts", "src", "tests", "*"],
+	"exclude": ["src/service-worker"],
 	"compilerOptions": {
-		"types": ["svelte"],
 		"target": "ESNext",
 		"module": "ESNext"
 	}
