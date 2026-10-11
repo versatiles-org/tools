@@ -68,11 +68,17 @@ export function estimateSize(
 
 const indexCache = new Map<string, SizeIndex>();
 
-export async function loadSizeIndex(mapKey: KeyMap, basePath: string): Promise<SizeIndex> {
+export type SizeIndexPath = `data/size-index-${KeyMap}.json`;
+export type AssetResolver = (path: SizeIndexPath) => string;
+
+export async function loadSizeIndex(
+	mapKey: KeyMap,
+	resolveAsset: AssetResolver
+): Promise<SizeIndex> {
 	const cached = indexCache.get(mapKey);
 	if (cached) return cached;
 
-	const url = `${basePath}/data/size-index-${mapKey}.json`;
+	const url = resolveAsset(`data/size-index-${mapKey}.json`);
 	const res = await fetch(url);
 	if (!res.ok) throw new Error(`Failed to load size index for ${mapKey}: ${res.status}`);
 	const index: SizeIndex = await res.json();
@@ -91,7 +97,7 @@ export const BORDER = 3;
 export async function estimateDownloadSizes(
 	maps: OptionMap[],
 	coverage: KeyCoverage,
-	basePath: string,
+	resolveAsset: AssetResolver,
 	bbox?: BBox,
 	minZoom?: number,
 	maxZoom?: number
@@ -99,7 +105,7 @@ export async function estimateDownloadSizes(
 	const results: SizeEstimate[] = [];
 
 	for (const map of maps) {
-		const index = await loadSizeIndex(map.key, basePath);
+		const index = await loadSizeIndex(map.key, resolveAsset);
 		let totalBytes = 0;
 
 		for (const [zStr, root] of Object.entries(index.levels)) {

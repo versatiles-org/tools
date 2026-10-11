@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { asset } from '$app/paths';
 	import { estimateDownloadSizes, createBytesFormatter, type SizeEstimate } from './size_estimate';
 	import type { BBox, OptionCoverage, OptionMap } from '../options';
 
@@ -35,7 +35,7 @@
 			estimateDownloadSizes(
 				sortedMaps,
 				coverageKey,
-				base,
+				asset,
 				currentBbox,
 				currentMinZoom,
 				currentMaxZoom

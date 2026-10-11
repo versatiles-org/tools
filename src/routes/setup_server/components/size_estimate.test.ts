@@ -141,6 +141,8 @@ describe('createBytesFormatter', () => {
 });
 
 describe('estimateDownloadSizes', () => {
+	const resolveAsset = (path: string) => `/${path}`;
+
 	beforeEach(() => {
 		clearIndexCache();
 		vi.restoreAllMocks();
@@ -160,7 +162,7 @@ describe('estimateDownloadSizes', () => {
 		});
 
 		const maps: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap', hint: '' }];
-		const result = await estimateDownloadSizes(maps, 'global', '');
+		const result = await estimateDownloadSizes(maps, 'global', resolveAsset);
 
 		expect(result).toHaveLength(1);
 		expect(result[0].mapKey).toBe('osm');
@@ -184,7 +186,7 @@ describe('estimateDownloadSizes', () => {
 
 		const maps: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap', hint: '' }];
 		// Small bbox — at zoom 0 it's still 1 tile
-		const result = await estimateDownloadSizes(maps, 'bbox', '', [10, 40, 20, 50]);
+		const result = await estimateDownloadSizes(maps, 'bbox', resolveAsset, [10, 40, 20, 50]);
 
 		expect(result).toHaveLength(1);
 		expect(result[0].bytes).toBe(1000);
@@ -203,7 +205,7 @@ describe('estimateDownloadSizes', () => {
 			{ key: 'osm', label: 'OpenStreetMap', hint: '' },
 			{ key: 'satellite', label: 'Satellite Imagery', hint: '' }
 		];
-		const result = await estimateDownloadSizes(maps, 'global', '');
+		const result = await estimateDownloadSizes(maps, 'global', resolveAsset);
 
 		expect(result).toHaveLength(2);
 		expect(result[0].bytes).toBe(100);
