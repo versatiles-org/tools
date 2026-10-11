@@ -66,24 +66,31 @@ export function estimateSize(
 
 // --- Index loading with cache ---
 
-const indexCache = new Map<string, SizeIndex>();
+// Caches the pending request rather than its result, so concurrent callers
+// share one download instead of each fetching the (large) index again.
+const indexCache = new Map<string, Promise<SizeIndex>>();
 
 export type SizeIndexPath = `data/size-index-${KeyMap}.json`;
 export type AssetResolver = (path: SizeIndexPath) => string;
 
-export async function loadSizeIndex(
-	mapKey: KeyMap,
-	resolveAsset: AssetResolver
-): Promise<SizeIndex> {
+export function loadSizeIndex(mapKey: KeyMap, resolveAsset: AssetResolver): Promise<SizeIndex> {
 	const cached = indexCache.get(mapKey);
 	if (cached) return cached;
 
+	const request = fetchSizeIndex(mapKey, resolveAsset);
+	indexCache.set(mapKey, request);
+	// Don't cache failures, so a later attempt can retry.
+	request.catch(() => {
+		if (indexCache.get(mapKey) === request) indexCache.delete(mapKey);
+	});
+	return request;
+}
+
+async function fetchSizeIndex(mapKey: KeyMap, resolveAsset: AssetResolver): Promise<SizeIndex> {
 	const url = resolveAsset(`data/size-index-${mapKey}.json`);
 	const res = await fetch(url);
 	if (!res.ok) throw new Error(`Failed to load size index for ${mapKey}: ${res.status}`);
-	const index: SizeIndex = await res.json();
-	indexCache.set(mapKey, index);
-	return index;
+	return res.json();
 }
 
 export function clearIndexCache(): void {

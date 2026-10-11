@@ -29,6 +29,7 @@
 	const resolveAsset: AssetResolver = (path) => asset(path as string as AssetPath);
 
 	let sizeEstimates = $state<SizeEstimate[]>([]);
+	let failed = $state(false);
 
 	$effect(() => {
 		const sortedMaps = maps.slice().sort((a, b) => a.label.localeCompare(b.label));
@@ -39,8 +40,13 @@
 
 		if (sortedMaps.length === 0) {
 			sizeEstimates = [];
+			failed = false;
 			return;
 		}
+
+		// Set once the inputs change again: a slow request must not overwrite the
+		// result of a newer one that finished first.
+		let stale = false;
 
 		const timer = setTimeout(() => {
 			estimateDownloadSizes(
@@ -52,14 +58,22 @@
 				currentMaxZoom
 			)
 				.then((estimates) => {
+					if (stale) return;
 					sizeEstimates = estimates;
+					failed = false;
 				})
-				.catch(() => {
+				.catch((error) => {
+					if (stale) return;
+					console.error(error);
 					sizeEstimates = [];
+					failed = true;
 				});
 		}, 50);
 
-		return () => clearTimeout(timer);
+		return () => {
+			stale = true;
+			clearTimeout(timer);
+		};
 	});
 
 	let totalBytes = $derived(sizeEstimates.reduce((s, e) => s + e.bytes, 0));
@@ -82,6 +96,8 @@
 			</span>
 		{/if}
 	</div>
+{:else if failed}
+	<div class="size-estimate">Download size estimate is not available.</div>
 {/if}
 
 <style>

@@ -6,6 +6,7 @@ import {
 	estimateDownloadSizes,
 	clearIndexCache,
 	createBytesFormatter,
+	loadSizeIndex,
 	BORDER
 } from './size_estimate';
 import type { OptionMap } from '../options';
@@ -137,6 +138,43 @@ describe('createBytesFormatter', () => {
 		const fmt = createBytesFormatter(25 * 1024 ** 3);
 		const results = [5, 8, 12].map((gb) => fmt(gb * 1024 ** 3));
 		expect(results).toEqual(['5.0 GB', '8.0 GB', '12.0 GB']);
+	});
+});
+
+describe('loadSizeIndex', () => {
+	const resolveAsset = (path: string) => `/${path}`;
+	const mockIndex = { levels: { '0': 1000 } };
+
+	beforeEach(() => {
+		clearIndexCache();
+		vi.restoreAllMocks();
+	});
+
+	it('shares one request between concurrent callers', async () => {
+		global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(mockIndex) });
+
+		const [a, b] = await Promise.all([
+			loadSizeIndex('osm', resolveAsset),
+			loadSizeIndex('osm', resolveAsset)
+		]);
+		await loadSizeIndex('osm', resolveAsset);
+
+		expect(a).toBe(b);
+		expect(global.fetch).toHaveBeenCalledTimes(1);
+		expect(global.fetch).toHaveBeenCalledWith('/data/size-index-osm.json');
+	});
+
+	it('does not cache a failed request', async () => {
+		global.fetch = vi
+			.fn()
+			.mockResolvedValueOnce({ ok: false, status: 404 })
+			.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockIndex) });
+
+		await expect(loadSizeIndex('osm', resolveAsset)).rejects.toThrow(
+			'Failed to load size index for osm: 404'
+		);
+		await expect(loadSizeIndex('osm', resolveAsset)).resolves.toEqual(mockIndex);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 });
 

@@ -52,6 +52,20 @@ export function encodeHash({
 	return parts.join(HASH_SEPARATOR);
 }
 
+// Expects exactly four numbers within the valid range: minLon, minLat, maxLon, maxLat
+function parseBBox(raw: string): BBox | undefined {
+	const parts = raw.split(',');
+	// `Number('')` is 0, so empty parts have to be rejected explicitly
+	if (parts.length !== 4 || parts.some((part) => part.trim() === '')) return undefined;
+
+	const [west, south, east, north] = parts.map(Number);
+	if (![west, south, east, north].every(Number.isFinite)) return undefined;
+	if (Math.abs(west) > 180 || Math.abs(east) > 180) return undefined;
+	if (Math.abs(south) > 90 || Math.abs(north) > 90) return undefined;
+
+	return [west, south, east, north];
+}
+
 export function decodeHash(hash: string): {
 	os?: string;
 	method?: string;
@@ -81,11 +95,7 @@ export function decodeHash(hash: string): {
 	if (segments[3]) {
 		if (segments[3].startsWith('bbox,')) {
 			coverage = 'bbox';
-			const coords = segments[3].slice(5).split(',').map(Number);
-			// Expect exactly four numeric values: minLon, minLat, maxLon, maxLat
-			if (coords.length === 4 && coords.every((n) => !Number.isNaN(n))) {
-				bbox = coords as BBox;
-			}
+			bbox = parseBBox(segments[3].slice(5));
 		} else {
 			coverage = 'global'; // e.g. 'global'
 		}

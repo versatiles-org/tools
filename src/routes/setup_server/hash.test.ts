@@ -198,6 +198,28 @@ describe('decodeHash', () => {
 		});
 	});
 
+	it.each([
+		['an empty value', 'bbox,1,2,,4'],
+		['a non-numeric value', 'bbox,1,2,x,4'],
+		['a non-finite value', 'bbox,1,2,Infinity,4'],
+		['too many values', 'bbox,1,2,3,4,5'],
+		['a longitude out of range', 'bbox,-181,2,3,4'],
+		['a latitude out of range', 'bbox,1,2,3,91']
+	])('ignores a bbox with %s', (_, segment) => {
+		expect(decodeHash(`linux+docker+osm+${segment}`)).toEqual({
+			os: 'linux',
+			method: 'docker',
+			maps: ['osm'],
+			coverage: 'bbox'
+		});
+	});
+
+	it('decodes a bbox with negative and fractional values', () => {
+		expect(decodeHash('linux+docker+osm+bbox,-180,-85.05,8.5,90').bbox).toEqual([
+			-180, -85.05, 8.5, 90
+		]);
+	});
+
 	it('decodes zoom range with both bounds and trailing frontend', () => {
 		expect(decodeHash('linux+docker+osm+global+z,3,12+web')).toEqual({
 			os: 'linux',
