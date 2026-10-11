@@ -1,6 +1,7 @@
 <!-- +page.svelte -->
 <script lang="ts">
 	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
+	import PageMeta from '../../lib/PageMeta/PageMeta.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import '../../style/default.css';
 
@@ -8,10 +9,11 @@
 	let code = $derived(selectedBBox ? JSON.stringify(selectedBBox) : '');
 </script>
 
-<svelte:head>
-	<title>Bounding Box VersaTiles</title>
-	<meta name="description" content="Select a geographic bounding box and get its coordinates." />
-</svelte:head>
+<PageMeta
+	title="Bounding Box VersaTiles"
+	description="Select a geographic bounding box and get its coordinates."
+	path="bounding_box"
+/>
 
 <section class="form">
 	<h1>Select a bounding box</h1>

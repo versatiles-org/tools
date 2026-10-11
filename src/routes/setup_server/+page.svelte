@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CodeBlock from '../../lib/CodeBlock/CodeBlock.svelte';
 	import FormOptionGroup from './components/FormOptionGroup.svelte';
+	import PageMeta from '../../lib/PageMeta/PageMeta.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
 	import { generateCode } from './generate_code';
 	import { clampZoom, decodeHash, encodeHash, MAX_ZOOM_LIMIT, MIN_ZOOM_LIMIT } from './hash';
@@ -130,28 +131,12 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Set up your own VersaTiles server</title>
-	<meta
-		name="description"
-		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
-	/>
-	<meta property="og:title" content="Set up your own VersaTiles server" />
-	<meta
-		property="og:description"
-		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://versatiles.org/tools/setup_server" />
-	<meta property="og:image" content="https://versatiles.org/tools/images/setup_server.png" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="Set up your own VersaTiles server" />
-	<meta
-		name="twitter:description"
-		content="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
-	/>
-	<meta name="twitter:image" content="https://versatiles.org/tools/images/setup_server.png" />
-</svelte:head>
+<PageMeta
+	title="Set up your own VersaTiles server"
+	description="An interactive guide to setting up a VersaTiles map server with map data and a frontend."
+	path="setup_server"
+	image="https://versatiles.org/tools/images/setup_server.png"
+/>
 
 <section class="form">
 	<h1>Set up your own VersaTiles server</h1>

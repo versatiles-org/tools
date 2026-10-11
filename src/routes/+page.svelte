@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import PageMeta from '../lib/PageMeta/PageMeta.svelte';
 </script>
+
+<PageMeta title="VersaTiles - Tools" description="Tools and utilities for VersaTiles" />
 
 <h1>VersaTiles Tools</h1>
 <p>We've prepared some tools to help you get started with VersaTiles:</p>
