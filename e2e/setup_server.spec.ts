@@ -25,10 +25,10 @@ test.describe('setup_server', () => {
 
 		const code = page.locator('code').first();
 		await expect(code).toContainText(
-			'curl -Ls "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh"'
+			'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh"'
 		);
 		await expect(code).toContainText('curl -C - -fLo "osm.versatiles"');
-		await expect(code).toContainText('versatiles server --port 80');
+		await expect(code).toContainText('sudo "$(command -v versatiles)" server --port 80');
 	});
 
 	test('Custom region generates a bbox-restricted convert script', async ({ page }) => {

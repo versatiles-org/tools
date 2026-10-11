@@ -65,8 +65,7 @@ export function generateCode({
 				break;
 			}
 			case 'docker_nginx':
-				yield `# Point your domain to the server IP`;
-				yield `...`;
+				yield `# Point your domain to the server IP before you continue.`;
 				yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
 				yield `docker run -d --name versatiles \\`;
 				yield `  -p 80:80 -p 443:443 \\`;
@@ -101,7 +100,8 @@ export function generateCode({
 				if (os!.key === 'windows') {
 					yield 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"';
 				} else {
-					yield 'curl -Ls "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh" | sudo sh';
+					// `-f`: fail on HTTP errors instead of piping an error page into a root shell.
+					yield 'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh" | sudo sh';
 				}
 				break;
 			case 'cargo':
@@ -128,7 +128,9 @@ export function generateCode({
 				yield 'cargo build --bin versatiles --release';
 				yield 'echo "Installing binary..."';
 				if (os!.key === 'windows') {
-					yield 'Copy-Item "target\\release\\versatiles.exe" "C:\\Program Files\\versatiles\\"';
+					// Cargo's bin directory exists and is on PATH wherever the Rust
+					// toolchain is installed, and needs no administrator rights.
+					yield 'Copy-Item "target\\release\\versatiles.exe" "$env:USERPROFILE\\.cargo\\bin\\"';
 				} else {
 					yield 'sudo cp target/release/versatiles /usr/local/bin/';
 				}
@@ -184,6 +186,10 @@ export function generateCode({
 			serverArgs.push(`"${map.key}.versatiles"`);
 		}
 
-		yield `${versatilesBin} server ${serverArgs.join(' ')}`;
+		// Binding port 80 requires root on Linux. `command -v` resolves the binary
+		// first, because sudo's restricted PATH may not contain it (e.g. ~/.cargo/bin).
+		const serverBin = os!.key === 'linux' ? `sudo "$(command -v ${versatilesBin})"` : versatilesBin;
+
+		yield `${serverBin} server ${serverArgs.join(' ')}`;
 	}
 }

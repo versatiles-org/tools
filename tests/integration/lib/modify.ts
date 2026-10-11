@@ -13,6 +13,9 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 		case 'cargo':
 		case 'source': {
 			code = code.replace('--port 80', `--port ${PORT}`);
+			// The test port is unprivileged, so drop sudo: the PID file must hold the
+			// server's PID, not that of a root-owned sudo process we couldn't kill.
+			code = code.replace('sudo "$(command -v versatiles)" server', 'versatiles server');
 
 			if (osKey === 'windows') {
 				// Background the server with Start-Process and save PID
@@ -45,11 +48,6 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 		}
 
 		case 'docker_nginx': {
-			// Remove placeholder lines (e.g. bare "...")
-			code = code
-				.split('\n')
-				.filter((l) => l.trim() !== '...')
-				.join('\n');
 			code = code.replace('-p 80:80 -p 443:443', `-p ${PORT}:80`);
 			code = code.replace('DOMAIN=maps.example.com', 'DOMAIN=localhost');
 			// Insert HTTP_ONLY=true after DOMAIN line

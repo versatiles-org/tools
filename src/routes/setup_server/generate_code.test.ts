@@ -12,6 +12,7 @@ import { allMethods, optionsCoverage, optionsFrontend, optionsMap, optionsOS } f
 
 const osWindows: OptionOS = optionsOS.find((opt) => opt.key === 'windows')!;
 const osLinux: OptionOS = optionsOS.find((opt) => opt.key === 'linux')!;
+const osMacos: OptionOS = optionsOS.find((opt) => opt.key === 'macos')!;
 const methodHomebrew: OptionMethod = allMethods.find((opt) => opt.key === 'homebrew')!;
 const methodScript: OptionMethod = allMethods.find((opt) => opt.key === 'script')!;
 const methodCargo: OptionMethod = allMethods.find((opt) => opt.key === 'cargo')!;
@@ -42,7 +43,7 @@ describe('generateCode', () => {
 		expect(code).toContain('brew trust versatiles-org/versatiles');
 		expect(code).toContain('brew install versatiles');
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
+		expect(code).toContain('sudo "$(command -v versatiles)" server --port 80 "osm.versatiles"');
 	});
 
 	it('generates code for script on windows', () => {
@@ -66,7 +67,7 @@ describe('generateCode', () => {
 		expect(sourceIdx).toBeGreaterThan(-1);
 		expect(installIdx).toBeGreaterThan(sourceIdx);
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles server --port 80 "osm.versatiles"');
+		expect(code).toContain('sudo "$(command -v versatiles)" server --port 80 "osm.versatiles"');
 	});
 
 	it('updates PATH before cargo install on windows', () => {
@@ -80,9 +81,33 @@ describe('generateCode', () => {
 	it('generates code for source on windows', () => {
 		const code = _generateCode(osWindows, methodSource, maps);
 		expect(code).toContain('git clone https://github.com/versatiles-org/versatiles-rs.git');
-		expect(code).toContain('Copy-Item "target\\release\\versatiles.exe"');
+		// Installs into cargo's bin directory: it exists, is on PATH and needs no
+		// administrator rights (unlike "C:\\Program Files").
+		expect(code).toContain(
+			'Copy-Item "target\\release\\versatiles.exe" "$env:USERPROFILE\\.cargo\\bin\\"'
+		);
+		expect(code).not.toContain('Program Files');
 		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
 		expect(code).toContain('versatiles.exe server --port 80 "osm.versatiles"');
+	});
+
+	it('fails on HTTP errors when piping the install script into a root shell', () => {
+		const code = _generateCode(osLinux, methodScript, maps);
+		expect(code).toContain(
+			'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh" | sudo sh'
+		);
+	});
+
+	it('uses sudo to bind port 80 on linux only', () => {
+		// Port 80 is privileged on Linux. macOS allows it for regular users and
+		// Windows has no sudo.
+		for (const method of [methodScript, methodCargo, methodSource]) {
+			expect(_generateCode(osLinux, method, maps)).toContain(
+				'sudo "$(command -v versatiles)" server --port 80'
+			);
+			expect(_generateCode(osMacos, method, maps)).toContain('\nversatiles server --port 80');
+			expect(_generateCode(osWindows, method, maps)).toContain('\nversatiles.exe server --port 80');
+		}
 	});
 
 	it('restores the working directory after a source install', () => {
@@ -166,6 +191,18 @@ describe('generateCode', () => {
 		expect(
 			_generateCode(osLinux, methodDockerNginx, maps, coverageBbox, undefined, frontend)
 		).toBeUndefined();
+	});
+
+	it('emits only comments and the docker command for docker_nginx', () => {
+		// Regression: a bare `...` placeholder line failed with "command not found"
+		// when the script was pasted into a shell.
+		const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend)!;
+		const lines = code.split('\n');
+		const commandStart = lines.findIndex((line) => line.startsWith('docker run'));
+		expect(commandStart).toBeGreaterThan(-1);
+		for (const line of lines.slice(0, commandStart)) {
+			expect(line).toMatch(/^#/);
+		}
 	});
 
 	it('generates code for docker_nginx without bbox (global coverage)', () => {
