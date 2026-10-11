@@ -5,7 +5,7 @@ export type KeyOS = 'linux' | 'macos' | 'windows';
 export type OptionOS = Option & { key: KeyOS };
 export const optionsOS: OptionOS[] = [
 	{ key: 'linux', label: 'Linux', hint: 'Debian, Ubuntu, Fedora, Raspberry Pi OS, etc.' },
-	{ key: 'macos', label: 'MacOS', hint: 'MacOS 10.15 (Catalina) or later' },
+	{ key: 'macos', label: 'macOS', hint: 'macOS 10.15 (Catalina) or later' },
 	{ key: 'windows', label: 'Windows', hint: 'Windows 10 or later' }
 ];
 
@@ -141,3 +141,7 @@ export const optionsFrontend: OptionFrontend[] = [
 	},
 	{ key: 'none', label: 'None', hint: 'No frontend — serve only tile data' }
 ];
+// The frontend that is preselected in the form
+export const defaultFrontend: OptionFrontend | undefined = optionsFrontend.find(
+	(option) => option.selected
+);

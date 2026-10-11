@@ -31,6 +31,24 @@ test.describe('setup_server', () => {
 		await expect(code).toContainText('sudo "$(command -v versatiles)" server --port 80');
 	});
 
+	test('preselects the Standard frontend', async ({ page }) => {
+		// Regression: no frontend was selected by default, so the native methods
+		// silently installed none while docker_nginx fell back to "standard".
+		await page.goto('/setup_server');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('button', { hasText: 'Linux' }).click();
+		await page.locator('button', { hasText: 'Install script' }).click();
+		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
+		await page.locator('button', { hasText: 'Entire world' }).click();
+
+		await expect(page.locator('button', { hasText: 'Standard' })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		);
+		await expect(page.locator('code').first()).toContainText('--static "frontend.br.tar.gz"');
+	});
+
 	test('Custom region generates a bbox-restricted convert script', async ({ page }) => {
 		// BBoxMap auto-initialises with a default region, so the script should
 		// always switch from a planet-wide curl to `versatiles convert --bbox …`.

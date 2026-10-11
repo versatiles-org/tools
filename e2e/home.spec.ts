@@ -24,7 +24,7 @@ test('clicking the Server Setup card navigates to the setup_server page', async 
 for (const { path, title } of [
 	{ path: '/', title: 'VersaTiles - Tools' },
 	{ path: '/setup_server', title: 'Set up your own VersaTiles server' },
-	{ path: '/bounding_box', title: 'Bounding Box VersaTiles' }
+	{ path: '/bounding_box', title: 'VersaTiles - Bounding Box Picker' }
 ]) {
 	test(`${path} has exactly one set of head tags and a same-page skip link`, async ({ page }) => {
 		await page.goto(path);

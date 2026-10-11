@@ -83,24 +83,21 @@
 	}
 </script>
 
-{#key selection}
-	<div class="option-list">
-		{#each options as option (option.key)}
-			<label class:selected={selection.has(option.key)}>
-				<button
-					class:selected={selection.has(option.key)}
-					onclick={() => handleClick(option)}
-					aria-pressed={selection.has(option.key)}
-				>
-					{#if _lockedAllow}<span class="checkbox">{selection.has(option.key) ? '☑' : '☐'}</span
-						>{/if}
-					{option.label}
-				</button>
-				<span class="hint">{option.hint ?? ''}</span>
-			</label>
-		{/each}
-	</div>
-{/key}
+<div class="option-list">
+	{#each options as option (option.key)}
+		<label class:selected={selection.has(option.key)}>
+			<button
+				class:selected={selection.has(option.key)}
+				onclick={() => handleClick(option)}
+				aria-pressed={selection.has(option.key)}
+			>
+				{#if _lockedAllow}<span class="checkbox">{selection.has(option.key) ? '☑' : '☐'}</span>{/if}
+				{option.label}
+			</button>
+			<span class="hint">{option.hint}</span>
+		</label>
+	{/each}
+</div>
 
 <style>
 	.option-list {

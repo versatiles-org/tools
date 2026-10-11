@@ -10,7 +10,7 @@
 </script>
 
 <PageMeta
-	title="Bounding Box VersaTiles"
+	title="VersaTiles - Bounding Box Picker"
 	description="Select a geographic bounding box and get its coordinates."
 	path="bounding_box"
 />

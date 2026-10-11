@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { optionsOS, optionsMethod, optionsMap, optionsCoverage, optionsFrontend } from './options';
+import {
+	defaultFrontend,
+	optionsOS,
+	optionsMethod,
+	optionsMap,
+	optionsCoverage,
+	optionsFrontend
+} from './options';
 
 describe('optionsOS', () => {
 	it('should contain all OS options', () => {
@@ -48,8 +55,11 @@ describe('optionsFrontend', () => {
 		const keys = optionsFrontend.map((opt) => opt.key);
 		expect(keys).toEqual(['standard', 'dev', 'min', 'blank', 'tiny', 'none']);
 	});
-	it('should have selected true for standard', () => {
-		expect(optionsFrontend.find((opt) => opt.key === 'standard')?.selected).toBe(true);
+	it('should preselect the standard frontend', () => {
+		expect(optionsFrontend.filter((opt) => opt.selected).map((opt) => opt.key)).toEqual([
+			'standard'
+		]);
+		expect(defaultFrontend?.key).toBe('standard');
 	});
 	it('should define the blank frontend variant', () => {
 		expect(optionsFrontend.find((opt) => opt.key === 'blank')).toEqual({

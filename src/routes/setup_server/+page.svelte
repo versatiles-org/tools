@@ -11,6 +11,7 @@
 	import '../../style/default.css';
 
 	import {
+		defaultFrontend,
 		optionsCoverage,
 		optionsFrontend,
 		optionsMap,
@@ -26,7 +27,7 @@
 		bbox: undefined,
 		minZoom: undefined,
 		maxZoom: undefined,
-		frontend: undefined
+		frontend: defaultFrontend
 	});
 
 	onMount(() => {
@@ -112,9 +113,7 @@
 	let code: string | undefined = $derived.by(() => {
 		if (zoomError) return undefined;
 		if (!coverageReady) return undefined;
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { os, method, maps, coverage, bbox, minZoom, maxZoom, frontend } = selection;
-		return selection.os && selection.method ? generateCode(selection) : undefined;
+		return generateCode(selection);
 	});
 
 	async function copyShareLink(this: HTMLButtonElement) {
@@ -219,7 +218,7 @@
 		{/if}
 
 		{#if coverageReady}
-			<p class="hint">
+			<div class="hint">
 				<SizeEstimate
 					maps={selection.maps}
 					coverage={selection.coverage}
@@ -227,7 +226,7 @@
 					minZoom={zoomApplies ? selection.minZoom : undefined}
 					maxZoom={zoomApplies ? selection.maxZoom : undefined}
 				/>
-			</p>
+			</div>
 		{/if}
 
 		<h2>5. Add a frontend</h2>
