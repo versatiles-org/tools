@@ -73,7 +73,7 @@ export function runScript(scriptPath: string, workDir: string, osKey: string): v
 
 // --- Server Polling ---
 
-function sleep(ms: number): Promise<void> {
+export function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -84,7 +84,7 @@ function sleep(ms: number): Promise<void> {
  * Elapsed time is logged on every attempt so a future timeout shows how far off
  * the budget was rather than just an attempt count.
  */
-async function pollUntilReady(
+export async function pollUntilReady(
 	what: string,
 	timeout: number,
 	check: () => Promise<string | null>
@@ -129,21 +129,21 @@ async function waitForProcess(workDir: string): Promise<void> {
 	const pid = parseInt(readFileSync(pidFile, 'utf-8').trim(), 10);
 	console.log(`    Server PID: ${pid}`);
 
-	console.log(`=== Health check: polling http://localhost:${PORT}/status ===`);
-	await pollUntilReady('Server', SERVER_READY_TIMEOUT, statusEndpointCheck);
+	await waitForStatus();
 }
 
 async function waitForDocker(): Promise<void> {
 	await sleep(2000);
 	verifyContainerRunning();
-
-	console.log(`=== Health check: polling http://localhost:${PORT}/status ===`);
-	await pollUntilReady('Server', SERVER_READY_TIMEOUT, statusEndpointCheck);
+	await waitForStatus();
 }
 
-async function statusEndpointCheck(): Promise<string | null> {
-	const res = await fetch(`http://localhost:${PORT}/status`);
-	return res.ok ? `HTTP ${res.status} — OK` : null;
+export async function waitForStatus(port: number = PORT): Promise<void> {
+	console.log(`=== Health check: polling http://localhost:${port}/status ===`);
+	await pollUntilReady('Server', SERVER_READY_TIMEOUT, async () => {
+		const res = await fetch(`http://localhost:${port}/status`);
+		return res.ok ? `HTTP ${res.status} — OK` : null;
+	});
 }
 
 async function waitForDockerNginx(): Promise<void> {

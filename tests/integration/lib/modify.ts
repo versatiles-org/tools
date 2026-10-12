@@ -7,7 +7,24 @@ import type { KeyOS } from '../../../src/routes/setup_server/options.js';
 
 export const PORT = 8080;
 
-export function applyModifications(code: string, methodKey: string, osKey: KeyOS): string {
+// Returns the last line that is a command, which for the native methods is the
+// one that starts the server.
+export function findServerLine(lines: string[]): number {
+	for (let i = lines.length - 1; i >= 0; i--) {
+		const trimmed = lines[i].trim();
+		if (trimmed && !trimmed.startsWith('#')) return i;
+	}
+	throw new Error('Generated code contains no command');
+}
+
+export function applyModifications(
+	code: string,
+	methodKey: string,
+	osKey: KeyOS,
+	// Redirect the server's output to a file. Needed where the script's output is
+	// a pipe (`docker exec`), which a background process would keep open.
+	{ logFile = false }: { logFile?: boolean } = {}
+): string {
 	switch (methodKey) {
 		case 'script':
 		case 'homebrew':
@@ -23,15 +40,10 @@ export function applyModifications(code: string, methodKey: string, osKey: KeyOS
 					].join('\n');
 				});
 			} else {
-				// Background the server (last non-comment, non-empty line) and save PID
+				// Background the server and save PID
 				const lines = code.split('\n');
-				for (let i = lines.length - 1; i >= 0; i--) {
-					const trimmed = lines[i].trim();
-					if (trimmed && !trimmed.startsWith('#')) {
-						lines[i] += ' & echo $! > "$_SMOKE_DIR/server.pid"';
-						break;
-					}
-				}
+				const redirect = logFile ? ' > "$_SMOKE_DIR/server.log" 2>&1' : '';
+				lines[findServerLine(lines)] += `${redirect} & echo $! > "$_SMOKE_DIR/server.pid"`;
 				code = lines.join('\n');
 			}
 			return code;

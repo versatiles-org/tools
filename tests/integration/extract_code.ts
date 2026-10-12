@@ -29,7 +29,7 @@ mkdirSync(outDir, { recursive: true });
 const FRONTEND_VARIANT_METHODS = ['script', 'docker_nginx'];
 
 function write(osKey: KeyOS, methodKey: string, frontendKey: KeyFrontend, filename: string): void {
-	const code = generateTestCode(osKey, methodKey, frontendKey);
+	const code = generateTestCode(osKey, methodKey, { frontend: frontendKey, full: true });
 	const filepath = join(outDir, filename);
 	if (osKey === 'windows') {
 		writeFileSync(filepath, `${code}\n`);

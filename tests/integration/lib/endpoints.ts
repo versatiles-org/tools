@@ -27,12 +27,12 @@ const ENDPOINTS = [
 	}
 ];
 
-export async function checkEndpoints(): Promise<boolean> {
-	console.log('\n=== Checking HTTP endpoints ===');
+export async function checkEndpoints(port: number = PORT): Promise<boolean> {
+	console.log(`\n=== Checking HTTP endpoints on port ${port} ===`);
 	let allPassed = true;
 
 	for (const ep of ENDPOINTS) {
-		const url = `http://localhost:${PORT}${ep.path}`;
+		const url = `http://localhost:${port}${ep.path}`;
 		try {
 			const res = await fetch(url);
 			const body = await res.text();

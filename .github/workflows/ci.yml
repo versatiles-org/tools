@@ -72,11 +72,35 @@ jobs:
         run: bash tests/integration/validate_syntax.sh
 
   # Phase 2: Smoke tests (needs check)
+  #
+  # Each test is a job of its own, so they run in parallel. To be fast they
+  # download a single map source at low zoom levels; one of them (`--full`)
+  # covers all sources and zoom levels. The `--container` tests run in a
+  # container of the given distribution, where port 80 is tested as well.
 
-  smoke-test-linux:
+  smoke-test:
     needs: [check]
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    name: 'smoke-test: ${{ matrix.name }}'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, name: 'linux script (full)', args: 'script --full' }
+          - { os: ubuntu-latest, name: 'linux docker', args: 'docker' }
+          - { os: ubuntu-latest, name: 'linux docker_nginx', args: 'docker_nginx' }
+          - {
+              os: ubuntu-latest,
+              name: 'debian script',
+              args: 'script --container debian:stable-slim'
+            }
+          - { os: ubuntu-latest, name: 'ubuntu script', args: 'script --container ubuntu:latest' }
+          - { os: ubuntu-latest, name: 'fedora script', args: 'script --container fedora:latest' }
+          - { os: macos-latest, name: 'macos homebrew', args: 'homebrew' }
+          - { os: macos-latest, name: 'macos script', args: 'script' }
+          - { os: windows-latest, name: 'windows script', args: 'script' }
 
     steps:
       - name: Checkout
@@ -91,64 +115,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: 'Smoke test: script'
-        run: npm run test:integration -- script
-
-      - name: 'Smoke test: docker'
-        run: npm run test:integration -- docker
-
-      - name: 'Smoke test: docker_nginx'
-        run: npm run test:integration -- docker_nginx
-
-  smoke-test-macos:
-    needs: [check]
-    if: github.ref == 'refs/heads/main'
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: 'Smoke test: homebrew'
-        run: npm run test:integration -- homebrew
-
-      - name: 'Smoke test: script'
-        run: npm run test:integration -- script
-
-  smoke-test-windows:
-    needs: [check]
-    if: github.ref == 'refs/heads/main'
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: 'Smoke test: script'
-        run: npm run test:integration -- script
+      - name: Smoke test
+        run: npm run test:integration -- ${{ matrix.args }}
 
   # Phase 3: Build and deploy (needs all smoke tests)
 
   build:
-    needs: [smoke-test-linux, smoke-test-macos, smoke-test-windows]
+    needs: [smoke-test]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 

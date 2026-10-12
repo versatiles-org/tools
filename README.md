@@ -108,14 +108,26 @@ There are three layers of tests:
   - `npm run test:integration` executes the scripts for the current operating
     system, waits for the server and checks its HTTP endpoints.
 
-The smoke tests really run the generated scripts: they install VersaTiles on
-the machine (using `sudo`, Homebrew, Cargo or Docker, depending on the method)
-and download map data. They are meant for CI. To run a subset, pass methods as
-arguments, optionally with a frontend:
+The smoke tests really run the generated scripts: on this machine they install
+VersaTiles (using `sudo`, Homebrew, Cargo or Docker, depending on the method)
+and download map data. To be fast, they download a single map source at low
+zoom levels only.
 
 ```bash
 npm run test:integration -- script docker   # only these methods
 npm run test:integration -- script:none     # method with a specific frontend
+npm run test:integration -- script --full   # all map sources and zoom levels
+```
+
+With `--container`, the script for Linux runs inside a Docker container of the
+given distribution instead, as a regular user with `sudo`. Nothing is installed
+on this machine, so this also works on macOS and Windows. After the test on the
+default port, the server is restarted on port 80: without `sudo` it has to fail,
+with the generated command it has to work.
+
+```bash
+npm run test:integration -- script --container debian:stable-slim
+npm run test:integration -- script --container fedora:latest
 ```
 
 ## Deployment
