@@ -39,9 +39,8 @@ if command -v shellcheck &>/dev/null; then
 		# SC2086: word splitting (expected in generated install commands)
 		# SC2034: unused variables (comments reference URLs)
 		# SC2164: cd without || exit (generated scripts use set -e)
-		# SC2046: unquoted $(pwd) in docker volume mounts (intentional)
 		# SC1091: sourcing paths that only exist at install time (~/.cargo/env)
-		if shellcheck -e SC2086,SC2034,SC2164,SC2046,SC1091 -s bash "$script" 2>&1; then
+		if shellcheck -e SC2086,SC2034,SC2164,SC1091 -s bash "$script" 2>&1; then
 			echo "OK"
 		else
 			echo "FAIL"

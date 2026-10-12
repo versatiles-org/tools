@@ -22,7 +22,7 @@
 
 import { execSync } from 'child_process';
 import { generateTestCode, allMethods, optionsFrontend, DEFAULT_FRONTEND } from './lib/generate.js';
-import { applyModifications, findServerLine } from './lib/modify.js';
+import { applyModifications, splitServerCommand } from './lib/modify.js';
 import {
 	createWorkDir,
 	writeScript,
@@ -130,8 +130,7 @@ async function runInContainer(image: string, task: Task, options: Options): Prom
 		generateTestCode('linux', method, { frontend, full: options.full, port });
 
 	const code = applyModifications(generate(), method, 'linux', { logFile: true });
-	const privilegedLines = generate(PRIVILEGED_PORT).split('\n');
-	const privilegedServerLine = privilegedLines[findServerLine(privilegedLines)];
+	const privilegedServerLine = splitServerCommand(generate(PRIVILEGED_PORT)).command;
 
 	console.log('\n--- Modified script ---');
 	console.log(code);

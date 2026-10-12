@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { generateCode } from './generate_code';
+import { generateCode as generateWrappedCode, generateNotes } from './generate_code';
+import { unwrapCommands } from './shell_format';
+import type { SetupState } from './types';
 import type {
 	BBox,
 	OptionCoverage,
@@ -24,6 +26,13 @@ const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === '
 const bbox: BBox = [1, 2, 3, 4];
 const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'standard')!;
 
+// Long commands are wrapped over several lines. These tests are about what the
+// commands are, so they look at them unwrapped; the layout has tests of its own.
+function generateCode(state: SetupState): string | undefined {
+	const code = generateWrappedCode(state);
+	return code === undefined ? undefined : unwrapCommands(code);
+}
+
 function _generateCode(
 	os: OptionOS,
 	method: OptionMethod,
@@ -43,7 +52,7 @@ describe('generateCode', () => {
 		expect(code).toContain('brew trust versatiles-org/versatiles');
 		expect(code).toContain('brew install versatiles');
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('\nversatiles server --port 8080 "osm.versatiles"');
+		expect(code).toContain('\nversatiles serve --port 8080 "osm.versatiles"');
 	});
 
 	it('generates code for script on windows', () => {
@@ -52,7 +61,7 @@ describe('generateCode', () => {
 			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1"'
 		);
 		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe server --port 8080 "osm.versatiles"');
+		expect(code).toContain('versatiles.exe serve --port 8080 "osm.versatiles"');
 	});
 
 	it('generates code for cargo on linux', () => {
@@ -67,7 +76,7 @@ describe('generateCode', () => {
 		expect(sourceIdx).toBeGreaterThan(-1);
 		expect(installIdx).toBeGreaterThan(sourceIdx);
 		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('\nversatiles server --port 8080 "osm.versatiles"');
+		expect(code).toContain('\nversatiles serve --port 8080 "osm.versatiles"');
 	});
 
 	it('updates PATH before cargo install on windows', () => {
@@ -88,7 +97,7 @@ describe('generateCode', () => {
 		);
 		expect(code).not.toContain('Program Files');
 		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe server --port 8080 "osm.versatiles"');
+		expect(code).toContain('versatiles.exe serve --port 8080 "osm.versatiles"');
 	});
 
 	it('fails on HTTP errors when piping the install script into a root shell', () => {
@@ -101,11 +110,11 @@ describe('generateCode', () => {
 	it('runs the server without sudo on the default port', () => {
 		// The default port is unprivileged, so no operating system needs root.
 		for (const method of [methodScript, methodCargo, methodSource]) {
-			expect(_generateCode(osLinux, method, maps)).toContain('\nversatiles server --port 8080');
+			expect(_generateCode(osLinux, method, maps)).toContain('\nversatiles serve --port 8080');
 			expect(_generateCode(osLinux, method, maps)).not.toContain('sudo "$(command');
-			expect(_generateCode(osMacos, method, maps)).toContain('\nversatiles server --port 8080');
+			expect(_generateCode(osMacos, method, maps)).toContain('\nversatiles serve --port 8080');
 			expect(_generateCode(osWindows, method, maps)).toContain(
-				'\nversatiles.exe server --port 8080'
+				'\nversatiles.exe serve --port 8080'
 			);
 		}
 	});
@@ -129,38 +138,38 @@ describe('generateCode', () => {
 
 	it('includes frontend download and server static argument', () => {
 		const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, frontend);
-		expect(code).toContain('Downloading frontend...');
+		expect(code).toContain('Downloading frontend');
 		expect(code).toContain('curl -C - -fLo "frontend.br.tar.gz"');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 	});
 
 	it('does not generate map or server commands if maps is empty', () => {
 		const code = _generateCode(osLinux, methodScript, []);
-		expect(code).not.toContain('Downloading map data...');
-		expect(code).not.toContain('Starting VersaTiles server...');
+		expect(code).not.toContain('Downloading map data');
+		expect(code).not.toContain('Starting VersaTiles server');
 	});
 
 	it('does not generate frontend download if frontend is not provided', () => {
 		const code = _generateCode(osLinux, methodScript, maps);
-		expect(code).not.toContain('Downloading frontend...');
+		expect(code).not.toContain('Downloading frontend');
 	});
 
 	it('generates code for docker on linux with maps, frontend, and bbox', () => {
 		const code = _generateCode(osLinux, methodDocker, maps, coverageBbox, bbox, frontend);
-		expect(code).toContain('# Install Docker');
-		expect(code).toContain('Downloading frontend...');
+		expect(code).toContain('Downloading frontend');
 		expect(code).toContain('curl -C - -fLo "frontend.br.tar.gz"');
-		expect(code).toContain('docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest');
+		expect(code).toContain(
+			'docker run -it --rm -v "$(pwd)":/data versatiles/versatiles:latest convert'
+		);
 		expect(code).toContain('--bbox "1,2,3,4"');
-		expect(code).toContain('Configuring and running Docker container...');
+		expect(code).toContain('echo "Starting VersaTiles server in a Docker container..."');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
 		expect(code).toContain('"osm.versatiles"');
 	});
 
 	it('generates code for docker_nginx on linux with maps, bbox, and frontend', () => {
 		const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend);
-		expect(code).toContain('# Install Docker');
-		expect(code).toContain('# Point your domain to the server IP');
+		expect(code).toContain('echo "Starting VersaTiles server with Nginx and TLS..."');
 		expect(code).toContain('-e DOMAIN=maps.example.com');
 		expect(code).toContain('-e EMAIL=admin@example.com');
 		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
@@ -193,16 +202,14 @@ describe('generateCode', () => {
 		).toBeUndefined();
 	});
 
-	it('emits only comments and the docker command for docker_nginx', () => {
+	it('emits only a heading and the docker command for docker_nginx', () => {
 		// Regression: a bare `...` placeholder line failed with "command not found"
 		// when the script was pasted into a shell.
 		const code = _generateCode(osLinux, methodDockerNginx, maps, coverageBbox, bbox, frontend)!;
 		const lines = code.split('\n');
-		const commandStart = lines.findIndex((line) => line.startsWith('docker run'));
-		expect(commandStart).toBeGreaterThan(-1);
-		for (const line of lines.slice(0, commandStart)) {
-			expect(line).toMatch(/^#/);
-		}
+		expect(lines).toHaveLength(2);
+		expect(lines[0]).toMatch(/^echo "/);
+		expect(lines[1]).toMatch(/^docker run /);
 	});
 
 	it('generates code for docker_nginx without bbox (global coverage)', () => {
@@ -241,7 +248,7 @@ describe('generateCode', () => {
 		it('adds --min-zoom and --max-zoom alongside --bbox when both are set', () => {
 			const code = _generateCode(osLinux, methodScript, maps, coverageBbox, bbox, undefined, 5, 12);
 			expect(code).toContain(
-				'versatiles convert --bbox-border 3 --bbox "1,2,3,4" --min-zoom 5 --max-zoom 12'
+				'versatiles convert --bbox "1,2,3,4" --bbox-border 3 --min-zoom 5 --max-zoom 12'
 			);
 		});
 
@@ -286,7 +293,7 @@ describe('generateCode', () => {
 				undefined,
 				10
 			);
-			expect(code).toContain('convert --bbox-border 3 --bbox "1,2,3,4" --max-zoom 10');
+			expect(code).toContain('convert --bbox "1,2,3,4" --bbox-border 3 --max-zoom 10');
 		});
 	});
 
@@ -304,7 +311,7 @@ describe('generateCode', () => {
 		it('omits frontend download when none is selected', () => {
 			const none = optionsFrontend.find((f) => f.key === 'none')!;
 			const code = _generateCode(osLinux, methodScript, maps, undefined, undefined, none);
-			expect(code).not.toContain('Downloading frontend...');
+			expect(code).not.toContain('Downloading frontend');
 			expect(code).not.toContain('--static');
 		});
 	});
@@ -312,14 +319,13 @@ describe('generateCode', () => {
 	describe('server settings', () => {
 		const base = { maps, coverage: coverageBbox, bbox, frontend };
 
-		it('uses the example domain and email with a warning by default', () => {
+		it('uses the example domain and email by default', () => {
 			const code = generateCode({ os: osLinux, method: methodDockerNginx, ...base })!;
-			expect(code).toContain('-e DOMAIN=maps.example.com \\');
-			expect(code).toContain('-e EMAIL=admin@example.com \\');
-			expect(code).toContain('# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+			expect(code).toContain('-e DOMAIN=maps.example.com');
+			expect(code).toContain('-e EMAIL=admin@example.com');
 		});
 
-		it('uses domain and email for docker_nginx and drops the warning', () => {
+		it('uses domain and email for docker_nginx', () => {
 			const code = generateCode({
 				os: osLinux,
 				method: methodDockerNginx,
@@ -327,23 +333,20 @@ describe('generateCode', () => {
 				domain: 'tiles.my-city.org',
 				email: 'ops@my-city.org'
 			})!;
-			expect(code).toContain('-e DOMAIN=tiles.my-city.org \\');
-			expect(code).toContain('-e EMAIL=ops@my-city.org \\');
+			expect(code).toContain('-e DOMAIN=tiles.my-city.org');
+			expect(code).toContain('-e EMAIL=ops@my-city.org');
 			expect(code).not.toContain('example.com');
-			expect(code).not.toContain('USE THE CORRECT DOMAIN');
-			expect(code).toContain('# Point your domain to the server IP before you continue.');
 		});
 
-		it('keeps the warning while only one of domain and email is set', () => {
+		it('uses the example value for the one of domain and email that is not set', () => {
 			const code = generateCode({
 				os: osLinux,
 				method: methodDockerNginx,
 				...base,
 				domain: 'tiles.my-city.org'
 			})!;
-			expect(code).toContain('-e DOMAIN=tiles.my-city.org \\');
-			expect(code).toContain('-e EMAIL=admin@example.com \\');
-			expect(code).toContain('# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+			expect(code).toContain('-e DOMAIN=tiles.my-city.org');
+			expect(code).toContain('-e EMAIL=admin@example.com');
 		});
 
 		it('never emits invalid values', () => {
@@ -354,27 +357,29 @@ describe('generateCode', () => {
 				domain: 'a.com; rm -rf /',
 				email: '$(id)@example.com'
 			})!;
-			expect(code).toContain('-e DOMAIN=maps.example.com \\');
-			expect(code).toContain('-e EMAIL=admin@example.com \\');
+			expect(code).toContain('-e DOMAIN=maps.example.com');
+			expect(code).toContain('-e EMAIL=admin@example.com');
 			expect(code).not.toContain('rm -rf');
 			expect(code).not.toContain('$(id)');
 
 			for (const port of [0, 65536, 80.5, NaN]) {
 				expect(generateCode({ os: osMacos, method: methodScript, ...base, port })).toContain(
-					'versatiles server --port 8080 '
+					'versatiles serve --port 8080 '
 				);
 			}
 		});
 
 		it('ignores the port for docker_nginx', () => {
 			const code = generateCode({ os: osLinux, method: methodDockerNginx, ...base, port: 8080 })!;
-			expect(code).toContain('-p 80:80 -p 443:443 \\');
+			expect(code).toContain('-p 80:80 -p 443:443');
 			expect(code).not.toContain('8080');
 		});
 
 		it('maps the port for docker', () => {
 			const code = generateCode({ os: osLinux, method: methodDocker, ...base, port: 8081 })!;
-			expect(code).toContain('docker run -d --name versatiles -p 8081:8080 -v $(pwd):/data');
+			expect(code).toContain(
+				'docker run -d --name versatiles -p 8081:8080 -v "$(pwd)":/data versatiles/versatiles:latest serve '
+			);
 		});
 
 		it('ignores domain and email for other methods', () => {
@@ -393,7 +398,7 @@ describe('generateCode', () => {
 			(method) => {
 				for (const os of [osLinux, osMacos, osWindows]) {
 					expect(generateCode({ os, method, ...base, port: 8080 })).toContain(
-						' server --port 8080 '
+						' serve --port 8080 '
 					);
 				}
 			}
@@ -401,7 +406,9 @@ describe('generateCode', () => {
 
 		it('uses the default port for docker', () => {
 			const code = generateCode({ os: osLinux, method: methodDocker, ...base })!;
-			expect(code).toContain('docker run -d --name versatiles -p 8080:8080 -v $(pwd):/data');
+			expect(code).toContain(
+				'docker run -d --name versatiles -p 8080:8080 -v "$(pwd)":/data versatiles/versatiles:latest serve '
+			);
 		});
 
 		it('never uses sudo on macos and windows', () => {
@@ -415,13 +422,178 @@ describe('generateCode', () => {
 		it('uses sudo on linux only for privileged ports', () => {
 			const run = (port?: number) =>
 				generateCode({ os: osLinux, method: methodScript, ...base, port })!;
-			expect(run()).toContain('\nversatiles server --port 8080 ');
-			expect(run(80)).toContain('sudo "$(command -v versatiles)" server --port 80 ');
-			expect(run(443)).toContain('sudo "$(command -v versatiles)" server --port 443 ');
-			expect(run(1023)).toContain('sudo "$(command -v versatiles)" server --port 1023 ');
-			expect(run(1024)).toContain('\nversatiles server --port 1024 ');
-			expect(run(8080)).toContain('\nversatiles server --port 8080 ');
+			expect(run()).toContain('\nversatiles serve --port 8080 ');
+			expect(run(80)).toContain('sudo "$(command -v versatiles)" serve --port 80 ');
+			expect(run(443)).toContain('sudo "$(command -v versatiles)" serve --port 443 ');
+			expect(run(1023)).toContain('sudo "$(command -v versatiles)" serve --port 1023 ');
+			expect(run(1024)).toContain('\nversatiles serve --port 1024 ');
+			expect(run(8080)).toContain('\nversatiles serve --port 8080 ');
 			expect(run(8080)).not.toContain('sudo "$(command');
 		});
+	});
+
+	describe('layout', () => {
+		const state: SetupState = {
+			os: osLinux,
+			method: methodScript,
+			maps,
+			coverage: coverageBbox,
+			bbox,
+			minZoom: 2,
+			maxZoom: 12,
+			frontend
+		};
+		const everyCombination = optionsOS.flatMap((os) =>
+			allMethods
+				.filter((method) => method.os.includes(os.key))
+				.map((method) => ({ os, method, name: `${os.key}/${method.key}` }))
+		);
+
+		it('starts every section with a heading and separates sections by one empty line', () => {
+			for (const { os, method } of everyCombination) {
+				const code = generateWrappedCode({ ...state, os, method })!;
+				expect(code).not.toMatch(/\n\n\n/);
+				for (const section of code.split('\n\n')) {
+					expect(section).toMatch(/^echo "[A-Za-z ]+\.\.\."\n/);
+				}
+			}
+		});
+
+		it('contains no comments', () => {
+			// zsh, the default shell of macOS, does not know comments in pasted code.
+			// It runs "#" as a command, and what follows as its arguments: quotes,
+			// parentheses and pipes in a comment then do what they do in a command.
+			for (const { os, method } of everyCombination) {
+				expect(generateWrappedCode({ ...state, os, method })).not.toContain('#');
+			}
+		});
+
+		it('contains nothing in a heading that a shell would expand', () => {
+			for (const { os, method } of everyCombination) {
+				const code = generateWrappedCode({ ...state, os, method })!;
+				for (const heading of code.split('\n').filter((line) => line.startsWith('echo '))) {
+					expect(heading).toMatch(/^echo "[A-Za-z ]+\.\.\."$/);
+				}
+			}
+		});
+
+		it('wraps long commands with a backslash on linux and macos', () => {
+			const code = generateWrappedCode(state)!;
+			expect(code).toContain(
+				[
+					'versatiles convert \\',
+					'  --bbox "1,2,3,4" --bbox-border 3 \\',
+					'  --min-zoom 2 --max-zoom 12 \\',
+					'  "https://download.versatiles.org/osm.versatiles" \\',
+					'  "osm.versatiles"'
+				].join('\n')
+			);
+			expect(code).toContain(
+				[
+					'versatiles serve \\',
+					'  --port 8080 \\',
+					'  --static "frontend.br.tar.gz" \\',
+					'  "osm.versatiles" "satellite.versatiles" "elevation.versatiles"'
+				].join('\n')
+			);
+			expect(code).not.toContain('`');
+		});
+
+		it('wraps long commands with a backtick on windows', () => {
+			const code = generateWrappedCode({ ...state, os: osWindows })!;
+			expect(code).toContain(
+				[
+					'versatiles.exe serve `',
+					'  --port 8080 `',
+					'  --static "frontend.br.tar.gz" `',
+					'  "osm.versatiles" "satellite.versatiles" "elevation.versatiles"'
+				].join('\n')
+			);
+			// A backslash at the end of a line would not continue it in PowerShell.
+			expect(code).not.toMatch(/\\$/m);
+		});
+
+		it('never leaves whitespace after a line continuation', () => {
+			for (const { os, method } of everyCombination) {
+				expect(generateWrappedCode({ ...state, os, method })).not.toMatch(/[\\`][ \t]+$/m);
+			}
+		});
+
+		it.each(everyCombination)('keeps lines short for $name', ({ os, method }) => {
+			// Only a URL that cannot be broken may exceed the limit.
+			const lines = generateWrappedCode({ ...state, os, method })!.split('\n');
+			for (const line of lines.filter((line) => !line.includes('https://'))) {
+				expect(line.length, line).toBeLessThanOrEqual(80);
+			}
+		});
+
+		it('uses the same server command for all methods', () => {
+			for (const { os, method } of everyCombination) {
+				if (method.key === 'docker_nginx') continue;
+				const code = generateCode({ ...state, os, method })!;
+				expect(code).toMatch(
+					/ serve (--port \d+ )?--static "frontend\.br\.tar\.gz" "osm\.versatiles"/
+				);
+				// …and not its alias `server` (headings may use the word)
+				expect(code).not.toMatch(/^(?!echo ).* server /m);
+			}
+		});
+	});
+});
+
+describe('generateNotes', () => {
+	const base = { maps, coverage: coverageBbox, bbox, frontend };
+	const global = { ...base, coverage: optionsCoverage.find((opt) => opt.key === 'global')! };
+	const DOCKER = /^Docker has to be installed/;
+	const DOMAIN = /^Point your domain to the IP address/;
+	const EXAMPLE = /^Replace the example domain and email address/;
+	const RESUME = /"curl -C -" resumes it/;
+	const SUDO = /started with sudo/;
+
+	it('returns nothing without os and method', () => {
+		expect(generateNotes({ maps: [] })).toEqual([]);
+	});
+
+	it('mentions that curl resumes downloads', () => {
+		expect(generateNotes({ os: osLinux, method: methodScript, ...global })).toEqual([
+			expect.stringMatching(RESUME)
+		]);
+		// With a region the map data is converted, but the frontend still uses curl.
+		expect(generateNotes({ os: osLinux, method: methodScript, ...base })).toEqual([
+			expect.stringMatching(RESUME)
+		]);
+		expect(
+			generateNotes({ os: osLinux, method: methodScript, ...base, frontend: undefined })
+		).toEqual([]);
+	});
+
+	it('explains sudo for privileged ports on linux only', () => {
+		const notes = (os: OptionOS, port?: number) =>
+			generateNotes({ os, method: methodScript, ...base, frontend: undefined, port });
+		expect(notes(osLinux, 80)).toEqual([expect.stringMatching(SUDO)]);
+		expect(notes(osLinux, 8080)).toEqual([]);
+		expect(notes(osLinux)).toEqual([]);
+		expect(notes(osMacos, 80)).toEqual([]);
+		expect(notes(osWindows, 80)).toEqual([]);
+	});
+
+	it('mentions Docker, but not sudo, for docker', () => {
+		expect(
+			generateNotes({ os: osLinux, method: methodDocker, ...base, frontend: undefined, port: 80 })
+		).toEqual([expect.stringMatching(DOCKER)]);
+	});
+
+	it('asks for domain and email for docker_nginx until both are valid', () => {
+		const notes = (domain?: string, email?: string) =>
+			generateNotes({ os: osLinux, method: methodDockerNginx, ...base, domain, email });
+		const always = [expect.stringMatching(DOCKER), expect.stringMatching(DOMAIN)];
+
+		expect(notes()).toEqual([...always, expect.stringMatching(EXAMPLE)]);
+		expect(notes('tiles.my-city.org')).toEqual([...always, expect.stringMatching(EXAMPLE)]);
+		expect(notes('a.com; rm -rf /', 'ops@my-city.org')).toEqual([
+			...always,
+			expect.stringMatching(EXAMPLE)
+		]);
+		expect(notes('tiles.my-city.org', 'ops@my-city.org')).toEqual(always);
 	});
 });

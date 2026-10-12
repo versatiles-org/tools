@@ -4,17 +4,25 @@
  */
 
 import type { KeyOS } from '../../../src/routes/setup_server/options.js';
+import { unwrapCommands } from '../../../src/routes/setup_server/shell_format.js';
 
 export const PORT = 8080;
 
-// Returns the last line that is a command, which for the native methods is the
-// one that starts the server.
-export function findServerLine(lines: string[]): number {
-	for (let i = lines.length - 1; i >= 0; i--) {
-		const trimmed = lines[i].trim();
-		if (trimmed && !trimmed.startsWith('#')) return i;
-	}
-	throw new Error('Generated code contains no command');
+// Splits off the last command, which for the native methods is the one that
+// starts the server. It may span several lines; it is returned on a single one.
+export function splitServerCommand(code: string): { before: string; command: string } {
+	const lines = code.split('\n');
+	let end = lines.length - 1;
+	while (end >= 0 && (!lines[end].trim() || lines[end].trim().startsWith('#'))) end--;
+	if (end < 0) throw new Error('Generated code contains no command');
+
+	let start = end;
+	while (start > 0 && /[\\`]$/.test(lines[start - 1])) start--;
+
+	return {
+		before: lines.slice(0, start).join('\n'),
+		command: unwrapCommands(lines.slice(start, end + 1).join('\n'))
+	};
 }
 
 export function applyModifications(
@@ -32,21 +40,22 @@ export function applyModifications(
 		case 'source': {
 			if (osKey === 'windows') {
 				// Background the server with Start-Process and save PID
-				code = code.replace(/^(versatiles\.exe server .+)$/m, (match) => {
-					const args = match.replace('versatiles.exe ', '');
-					return [
-						`$proc = Start-Process versatiles.exe -ArgumentList '${args}' -PassThru -NoNewWindow`,
-						'$proc.Id | Out-File -Encoding ascii "$PSScriptRoot\\server.pid"'
-					].join('\n');
-				});
-			} else {
-				// Background the server and save PID
-				const lines = code.split('\n');
-				const redirect = logFile ? ' > "$_SMOKE_DIR/server.log" 2>&1' : '';
-				lines[findServerLine(lines)] += `${redirect} & echo $! > "$_SMOKE_DIR/server.pid"`;
-				code = lines.join('\n');
+				const { before, command } = splitServerCommand(code);
+				if (!command.startsWith('versatiles.exe serve ')) {
+					throw new Error(`Expected the last command to start the server, but got: ${command}`);
+				}
+				const args = command.replace('versatiles.exe ', '');
+				return [
+					before,
+					`$proc = Start-Process versatiles.exe -ArgumentList '${args}' -PassThru -NoNewWindow`,
+					'$proc.Id | Out-File -Encoding ascii "$PSScriptRoot\\server.pid"'
+				].join('\n');
 			}
-			return code;
+
+			// Background the server and save PID. The command keeps its line breaks,
+			// so the code that runs is laid out like the code a user copies.
+			const redirect = logFile ? ' > "$_SMOKE_DIR/server.log" 2>&1' : '';
+			return `${code.trimEnd()}${redirect} & echo $! > "$_SMOKE_DIR/server.pid"`;
 		}
 
 		case 'docker': {

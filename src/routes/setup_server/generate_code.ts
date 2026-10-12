@@ -8,7 +8,64 @@ import {
 	isValidEmail,
 	isValidPort
 } from './server_settings';
+import type { KeyOS } from './options';
+import { wrapCommand } from './shell_format';
 import type { SetupState } from './types';
+
+// The server settings are typed in by the user and end up in a shell command,
+// so anything invalid is replaced by the example value or the default.
+function serverSettings({ domain, email, port }: Pick<SetupState, 'domain' | 'email' | 'port'>) {
+	return {
+		validDomain: domain !== undefined && isValidDomain(domain) ? domain : undefined,
+		validEmail: email !== undefined && isValidEmail(email) ? email : undefined,
+		serverPort: port !== undefined && isValidPort(port) ? port : DEFAULT_PORT
+	};
+}
+
+// Whether the server is started with sudo: binding a privileged port (like 80)
+// requires root on Linux.
+function serverNeedsSudo(os: KeyOS, port: number): boolean {
+	return os === 'linux' && isPrivilegedPort(port);
+}
+
+/**
+ * Remarks on the generated code, to be shown next to it. They are not comments
+ * in the code, because not every shell accepts comments in pasted code.
+ */
+export function generateNotes(state: SetupState): string[] {
+	const { os, method, maps, coverage, frontend } = state;
+	if (!os || !method) return [];
+
+	const { validDomain, validEmail, serverPort } = serverSettings(state);
+	const notes: string[] = [];
+
+	if (method.key === 'docker' || method.key === 'docker_nginx') {
+		notes.push(
+			'Docker has to be installed, for example with: curl -fsSL https://get.docker.com | sudo sh'
+		);
+	}
+
+	if (method.key === 'docker_nginx') {
+		notes.push('Point your domain to the IP address of the server before you run the command.');
+		if (!validDomain || !validEmail) {
+			notes.push('Replace the example domain and email address with your own in the fields above.');
+		}
+		return notes;
+	}
+
+	const downloadsMaps = maps.length > 0 && coverage?.key !== 'bbox';
+	if (downloadsMaps || frontend?.name) {
+		notes.push('If a download is interrupted, run its command again: "curl -C -" resumes it.');
+	}
+
+	if (method.key !== 'docker' && maps.length > 0 && serverNeedsSudo(os.key, serverPort)) {
+		notes.push(
+			'Ports below 1024 are reserved for root on Linux, so the server is started with sudo.'
+		);
+	}
+
+	return notes;
+}
 
 export function generateCode({
 	os,
@@ -44,174 +101,185 @@ export function generateCode({
 	const needsConvert =
 		bboxArg !== undefined || effectiveMinZoom !== undefined || effectiveMaxZoom !== undefined;
 
-	// These values are typed in by the user and end up in a shell command, so
-	// anything invalid is replaced by the example value or the default.
-	const validDomain = domain !== undefined && isValidDomain(domain) ? domain : undefined;
-	const validEmail = email !== undefined && isValidEmail(email) ? email : undefined;
-	const serverPort = port !== undefined && isValidPort(port) ? port : DEFAULT_PORT;
+	const { validDomain, validEmail, serverPort } = serverSettings({ domain, email, port });
 
-	if (method.key.startsWith('docker')) {
-		return [...runDocker()].join('\n');
+	// The code consists of sections, each one a heading followed by its commands.
+	// A heading is an `echo`, not a comment: zsh, the default shell of macOS, does
+	// not know comments when code is pasted into it and would try to run them.
+	// So the code contains no comments at all; see `generateNotes` for remarks.
+	const sections =
+		method.key === 'docker' || method.key === 'docker_nginx'
+			? [...runDocker()]
+			: [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()];
+
+	return sections.map((section) => section.join('\n')).join('\n\n');
+
+	function heading(text: string): string {
+		return `echo "${text}..."`;
 	}
 
-	return [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()].join(
-		'\n'
-	);
+	function wrap(...parts: string[]): string {
+		return wrapCommand(os!.key, parts);
+	}
 
-	function* runDocker(): Generator<string> {
-		yield `# Install Docker on your server,`;
-		yield `# e.g. \`curl -fsSL https://get.docker.com | sudo sh\``;
-		switch (method!.key) {
-			case 'docker': {
-				yield* downloadFrontend();
-				yield* downloadMaps(
-					'docker run -it --rm -v $(pwd):/data versatiles/versatiles:latest \\\n'
-				);
-
-				const serverArgs = [];
-				if (frontend?.name) {
-					serverArgs.push(`--static "${frontend.name}.br.tar.gz"`);
-				}
-				for (const map of maps) {
-					serverArgs.push(`"${map.key}.versatiles"`);
-				}
-
-				yield ``;
-				yield `echo "Configuring and running Docker container..."`;
-				yield `docker run -d --name versatiles -p ${serverPort}:8080 -v $(pwd):/data versatiles/versatiles:latest \\`;
-				yield `  serve ${serverArgs.join(' ')}`;
-				break;
-			}
-			case 'docker_nginx':
-				yield `# Point your domain to the server IP before you continue.`;
-				if (!validDomain || !validEmail) {
-					yield `# USE THE CORRECT DOMAIN AND EMAIL SETTINGS!`;
-				}
-				yield `docker run -d --name versatiles \\`;
-				yield `  -p 80:80 -p 443:443 \\`;
-				yield `  -v $(pwd)/data:/data \\`;
-				yield `  -e DOMAIN=${validDomain ?? EXAMPLE_DOMAIN} \\`;
-				yield `  -e EMAIL=${validEmail ?? EXAMPLE_EMAIL} \\`;
-				yield `  -e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')} \\`;
-
-				if (bboxArg) {
-					yield `  -e BBOX="${bboxArg}" \\`;
-				}
-
-				yield `  -e FRONTEND=${frontend?.key ?? 'standard'} \\`;
-				yield `  versatiles/versatiles-nginx:latest`;
-				break;
-			default:
-				yield `# Unsupported Docker method ${method!.key}`;
-				break;
+	function* runDocker(): Generator<string[]> {
+		if (method!.key === 'docker') {
+			yield* downloadMaps('docker run -it --rm -v "$(pwd)":/data versatiles/versatiles:latest');
+			yield* downloadFrontend();
+			yield [
+				heading('Starting VersaTiles server in a Docker container'),
+				wrap(
+					'docker run -d --name versatiles',
+					`-p ${serverPort}:8080`,
+					'-v "$(pwd)":/data',
+					'versatiles/versatiles:latest serve',
+					...serverArgs()
+				)
+			];
+			return;
 		}
+
+		const args = [
+			'-p 80:80 -p 443:443',
+			'-v "$(pwd)/data":/data',
+			`-e DOMAIN=${validDomain ?? EXAMPLE_DOMAIN}`,
+			`-e EMAIL=${validEmail ?? EXAMPLE_EMAIL}`,
+			`-e TILE_SOURCES=${maps.map((m) => m.key + '.versatiles').join(',')}`
+		];
+		if (bboxArg) args.push(`-e BBOX="${bboxArg}"`);
+		args.push(`-e FRONTEND=${frontend?.key ?? 'standard'}`);
+
+		yield [
+			heading('Starting VersaTiles server with Nginx and TLS'),
+			wrap('docker run -d --name versatiles', ...args, 'versatiles/versatiles-nginx:latest')
+		];
 	}
 
-	function* installVersatiles(): Generator<string> {
+	function* installVersatiles(): Generator<string[]> {
+		const windows = os!.key === 'windows';
+
 		switch (method!.key) {
 			case 'homebrew':
-				yield `echo "Installing VersaTiles..."`;
-				yield `brew tap versatiles-org/versatiles`;
-				yield `brew trust versatiles-org/versatiles`;
-				yield `brew install versatiles`;
+				yield [
+					heading('Installing VersaTiles'),
+					'brew tap versatiles-org/versatiles',
+					'brew trust versatiles-org/versatiles',
+					'brew install versatiles'
+				];
 				break;
-			case 'script':
-				yield `echo "Installing VersaTiles..."`;
-				if (os!.key === 'windows') {
-					yield 'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1" -OutFile "$env:TEMP\\install-windows.ps1"\n. "$env:TEMP\\install-windows.ps1"';
+			case 'script': {
+				const url = 'https://github.com/versatiles-org/versatiles-rs/releases/latest/download';
+				if (windows) {
+					yield [
+						heading('Installing VersaTiles'),
+						wrap(
+							'Invoke-WebRequest',
+							`-Uri "${url}/install-windows.ps1"`,
+							'-OutFile "$env:TEMP\\install-windows.ps1"'
+						),
+						'. "$env:TEMP\\install-windows.ps1"'
+					];
 				} else {
 					// `-f`: fail on HTTP errors instead of piping an error page into a root shell.
-					yield 'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh" | sudo sh';
+					yield [heading('Installing VersaTiles'), `curl -fsSL "${url}/install-unix.sh" | sudo sh`];
 				}
 				break;
+			}
 			case 'cargo':
-				yield 'echo "Installing Rust..."';
-				if (os!.key === 'windows') {
-					yield 'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe\n.\\rustup-init.exe -y';
-					// rustup-init updates the user profile but not the current shell —
-					// prepend ~/.cargo/bin to PATH so `cargo` is found this session.
-					yield '$env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"';
+				if (windows) {
+					yield [
+						heading('Installing Rust'),
+						'Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe',
+						'.\\rustup-init.exe -y',
+						// rustup-init updates the user profile but not the current shell —
+						// prepend ~/.cargo/bin to PATH so `cargo` is found this session.
+						'$env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"'
+					];
 				} else {
-					yield 'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y';
-					// rustup-init writes ~/.cargo/env; source it so `cargo` is on PATH
-					// in the current shell (without restarting).
-					yield '. "$HOME/.cargo/env"';
+					yield [
+						heading('Installing Rust'),
+						'curl --proto "=https" --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y',
+						// rustup-init writes ~/.cargo/env; source it so `cargo` is on PATH
+						// in the current shell (without restarting).
+						'. "$HOME/.cargo/env"'
+					];
 				}
-				yield 'echo "Compiling and installing VersaTiles..."';
-				yield 'cargo install versatiles';
+				yield [heading('Compiling and installing VersaTiles'), 'cargo install versatiles'];
 				break;
 			case 'source':
-				yield 'echo "Cloning repository..."';
-				yield `git clone https://github.com/versatiles-org/versatiles-rs.git`;
-				yield 'cd versatiles-rs';
-				yield 'echo "Building project..."';
-				yield 'cargo build --bin versatiles --release';
-				yield 'echo "Installing binary..."';
-				if (os!.key === 'windows') {
-					// Cargo's bin directory exists and is on PATH wherever the Rust
-					// toolchain is installed, and needs no administrator rights.
-					yield 'Copy-Item "target\\release\\versatiles.exe" "$env:USERPROFILE\\.cargo\\bin\\"';
-				} else {
-					yield 'sudo cp target/release/versatiles /usr/local/bin/';
-				}
-				// Return to the original working directory so subsequent map / frontend
-				// downloads don't land inside versatiles-rs/.
-				yield 'cd ..';
+				yield [
+					heading('Building VersaTiles from source'),
+					'git clone https://github.com/versatiles-org/versatiles-rs.git',
+					'cd versatiles-rs',
+					'cargo build --bin versatiles --release'
+				];
+				yield [
+					heading('Installing binary'),
+					windows
+						? // Cargo's bin directory exists and is on PATH wherever the Rust
+							// toolchain is installed, and needs no administrator rights.
+							'Copy-Item "target\\release\\versatiles.exe" "$env:USERPROFILE\\.cargo\\bin\\"'
+						: 'sudo cp target/release/versatiles /usr/local/bin/',
+					// Return to the original working directory so subsequent map / frontend
+					// downloads don't land inside versatiles-rs/.
+					'cd ..'
+				];
 				break;
 		}
 	}
 
-	function* downloadMaps(alternateVersatilesBin?: string): Generator<string> {
+	function* downloadMaps(alternateVersatilesBin?: string): Generator<string[]> {
 		if (maps.length === 0) return;
 
-		yield `\necho "Downloading map data..."`;
+		const section = [heading('Downloading map data')];
+
+		const zoomFlags: string[] = [];
+		if (effectiveMinZoom !== undefined) zoomFlags.push(`--min-zoom ${effectiveMinZoom}`);
+		if (effectiveMaxZoom !== undefined) zoomFlags.push(`--max-zoom ${effectiveMaxZoom}`);
 
 		for (const map of maps) {
 			const filename = `${map.key}.versatiles`;
 			const url = `https://download.versatiles.org/${filename}`;
 			if (needsConvert) {
-				const flags: string[] = [];
-				if (bboxArg) flags.push(`--bbox-border ${BORDER}`, `--bbox "${bboxArg}"`);
-				if (effectiveMinZoom !== undefined) flags.push(`--min-zoom ${effectiveMinZoom}`);
-				if (effectiveMaxZoom !== undefined) flags.push(`--max-zoom ${effectiveMaxZoom}`);
-				yield `${alternateVersatilesBin ?? versatilesBin} convert ${flags.join(' ')} "${url}" "${filename}"`;
+				const parts = [`${alternateVersatilesBin ?? versatilesBin} convert`];
+				if (bboxArg) parts.push(`--bbox "${bboxArg}" --bbox-border ${BORDER}`);
+				if (zoomFlags.length > 0) parts.push(zoomFlags.join(' '));
+				section.push(wrap(...parts, `"${url}"`, `"${filename}"`));
 			} else {
-				yield `${curlBin} -C - -fLo "${filename}" "${url}"`;
+				section.push(`${curlBin} -C - -fLo "${filename}" "${url}"`);
 			}
 		}
+
+		yield section;
 	}
 
-	function* downloadFrontend(): Generator<string> {
+	function* downloadFrontend(): Generator<string[]> {
 		if (!frontend || !frontend.name) return;
-
-		yield `\necho "Downloading frontend..."`;
 
 		const filename = `${frontend.name}.br.tar.gz`;
 		const url = `https://github.com/versatiles-org/versatiles-frontend/releases/latest/download/${filename}`;
-		yield `${curlBin} -C - -fLo "${filename}" "${url}"`;
+		yield [heading('Downloading frontend'), wrap(`${curlBin} -C - -fLo "${filename}"`, `"${url}"`)];
 	}
 
-	function* startServer(): Generator<string> {
+	// Arguments of the server that are the same for all methods
+	function serverArgs(): string[] {
+		const args: string[] = [];
+		if (frontend?.name) args.push(`--static "${frontend.name}.br.tar.gz"`);
+		args.push(maps.map((map) => `"${map.key}.versatiles"`).join(' '));
+		return args;
+	}
+
+	function* startServer(): Generator<string[]> {
 		if (maps.length === 0) return;
 
-		yield `\necho "Starting VersaTiles server..."`;
-
-		const serverArgs = [`--port ${serverPort}`];
-
-		if (frontend?.name) {
-			serverArgs.push(`--static "${frontend.name}.br.tar.gz"`);
-		}
-
-		for (const map of maps) {
-			serverArgs.push(`"${map.key}.versatiles"`);
-		}
-
-		// Binding a privileged port (like 80) requires root on Linux.
 		// `command -v` resolves the binary first, because sudo's restricted PATH may
 		// not contain it (e.g. ~/.cargo/bin).
-		const needsSudo = os!.key === 'linux' && isPrivilegedPort(serverPort);
+		const needsSudo = serverNeedsSudo(os!.key, serverPort);
 		const serverBin = needsSudo ? `sudo "$(command -v ${versatilesBin})"` : versatilesBin;
 
-		yield `${serverBin} server ${serverArgs.join(' ')}`;
+		yield [
+			heading('Starting VersaTiles server'),
+			wrap(`${serverBin} serve`, `--port ${serverPort}`, ...serverArgs())
+		];
 	}
 }

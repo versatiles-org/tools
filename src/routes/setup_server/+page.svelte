@@ -3,7 +3,7 @@
 	import FormOptionGroup from './components/FormOptionGroup.svelte';
 	import PageMeta from '../../lib/PageMeta/PageMeta.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
-	import { generateCode } from './generate_code';
+	import { generateCode, generateNotes } from './generate_code';
 	import { clampZoom, decodeHash, encodeHash, MAX_ZOOM_LIMIT, MIN_ZOOM_LIMIT } from './hash';
 	import {
 		DEFAULT_PORT,
@@ -150,6 +150,10 @@
 		if (!coverageReady) return undefined;
 		return generateCode({ ...selection, domain, email, port });
 	});
+
+	// Remarks on the code. They are shown below it and are not comments in it,
+	// because not every shell accepts comments in pasted code.
+	let notes = $derived(code ? generateNotes({ ...selection, domain, email, port }) : []);
 
 	async function copyShareLink(this: HTMLButtonElement) {
 		const hash = encodeHash(selection);
@@ -331,6 +335,9 @@
 			<p class="hint input-error">{settingsError}</p>
 		{/if}
 		<CodeBlock {code} />
+		{#each notes as note (note)}
+			<p class="hint note">{note}</p>
+		{/each}
 		<p style="text-align:center; margin-top: 8em; font-size: 0.8em; opacity: 0.7;">
 			Share your current selection:<br />
 			<button onclick={copyShareLink} class="check">copy link</button>
@@ -413,6 +420,9 @@
 	.server-settings input.wide {
 		width: 14rem;
 		max-width: 100%;
+	}
+	.note {
+		margin: 0.4rem 0;
 	}
 	.input-error {
 		color: #e88;

@@ -23,14 +23,15 @@ test.describe('server settings', () => {
 
 		await expect(page.getByLabel('Domain')).toHaveCount(0);
 		await expect(page.getByLabel('Email')).toHaveCount(0);
-		await expect(code).toContainText('versatiles server --port 8080 ');
+		await expect(code).toContainText('--port 8080 ');
 		await expect(code).not.toContainText('sudo "$(command -v versatiles)"');
 
 		await port.fill('80');
-		await expect(code).toContainText('sudo "$(command -v versatiles)" server --port 80 ');
+		await expect(code).toContainText('sudo "$(command -v versatiles)" serve');
+		await expect(code).toContainText('--port 80 ');
 
 		await port.fill('1024');
-		await expect(code).toContainText('versatiles server --port 1024 ');
+		await expect(code).toContainText('--port 1024 ');
 		await expect(code).not.toContainText('sudo "$(command -v versatiles)"');
 	});
 
@@ -42,7 +43,7 @@ test.describe('server settings', () => {
 		await port.blur();
 
 		await expect(page.getByText('Port must be a number between 1 and 65535')).toBeVisible();
-		await expect(page.locator('code').first()).toContainText('server --port 8080 ');
+		await expect(page.locator('code').first()).toContainText('--port 8080 ');
 	});
 
 	test('domain and email replace the example values for Docker with Nginx', async ({ page }) => {
@@ -51,14 +52,18 @@ test.describe('server settings', () => {
 
 		await expect(page.getByLabel('Port')).toHaveCount(0);
 		await expect(code).toContainText('-e DOMAIN=maps.example.com');
-		await expect(code).toContainText('USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+		const note = page.getByText('Replace the example domain and email address');
+		await expect(note).toBeVisible();
 
 		await page.getByLabel('Domain').fill('tiles.my-city.org');
 		await page.getByLabel('Email').fill('ops@my-city.org');
 
 		await expect(code).toContainText('-e DOMAIN=tiles.my-city.org');
 		await expect(code).toContainText('-e EMAIL=ops@my-city.org');
-		await expect(code).not.toContainText('USE THE CORRECT DOMAIN AND EMAIL SETTINGS!');
+		await expect(note).toHaveCount(0);
+		// Remarks are shown below the code, never as comments in it: zsh does not
+		// know comments in pasted code.
+		await expect(code).not.toContainText('#');
 	});
 
 	test('a value that is not a domain never reaches the script', async ({ page }) => {
