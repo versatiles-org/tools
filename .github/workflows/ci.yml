@@ -51,6 +51,11 @@ jobs:
       - name: Run Tests
         run: npm run test
 
+      # The setup page reads the size indices from download.versatiles.org, so
+      # check that one is published for every map it offers.
+      - name: Check published size indices
+        run: npx tsx tests/integration/check_size_indices.ts
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 

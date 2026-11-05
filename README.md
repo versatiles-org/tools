@@ -88,10 +88,11 @@ There are three layers of tests:
 - **Unit tests** (`npm test`) live next to the code as `*.test.ts` and cover
   code generation, options, the URL hash and the size estimate.
 - **End-to-end tests** (`npm run test:e2e`) live in [e2e](./e2e) and drive the
-  site in a browser. They start their own development server and do not depend
-  on the size indices.
+  site in a browser. They start their own development server and stay offline:
+  [e2e/fixtures.ts](./e2e/fixtures.ts) blocks download.versatiles.org, and
+  tests that need a size index stub it.
 - **Integration tests** live in [tests/integration](./tests/integration) and
-  check the generated install scripts themselves:
+  check the generated install scripts themselves and the data they rely on:
   - `npx tsx tests/integration/extract_code.ts` writes the scripts for all
     combinations of operating system and method to
     `tests/integration/fixtures/generated/`.
@@ -99,6 +100,9 @@ There are three layers of tests:
     and the PowerShell parser. Locally, a missing tool is skipped.
   - `npm run test:integration` executes the scripts for the current operating
     system, waits for the server and checks its HTTP endpoints.
+  - `npx tsx tests/integration/check_size_indices.ts` checks that
+    download.versatiles.org publishes a size index for every map, readable
+    from another origin.
 
 The smoke tests really run the generated scripts: on this machine they install
 VersaTiles (using `sudo`, Homebrew, Cargo or Docker, depending on the method)
@@ -126,6 +130,5 @@ npm run test:integration -- script --container fedora:latest
 
 The [CI workflow](./.github/workflows/ci.yml) checks every pull request. On
 `main` it additionally runs the smoke tests on Linux, macOS and Windows, builds
-the site and deploys it to GitHub Pages. A weekly scheduled run keeps the size
-indices and the page template up to date. The size indices are cached and only
-rebuilt when a tile source or the build script has changed.
+the site and deploys it to GitHub Pages. A weekly scheduled run keeps the page
+template up to date and checks that the size indices are still published.
