@@ -8,7 +8,6 @@ async function selectMethod(page: Page, method: string) {
 	await page.waitForLoadState('networkidle');
 	await page.locator('button', { hasText: 'Linux' }).click();
 	await page.locator('button', { hasText: method }).click();
-	await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 	await page.locator('button', { hasText: 'Entire world' }).click();
 	await expect(
 		page.getByRole('heading', { name: 'Review and run these commands in your shell' })

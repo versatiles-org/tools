@@ -65,30 +65,55 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 // ### Map Options
 // The key names the file on download.versatiles.org and the tile source on the server.
 export type KeyMap = 'osm' | 'satellite' | 'elevation' | 'landcover-vectors';
-export type OptionMap = Option & { key: KeyMap };
+export type OptionMap = Option & {
+	key: KeyMap;
+	// Some maps only add to another one, so the frontends draw them only together
+	// with one of these maps. The note explains this when none of them is selected.
+	drawnWith?: { maps: KeyMap[]; note: string };
+};
 export const optionsMap: OptionMap[] = [
 	{
 		key: 'osm',
 		label: 'OpenStreetMap',
-		hint: 'Vector tiles with streets, buildings, and labels'
+		hint: 'Recommended — the map with streets, buildings, and labels',
+		selected: true
 	},
 	{
 		key: 'satellite',
 		label: 'Satellite imagery',
-		hint: 'Raster tiles with satellite and aerial imagery'
+		hint: 'Satellite and aerial imagery, with labels if OpenStreetMap is selected too'
 	},
 	{
 		key: 'elevation',
 		label: 'Elevation',
-		hint: 'Raster tiles with terrain elevation data'
+		hint: 'Adds hillshading and 3D terrain to OpenStreetMap or satellite imagery',
+		drawnWith: {
+			maps: ['osm', 'satellite'],
+			note: 'Elevation is only drawn on OpenStreetMap or satellite imagery, so select one of them too.'
+		}
 	},
 	{
 		// The frontends' styler draws it under OpenStreetMap when the server has it.
 		key: 'landcover-vectors',
 		label: 'Land cover',
-		hint: 'Vector tiles with forests, farmland, and other land cover, to draw under OpenStreetMap'
+		hint: 'Adds forests, farmland, and other land cover to OpenStreetMap',
+		drawnWith: {
+			maps: ['osm'],
+			note: 'Land cover is only drawn under OpenStreetMap, so select it too.'
+		}
 	}
 ];
+// The maps that are preselected in the form
+export const defaultMaps: OptionMap[] = optionsMap.filter((option) => option.selected);
+
+// Notes on selected maps that the frontends would not draw, because none of the
+// maps they are drawn with is selected.
+export function undrawnMapNotes(maps: OptionMap[]): string[] {
+	const selected = new Set(maps.map((map) => map.key));
+	return maps
+		.filter(({ drawnWith }) => drawnWith && !drawnWith.maps.some((key) => selected.has(key)))
+		.map(({ drawnWith }) => drawnWith!.note);
+}
 
 // ### Coverage Options
 export type BBox = [number, number, number, number];

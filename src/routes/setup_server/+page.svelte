@@ -20,17 +20,19 @@
 
 	import {
 		defaultFrontend,
+		defaultMaps,
 		optionsCoverage,
 		optionsFrontend,
 		optionsMap,
 		optionsMethod,
-		optionsOS
+		optionsOS,
+		undrawnMapNotes
 	} from './options';
 
 	let selection = $state<SetupState>({
 		os: undefined,
 		method: undefined,
-		maps: [],
+		maps: [...defaultMaps],
 		coverage: undefined,
 		bbox: undefined,
 		minZoom: undefined,
@@ -197,6 +199,9 @@
 				bind:valueList={selection.maps}
 			/>
 		</div>
+		{#each undrawnMapNotes(selection.maps) as note (note)}
+			<p class="hint warning">{note}</p>
+		{/each}
 	{/if}
 
 	{#if selection.os && selection.method && selection.maps.length > 0}
@@ -436,5 +441,15 @@
 	}
 	.incomplete {
 		opacity: 0.8;
+	}
+	/* versatiles.org is dark unless the browser prefers light. */
+	.warning {
+		color: #eb8;
+		opacity: 1;
+	}
+	@media (prefers-color-scheme: light) {
+		.warning {
+			color: #8a4b00;
+		}
 	}
 </style>

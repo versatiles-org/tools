@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
 	defaultFrontend,
+	defaultMaps,
+	undrawnMapNotes,
 	optionsOS,
 	optionsMethod,
 	optionsMap,
@@ -40,6 +42,43 @@ describe('optionsMaps', () => {
 			expect.objectContaining({ key: 'satellite', label: 'Satellite imagery' }),
 			expect.objectContaining({ key: 'elevation', label: 'Elevation' }),
 			expect.objectContaining({ key: 'landcover-vectors', label: 'Land cover' })
+		]);
+	});
+});
+
+describe('defaultMaps', () => {
+	it('should preselect OpenStreetMap', () => {
+		expect(defaultMaps.map((map) => map.key)).toEqual(['osm']);
+	});
+});
+
+describe('undrawnMapNotes', () => {
+	const pick = (...keys: string[]) => optionsMap.filter((map) => keys.includes(map.key));
+	const ELEVATION = /^Elevation is only drawn/;
+	const LANDCOVER = /^Land cover is only drawn/;
+
+	it('has no notes for maps that are drawn', () => {
+		expect(undrawnMapNotes([])).toEqual([]);
+		expect(undrawnMapNotes(pick('osm', 'elevation', 'landcover-vectors'))).toEqual([]);
+		expect(undrawnMapNotes(pick('satellite', 'elevation'))).toEqual([]);
+		expect(undrawnMapNotes(pick('satellite'))).toEqual([]);
+	});
+
+	it('notes elevation without a map to draw it on', () => {
+		expect(undrawnMapNotes(pick('elevation'))).toEqual([expect.stringMatching(ELEVATION)]);
+	});
+
+	it('notes land cover without OpenStreetMap, even with satellite imagery', () => {
+		expect(undrawnMapNotes(pick('landcover-vectors'))).toEqual([expect.stringMatching(LANDCOVER)]);
+		expect(undrawnMapNotes(pick('satellite', 'elevation', 'landcover-vectors'))).toEqual([
+			expect.stringMatching(LANDCOVER)
+		]);
+	});
+
+	it('notes both add-ons without any map', () => {
+		expect(undrawnMapNotes(pick('elevation', 'landcover-vectors'))).toEqual([
+			expect.stringMatching(ELEVATION),
+			expect.stringMatching(LANDCOVER)
 		]);
 	});
 });

@@ -9,7 +9,6 @@ async function selectUpToMaps(page: Page) {
 	await page.waitForLoadState('networkidle');
 	await page.locator('button', { hasText: 'Linux' }).click();
 	await page.locator('button', { hasText: 'Install script' }).click();
-	await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 }
 
 test.describe('size estimate', () => {

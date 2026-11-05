@@ -22,7 +22,6 @@ test.describe('share link', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Install script' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Satellite imagery' }).click();
 		await page.locator('button', { hasText: 'Custom region' }).click();
 		const minZoom = page.getByLabel('Min zoom');

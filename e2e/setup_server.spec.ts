@@ -15,7 +15,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Install script' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Entire world' }).click();
 		await page.locator('button', { hasText: 'Standard' }).click();
 
@@ -51,8 +50,12 @@ test.describe('setup_server', () => {
 		await expect(code).not.toContainText('versatiles serve');
 		await expect(page.getByLabel('Port')).toHaveCount(0);
 
-		// Map data without a coverage area must not download the whole planet.
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
+		// OpenStreetMap is preselected, but without a coverage area the script
+		// must not download the whole planet.
+		await expect(page.locator('button', { hasText: 'OpenStreetMap' })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		);
 		await expect(code).not.toContainText('Downloading');
 
 		await page.locator('button', { hasText: 'Entire world' }).click();
@@ -68,7 +71,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: /^\s*Docker\s*$/ }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		const heading = page.getByRole('heading', {
 			name: 'Review and run these commands in your shell'
 		});
@@ -79,6 +81,26 @@ test.describe('setup_server', () => {
 		await expect(page.locator('code').first()).toContainText('docker run');
 	});
 
+	test('notes a map that would not be drawn without OpenStreetMap', async ({ page }) => {
+		await page.goto('/setup_server');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('button', { hasText: 'Linux' }).click();
+		await page.locator('button', { hasText: 'Install script' }).click();
+
+		const osm = page.locator('button', { hasText: 'OpenStreetMap' });
+		const note = page.getByText('Land cover is only drawn under OpenStreetMap');
+		await page.locator('button', { hasText: 'Land cover' }).click();
+		await expect(note).toHaveCount(0);
+
+		await osm.click();
+		await expect(osm).toHaveAttribute('aria-pressed', 'false');
+		await expect(note).toBeVisible();
+
+		await osm.click();
+		await expect(note).toHaveCount(0);
+	});
+
 	test('preselects the Standard frontend', async ({ page }) => {
 		// Regression: no frontend was selected by default, so the native methods
 		// silently installed none while docker_nginx fell back to "standard".
@@ -87,7 +109,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Install script' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Entire world' }).click();
 
 		await expect(page.locator('button', { hasText: 'Standard' })).toHaveAttribute(
@@ -105,7 +126,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Install script' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Custom region' }).click();
 		await page.locator('button', { hasText: 'Standard' }).click();
 
@@ -128,7 +148,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Install script' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Custom region' }).click();
 
 		const minZoom = page.getByLabel('Min zoom');
@@ -167,7 +186,6 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Linux' }).click();
 		await page.locator('button', { hasText: 'Docker with Nginx' }).click();
-		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
 		await page.locator('button', { hasText: 'Custom region' }).click();
 
 		await expect(page.getByText('Zoom range')).toBeHidden();
