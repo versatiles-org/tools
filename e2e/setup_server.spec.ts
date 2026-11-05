@@ -32,6 +32,53 @@ test.describe('setup_server', () => {
 		await expect(code).toContainText('--port 8080');
 	});
 
+	test('shows the install commands after step 2 and completes them later', async ({ page }) => {
+		await page.goto('/setup_server');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('button', { hasText: 'Linux' }).click();
+		await page.locator('button', { hasText: 'Install script' }).click();
+
+		const heading = page.getByRole('heading', {
+			name: 'Review and run these commands in your shell'
+		});
+		const incomplete = page.getByText('These commands install VersaTiles.');
+		const code = page.locator('code').first();
+		await expect(heading).toBeVisible();
+		await expect(incomplete).toBeVisible();
+		await expect(code).toContainText('install-unix.sh');
+		await expect(code).not.toContainText('Downloading');
+		await expect(code).not.toContainText('versatiles serve');
+		await expect(page.getByLabel('Port')).toHaveCount(0);
+
+		// Map data without a coverage area must not download the whole planet.
+		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
+		await expect(code).not.toContainText('Downloading');
+
+		await page.locator('button', { hasText: 'Entire world' }).click();
+		await expect(incomplete).toHaveCount(0);
+		await expect(code).toContainText('curl -C - -fLo "osm.versatiles"');
+		await expect(code).toContainText('versatiles serve');
+		await expect(page.getByLabel('Port')).toBeVisible();
+	});
+
+	test('shows no commands for Docker until the selection is complete', async ({ page }) => {
+		await page.goto('/setup_server');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('button', { hasText: 'Linux' }).click();
+		await page.locator('button', { hasText: /^\s*Docker\s*$/ }).click();
+		await page.locator('button', { hasText: 'OpenStreetMap' }).click();
+		const heading = page.getByRole('heading', {
+			name: 'Review and run these commands in your shell'
+		});
+		await expect(heading).toHaveCount(0);
+
+		await page.locator('button', { hasText: 'Entire world' }).click();
+		await expect(heading).toBeVisible();
+		await expect(page.locator('code').first()).toContainText('docker run');
+	});
+
 	test('preselects the Standard frontend', async ({ page }) => {
 		// Regression: no frontend was selected by default, so the native methods
 		// silently installed none while docker_nginx fell back to "standard".

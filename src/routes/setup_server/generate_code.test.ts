@@ -23,6 +23,7 @@ const methodDocker: OptionMethod = allMethods.find((opt) => opt.key === 'docker'
 const methodDockerNginx: OptionMethod = allMethods.find((opt) => opt.key === 'docker_nginx')!;
 const maps: OptionMap[] = optionsMap;
 const coverageBbox: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'bbox')!;
+const coverageGlobal: OptionCoverage = optionsCoverage.find((opt) => opt.key === 'global')!;
 const bbox: BBox = [1, 2, 3, 4];
 const frontend: OptionFrontend = optionsFrontend.find((opt) => opt.key === 'standard')!;
 
@@ -33,11 +34,12 @@ function generateCode(state: SetupState): string | undefined {
 	return code === undefined ? undefined : unwrapCommands(code);
 }
 
+// Coverage defaults to the entire world, so the selection is complete.
 function _generateCode(
 	os: OptionOS,
 	method: OptionMethod,
 	maps: OptionMap[],
-	coverage?: OptionCoverage,
+	coverage: OptionCoverage = coverageGlobal,
 	bbox?: BBox,
 	frontend?: OptionFrontend,
 	minZoom?: number,
@@ -193,13 +195,36 @@ describe('generateCode', () => {
 		expect(code).toContain('-e TILE_SOURCES=osm.versatiles,satellite.versatiles');
 	});
 
-	it('returns undefined when coverage is bbox but no rectangle was drawn', () => {
+	it('downloads nothing when coverage is bbox but no rectangle was drawn', () => {
 		// Regression: previously fell through to a planet-wide curl, downloading
 		// ~100 GB when the user intended a small custom region.
-		expect(_generateCode(osLinux, methodScript, maps, coverageBbox, undefined)).toBeUndefined();
+		const code = _generateCode(osLinux, methodScript, maps, coverageBbox, undefined, frontend);
+		expect(code).toContain('install-unix.sh');
+		expect(code).not.toContain('download.versatiles.org');
 		expect(
 			_generateCode(osLinux, methodDockerNginx, maps, coverageBbox, undefined, frontend)
 		).toBeUndefined();
+	});
+
+	describe('before the selection is complete', () => {
+		const STEPS = /Downloading|Starting|serve/;
+
+		it.each([
+			['no maps', { maps: [], coverage: coverageGlobal }],
+			['no coverage', { maps, coverage: undefined }]
+		])('only installs VersaTiles with %s', (_name, selection) => {
+			for (const method of [methodHomebrew, methodScript, methodCargo, methodSource]) {
+				const code = generateCode({ os: osMacos, method, ...selection, frontend })!;
+				expect(code, method.key).toMatch(/^echo "(Installing|Building)/);
+				expect(code, method.key).not.toMatch(STEPS);
+			}
+		});
+
+		it('has no code for the docker methods, which install nothing', () => {
+			for (const method of [methodDocker, methodDockerNginx]) {
+				expect(generateCode({ os: osLinux, method, maps, frontend })).toBeUndefined();
+			}
+		});
 	});
 
 	it('emits only a heading and the docker command for docker_nginx', () => {
@@ -552,6 +577,13 @@ describe('generateNotes', () => {
 
 	it('returns nothing without os and method', () => {
 		expect(generateNotes({ maps: [] })).toEqual([]);
+	});
+
+	it('only notes what the code does before the selection is complete', () => {
+		// The code only installs VersaTiles: no download, no server.
+		const incomplete = { ...global, coverage: undefined, port: 80 };
+		expect(generateNotes({ os: osLinux, method: methodScript, ...incomplete })).toEqual([]);
+		expect(generateNotes({ os: osLinux, method: methodDocker, ...incomplete })).toEqual([]);
 	});
 
 	it('mentions that curl resumes downloads', () => {

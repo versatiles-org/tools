@@ -3,7 +3,7 @@
 	import FormOptionGroup from './components/FormOptionGroup.svelte';
 	import PageMeta from '../../lib/PageMeta/PageMeta.svelte';
 	import { BBoxMap } from '@versatiles/svelte';
-	import { generateCode, generateNotes } from './generate_code';
+	import { generateCode, generateNotes, isSelectionComplete } from './generate_code';
 	import { clampZoom, decodeHash, encodeHash, MAX_ZOOM_LIMIT, MIN_ZOOM_LIMIT } from './hash';
 	import {
 		DEFAULT_PORT,
@@ -110,13 +110,9 @@
 		selection.coverage?.key === 'bbox' && selection.method?.key !== 'docker_nginx'
 	);
 
-	// "Custom region" without a drawn rectangle isn't a complete selection —
-	// without this guard the script silently falls back to a planet-wide curl
-	// and the size estimate shows the full-extent number.
-	let coverageReady = $derived(
-		selection.coverage?.key === 'global' ||
-			(selection.coverage?.key === 'bbox' && selection.bbox !== undefined)
-	);
+	// Map data and coverage are chosen, and a custom region has a rectangle.
+	// Until then the code only installs VersaTiles and there is nothing to estimate.
+	let complete = $derived(isSelectionComplete(selection));
 
 	// Server settings are a helper for the code block only: they replace example
 	// values in the generated code, are all optional and are not part of the
@@ -147,7 +143,6 @@
 
 	let code: string | undefined = $derived.by(() => {
 		if (zoomError) return undefined;
-		if (!coverageReady) return undefined;
 		return generateCode({ ...selection, domain, email, port });
 	});
 
@@ -256,7 +251,7 @@
 			{/if}
 		{/if}
 
-		{#if coverageReady}
+		{#if complete}
 			<div class="hint">
 				<SizeEstimate
 					maps={selection.maps}
@@ -286,53 +281,60 @@
 	{#if code}
 		<hr />
 		<h2>Review and run these commands in your shell</h2>
-		<div class="server-settings">
-			{#if usesDomain}
-				<label>
-					<span>Domain <span class="optional">(optional)</span></span>
-					<input
-						type="text"
-						class="wide"
-						placeholder={EXAMPLE_DOMAIN}
-						autocomplete="off"
-						autocapitalize="off"
-						spellcheck="false"
-						bind:value={domainInput}
-						onfocus={() => (focusedSetting = 'domain')}
-						onblur={() => (focusedSetting = undefined)}
-					/>
-				</label>
-				<label>
-					<span>Email <span class="optional">(optional)</span></span>
-					<input
-						type="email"
-						class="wide"
-						placeholder={EXAMPLE_EMAIL}
-						autocomplete="off"
-						autocapitalize="off"
-						spellcheck="false"
-						bind:value={emailInput}
-						onfocus={() => (focusedSetting = 'email')}
-						onblur={() => (focusedSetting = undefined)}
-					/>
-				</label>
-			{:else}
-				<label>
-					<span>Port <span class="optional">(optional)</span></span>
-					<input
-						type="text"
-						inputmode="numeric"
-						placeholder={DEFAULT_PORT.toString()}
-						autocomplete="off"
-						bind:value={portInput}
-						onfocus={() => (focusedSetting = 'port')}
-						onblur={() => (focusedSetting = undefined)}
-					/>
-				</label>
+		{#if !complete}
+			<p class="hint incomplete">
+				These commands install VersaTiles. Select map data and a coverage area above to add the
+				download and the server.
+			</p>
+		{:else}
+			<div class="server-settings">
+				{#if usesDomain}
+					<label>
+						<span>Domain <span class="optional">(optional)</span></span>
+						<input
+							type="text"
+							class="wide"
+							placeholder={EXAMPLE_DOMAIN}
+							autocomplete="off"
+							autocapitalize="off"
+							spellcheck="false"
+							bind:value={domainInput}
+							onfocus={() => (focusedSetting = 'domain')}
+							onblur={() => (focusedSetting = undefined)}
+						/>
+					</label>
+					<label>
+						<span>Email <span class="optional">(optional)</span></span>
+						<input
+							type="email"
+							class="wide"
+							placeholder={EXAMPLE_EMAIL}
+							autocomplete="off"
+							autocapitalize="off"
+							spellcheck="false"
+							bind:value={emailInput}
+							onfocus={() => (focusedSetting = 'email')}
+							onblur={() => (focusedSetting = undefined)}
+						/>
+					</label>
+				{:else}
+					<label>
+						<span>Port <span class="optional">(optional)</span></span>
+						<input
+							type="text"
+							inputmode="numeric"
+							placeholder={DEFAULT_PORT.toString()}
+							autocomplete="off"
+							bind:value={portInput}
+							onfocus={() => (focusedSetting = 'port')}
+							onblur={() => (focusedSetting = undefined)}
+						/>
+					</label>
+				{/if}
+			</div>
+			{#if settingsError}
+				<p class="hint input-error">{settingsError}</p>
 			{/if}
-		</div>
-		{#if settingsError}
-			<p class="hint input-error">{settingsError}</p>
 		{/if}
 		<CodeBlock {code} />
 		{#each notes as note (note)}
@@ -431,5 +433,8 @@
 	.draw-prompt {
 		opacity: 0.8;
 		font-style: italic;
+	}
+	.incomplete {
+		opacity: 0.8;
 	}
 </style>

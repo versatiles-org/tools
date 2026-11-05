@@ -28,18 +28,46 @@ function serverNeedsSudo(os: KeyOS, port: number): boolean {
 	return os === 'linux' && isPrivilegedPort(port);
 }
 
+function isDockerMethod(method: NonNullable<SetupState['method']>): boolean {
+	return method.key === 'docker' || method.key === 'docker_nginx';
+}
+
+/**
+ * Whether the selection names the map data and the area it covers, which is
+ * all the server needs. A custom region also needs a rectangle: without one,
+ * the download would silently fall back to the whole planet.
+ *
+ * Until then the code only installs VersaTiles. It leaves out the frontend
+ * too, because the form asks for it after the coverage.
+ */
+export function isSelectionComplete({
+	maps,
+	coverage,
+	bbox
+}: Pick<SetupState, 'maps' | 'coverage' | 'bbox'>): boolean {
+	if (maps.length === 0) return false;
+	if (coverage?.key === 'global') return true;
+	return coverage?.key === 'bbox' && bbox !== undefined;
+}
+
 /**
  * Remarks on the generated code, to be shown next to it. They are not comments
  * in the code, because not every shell accepts comments in pasted code.
  */
 export function generateNotes(state: SetupState): string[] {
-	const { os, method, maps, coverage, frontend } = state;
+	const { os, method, coverage } = state;
 	if (!os || !method) return [];
+
+	// Like the code, the notes are about what has been selected so far.
+	const complete = isSelectionComplete(state);
+	if (!complete && isDockerMethod(method)) return [];
+	const maps = complete ? state.maps : [];
+	const frontend = complete ? state.frontend : undefined;
 
 	const { validDomain, validEmail, serverPort } = serverSettings(state);
 	const notes: string[] = [];
 
-	if (method.key === 'docker' || method.key === 'docker_nginx') {
+	if (isDockerMethod(method)) {
 		notes.push(
 			'Docker has to be installed, for example with: curl -fsSL https://get.docker.com | sudo sh'
 		);
@@ -67,24 +95,20 @@ export function generateNotes(state: SetupState): string[] {
 	return notes;
 }
 
-export function generateCode({
-	os,
-	method,
-	maps,
-	coverage,
-	bbox,
-	minZoom,
-	maxZoom,
-	frontend,
-	domain,
-	email,
-	port
-}: SetupState): string | undefined {
+/**
+ * The commands for the selection so far. Once an operating system and a method
+ * are chosen they install VersaTiles; the download of map data and frontend and
+ * the server follow once the selection is complete (see `isSelectionComplete`).
+ * The Docker methods install nothing, so for them there is no code until then.
+ */
+export function generateCode(state: SetupState): string | undefined {
+	const { os, method, coverage, bbox, minZoom, maxZoom, domain, email, port } = state;
 	if (!os || !method) return undefined;
-	// Bbox coverage requires an actual rectangle. Without this guard, the script
-	// silently falls through to a full-planet curl which is almost never what
-	// the user picking "Custom region" intends.
-	if (coverage?.key === 'bbox' && !bbox) return undefined;
+
+	const complete = isSelectionComplete(state);
+	if (!complete && isDockerMethod(method)) return undefined;
+	const maps = complete ? state.maps : [];
+	const frontend = complete ? state.frontend : undefined;
 
 	const versatilesBin = os.key === 'windows' ? 'versatiles.exe' : 'versatiles';
 	// curl.exe ships with Windows 10+ (build 17063, April 2018); using it on
@@ -107,10 +131,9 @@ export function generateCode({
 	// A heading is an `echo`, not a comment: zsh, the default shell of macOS, does
 	// not know comments when code is pasted into it and would try to run them.
 	// So the code contains no comments at all; see `generateNotes` for remarks.
-	const sections =
-		method.key === 'docker' || method.key === 'docker_nginx'
-			? [...runDocker()]
-			: [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()];
+	const sections = isDockerMethod(method)
+		? [...runDocker()]
+		: [...installVersatiles(), ...downloadMaps(), ...downloadFrontend(), ...startServer()];
 
 	return sections.map((section) => section.join('\n')).join('\n\n');
 
