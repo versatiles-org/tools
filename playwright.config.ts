@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// E2E tests run against `vite dev` (no production build required so
-// build:size-index — which hits the network — doesn't need to run in CI).
-// Tests must not depend on size-index data being present.
+// E2E tests run against `vite dev`, so no production build is required. They
+// must stay offline: `e2e/fixtures.ts` blocks download.versatiles.org, and a
+// test that needs a response from it, such as a size index, stubs it.
 export default defineConfig({
 	testDir: 'e2e',
 	timeout: 30_000,

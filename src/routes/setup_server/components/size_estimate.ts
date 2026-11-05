@@ -70,14 +70,17 @@ export function estimateSize(
 // share one download instead of each fetching the (large) index again.
 const indexCache = new Map<string, Promise<SizeIndex>>();
 
-export type SizeIndexPath = `data/size-index-${KeyMap}.json`;
-export type AssetResolver = (path: SizeIndexPath) => string;
+// download.versatiles.org publishes a size index next to the latest release of
+// each map, so the estimate always matches the file that the script downloads.
+export function sizeIndexUrl(mapKey: KeyMap): string {
+	return `https://download.versatiles.org/${mapKey}.versatiles.index.json`;
+}
 
-export function loadSizeIndex(mapKey: KeyMap, resolveAsset: AssetResolver): Promise<SizeIndex> {
+export function loadSizeIndex(mapKey: KeyMap): Promise<SizeIndex> {
 	const cached = indexCache.get(mapKey);
 	if (cached) return cached;
 
-	const request = fetchSizeIndex(mapKey, resolveAsset);
+	const request = fetchSizeIndex(mapKey);
 	indexCache.set(mapKey, request);
 	// Don't cache failures, so a later attempt can retry.
 	request.catch(() => {
@@ -86,9 +89,8 @@ export function loadSizeIndex(mapKey: KeyMap, resolveAsset: AssetResolver): Prom
 	return request;
 }
 
-async function fetchSizeIndex(mapKey: KeyMap, resolveAsset: AssetResolver): Promise<SizeIndex> {
-	const url = resolveAsset(`data/size-index-${mapKey}.json`);
-	const res = await fetch(url);
+async function fetchSizeIndex(mapKey: KeyMap): Promise<SizeIndex> {
+	const res = await fetch(sizeIndexUrl(mapKey));
 	if (!res.ok) throw new Error(`Failed to load size index for ${mapKey}: ${res.status}`);
 	return res.json();
 }
@@ -104,7 +106,6 @@ export const BORDER = 3;
 export async function estimateDownloadSizes(
 	maps: OptionMap[],
 	coverage: KeyCoverage,
-	resolveAsset: AssetResolver,
 	bbox?: BBox,
 	minZoom?: number,
 	maxZoom?: number
@@ -112,7 +113,7 @@ export async function estimateDownloadSizes(
 	const results: SizeEstimate[] = [];
 
 	for (const map of maps) {
-		const index = await loadSizeIndex(map.key, resolveAsset);
+		const index = await loadSizeIndex(map.key);
 		let totalBytes = 0;
 
 		for (const [zStr, root] of Object.entries(index.levels)) {

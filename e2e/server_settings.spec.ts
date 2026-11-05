@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 
 // The server settings sit between the "Review and run…" headline and the code
 // block. They only fill values into the generated code.

@@ -19,16 +19,9 @@ npm i
 npm run dev
 ```
 
-Two things are not part of a fresh checkout:
-
-- **Size indices.** The download size estimates in the setup tool read
-  `static/data/size-index-*.json`. These files are generated and not committed.
-  Without them the tool shows "Download size estimate is not available." and
-  everything else works. Run `npm run build:size-index` to create them. This
-  reads the tile indices of the public tile sources over the network and takes
-  about 20 minutes.
-- **Browsers for the end-to-end tests.** Run `npx playwright install chromium`
-  once before `npm run test:e2e` or `npm run check`.
+Browsers for the end-to-end tests are not part of a fresh checkout. Run
+`npx playwright install chromium` once before `npm run test:e2e` or
+`npm run check`.
 
 ## NPM Scripts
 
@@ -37,8 +30,7 @@ The following NPM scripts are available:
 | `npm run ...`      | Description                                                                                    |
 | ------------------ | ---------------------------------------------------------------------------------------------- |
 | **`dev`**          | **Starts the development server with hot module reloading.**                                   |
-| **`build`**        | **Builds the size index, updates the page template, and builds the Svelte app.**               |
-| `build:size-index` | Generates the size indices used for download size estimates (network, about 20 minutes).       |
+| **`build`**        | **Updates the page template and builds the Svelte app.**                                       |
 | `build:html`       | Regenerates `src/app.html` from the page template of [versatiles.org](https://versatiles.org). |
 | `build:svelte`     | Synchronizes SvelteKit and builds the static site into `build/`.                               |
 | **`preview`**      | **Serves the built site locally for previewing the production build.**                         |
@@ -74,7 +66,7 @@ VersaTiles server. It is implemented in
 - The current selection is stored in the URL hash by [hash.ts](./src/routes/setup_server/hash.ts), which is what the "copy link" button shares.
 - Domain, email address and port can be filled in above the generated code. They are validated in [server_settings.ts](./src/routes/setup_server/server_settings.ts) and are not part of the shared link.
 - The tool uses [components/FormOptionGroup.svelte](./src/routes/setup_server/components/FormOptionGroup.svelte) to render the button groups.
-- Download sizes are estimated by [components/SizeEstimate.svelte](./src/routes/setup_server/components/SizeEstimate.svelte) and [components/size_estimate.ts](./src/routes/setup_server/components/size_estimate.ts) from the size indices. An index is a quadtree of average tile sizes per zoom level, built by [scripts/build-size-index.ts](./scripts/build-size-index.ts).
+- Download sizes are estimated by [components/SizeEstimate.svelte](./src/routes/setup_server/components/SizeEstimate.svelte) and [components/size_estimate.ts](./src/routes/setup_server/components/size_estimate.ts) from the size indices that [download.versatiles.org](https://download.versatiles.org) publishes next to each map, such as `osm.versatiles.index.json`. An index is a quadtree of average tile sizes per zoom level.
 
 ### Bounding Box Tool
 

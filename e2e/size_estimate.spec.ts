@@ -1,8 +1,8 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 
-// The size indices are generated at build time and may be missing in dev, so
-// these tests stub the requests instead of relying on the real files.
-const INDEX_URL = '**/data/size-index-*.json';
+// The size indices are published on download.versatiles.org. The tests stub
+// the requests, so they stay offline and don't depend on the real data.
+const INDEX_URL = 'https://download.versatiles.org/*.versatiles.index.json';
 
 async function selectUpToMaps(page: Page) {
 	await page.goto('/setup_server');

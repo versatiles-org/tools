@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 // Note on selectors: the FormOptionGroup template emits buttons whose label text
 // is prefixed with Svelte's reactive-comment markers. `getByRole` ends up unable

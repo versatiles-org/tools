@@ -1,8 +1,5 @@
 node_modules
 
-# Generated data
-static/data/
-
 # Output
 .output
 .vercel

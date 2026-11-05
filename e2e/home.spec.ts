@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('home page shows all four tool cards', async ({ page }) => {
 	await page.goto('/');
