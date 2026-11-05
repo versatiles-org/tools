@@ -17,7 +17,7 @@ const POLL_INTERVAL = 2000;
 const SERVER_READY_TIMEOUT = 60 * 1000;
 
 // The docker_nginx container downloads the frontend and converts a bounding box
-// out of osm/satellite/elevation before the backend starts listening, so its
+// out of every map before the backend starts listening, so its
 // budget is dominated by download speed. Observed ~74s on a healthy runner and
 // >127s on a slow one — keep enough headroom that ordinary variance passes.
 const BACKEND_READY_TIMEOUT = 6 * 60 * 1000;

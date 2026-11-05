@@ -284,11 +284,12 @@ export function generateCode(state: SetupState): string | undefined {
 		yield [heading('Downloading frontend'), wrap(`${curlBin} -C - -fLo "${filename}"`, `"${url}"`)];
 	}
 
-	// Arguments of the server that are the same for all methods
+	// Arguments of the server that are the same for all methods. Each file is a
+	// part of its own, so a long list is wrapped over several lines.
 	function serverArgs(): string[] {
 		const args: string[] = [];
 		if (frontend?.name) args.push(`--static "${frontend.name}.br.tar.gz"`);
-		args.push(maps.map((map) => `"${map.key}.versatiles"`).join(' '));
+		args.push(...maps.map((map) => `"${map.key}.versatiles"`));
 		return args;
 	}
 

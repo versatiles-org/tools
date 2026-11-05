@@ -34,11 +34,12 @@ describe('optionsMethod', () => {
 });
 
 describe('optionsMaps', () => {
-	it('should contain OpenStreetMap, Satellite, and Elevation options', () => {
+	it('should contain OpenStreetMap, Satellite, Elevation, and Land cover options', () => {
 		expect(optionsMap).toEqual([
 			expect.objectContaining({ key: 'osm', label: 'OpenStreetMap' }),
 			expect.objectContaining({ key: 'satellite', label: 'Satellite imagery' }),
-			expect.objectContaining({ key: 'elevation', label: 'Elevation' })
+			expect.objectContaining({ key: 'elevation', label: 'Elevation' }),
+			expect.objectContaining({ key: 'landcover-vectors', label: 'Land cover' })
 		]);
 	});
 });

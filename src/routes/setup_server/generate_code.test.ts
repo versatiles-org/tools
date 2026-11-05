@@ -518,7 +518,10 @@ describe('generateCode', () => {
 					'versatiles serve \\',
 					'  --port 8080 \\',
 					'  --static "frontend.br.tar.gz" \\',
-					'  "osm.versatiles" "satellite.versatiles" "elevation.versatiles"'
+					'  "osm.versatiles" \\',
+					'  "satellite.versatiles" \\',
+					'  "elevation.versatiles" \\',
+					'  "landcover-vectors.versatiles"'
 				].join('\n')
 			);
 			expect(code).not.toContain('`');
@@ -531,7 +534,10 @@ describe('generateCode', () => {
 					'versatiles.exe serve `',
 					'  --port 8080 `',
 					'  --static "frontend.br.tar.gz" `',
-					'  "osm.versatiles" "satellite.versatiles" "elevation.versatiles"'
+					'  "osm.versatiles" `',
+					'  "satellite.versatiles" `',
+					'  "elevation.versatiles" `',
+					'  "landcover-vectors.versatiles"'
 				].join('\n')
 			);
 			// A backslash at the end of a line would not continue it in PowerShell.
@@ -545,9 +551,12 @@ describe('generateCode', () => {
 		});
 
 		it.each(everyCombination)('keeps lines short for $name', ({ os, method }) => {
-			// Only a URL that cannot be broken may exceed the limit.
+			// Only what cannot be broken may exceed the limit: a URL, and the list of
+			// tile sources for versatiles-nginx, which splits it only on commas.
 			const lines = generateWrappedCode({ ...state, os, method })!.split('\n');
-			for (const line of lines.filter((line) => !line.includes('https://'))) {
+			const unbreakable = (line: string) =>
+				line.includes('https://') || line.trimStart().startsWith('-e TILE_SOURCES=');
+			for (const line of lines.filter((line) => !unbreakable(line))) {
 				expect(line.length, line).toBeLessThanOrEqual(80);
 			}
 		});

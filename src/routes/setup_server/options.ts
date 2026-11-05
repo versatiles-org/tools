@@ -63,7 +63,8 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 }
 
 // ### Map Options
-export type KeyMap = 'osm' | 'satellite' | 'elevation';
+// The key names the file on download.versatiles.org and the tile source on the server.
+export type KeyMap = 'osm' | 'satellite' | 'elevation' | 'landcover-vectors';
 export type OptionMap = Option & { key: KeyMap };
 export const optionsMap: OptionMap[] = [
 	{
@@ -80,6 +81,12 @@ export const optionsMap: OptionMap[] = [
 		key: 'elevation',
 		label: 'Elevation',
 		hint: 'Raster tiles with terrain elevation data'
+	},
+	{
+		// The frontends' styler draws it under OpenStreetMap when the server has it.
+		key: 'landcover-vectors',
+		label: 'Land cover',
+		hint: 'Vector tiles with forests, farmland, and other land cover, to draw under OpenStreetMap'
 	}
 ];
 
