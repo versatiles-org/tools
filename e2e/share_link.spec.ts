@@ -39,7 +39,9 @@ test.describe('share link', () => {
 
 		await page.locator('button', { hasText: 'copy link' }).click();
 		const link = await page.evaluate(() => navigator.clipboard.readText());
-		expect(link).toMatch(/#linux\+script\+osm,satellite\+bbox,[-\d.,]+\+z,2,10\+min$/);
+		expect(link).toMatch(
+			/#linux\+script\+osm-vector,satellite-raster\+bbox,[-\d.,]+\+z,2,10\+min$/
+		);
 
 		const restored = await context.newPage();
 		await openSetup(restored, new URL(link).hash);
@@ -51,9 +53,24 @@ test.describe('share link', () => {
 		await expect(restored.getByLabel('Max zoom')).toHaveValue('10');
 	});
 
+	test('a link made before the maps were renamed still selects them', async ({ page }) => {
+		await openSetup(page, '#linux+script+osm,satellite+global+standard');
+
+		await expect(page.locator('code').first()).toContainText('"osm-vector.versatiles"');
+		await expect(page.locator('code').first()).toContainText('"satellite-raster.versatiles"');
+		await expect(page.locator('button', { hasText: 'OpenStreetMap' })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		);
+		await expect(page.locator('button', { hasText: 'Satellite imagery' })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		);
+	});
+
 	test('a method that does not fit the operating system is dropped', async ({ page }) => {
 		// Docker is not offered on Windows.
-		await openSetup(page, '#windows+docker+osm+global+standard');
+		await openSetup(page, '#windows+docker+osm-vector+global+standard');
 
 		await expect(page.locator('button', { hasText: 'Windows' })).toHaveAttribute(
 			'aria-pressed',

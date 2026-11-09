@@ -1,4 +1,4 @@
-import type { BBox, KeyCoverage, KeyMap, OptionMap } from '../options';
+import { mapUrl, type BBox, type KeyCoverage, type KeyMap, type OptionMap } from '../options';
 
 // --- Types ---
 
@@ -73,7 +73,7 @@ const indexCache = new Map<string, Promise<SizeIndex>>();
 // download.versatiles.org publishes a size index next to the latest release of
 // each map, so the estimate always matches the file that the script downloads.
 export function sizeIndexUrl(mapKey: KeyMap): string {
-	return `https://download.versatiles.org/${mapKey}.versatiles.index.json`;
+	return `${mapUrl(mapKey)}.index.json`;
 }
 
 export function loadSizeIndex(mapKey: KeyMap): Promise<SizeIndex> {

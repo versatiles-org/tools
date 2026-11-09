@@ -64,7 +64,12 @@ export function optionsMethod(os: KeyOS): OptionMethod[] {
 
 // ### Map Options
 // The key names the file on download.versatiles.org and the tile source on the server.
-export type KeyMap = 'osm' | 'satellite' | 'elevation' | 'landcover-vectors';
+export type KeyMap = 'osm-vector' | 'satellite-raster' | 'elevation-raster' | 'landcover-vector';
+
+// download.versatiles.org stores each map in a folder named like the map.
+export function mapUrl(key: KeyMap): string {
+	return `https://download.versatiles.org/${key}/${key}.versatiles`;
+}
 export type OptionMap = Option & {
 	key: KeyMap;
 	// Some maps only add to another one, so the frontends draw them only together
@@ -73,32 +78,32 @@ export type OptionMap = Option & {
 };
 export const optionsMap: OptionMap[] = [
 	{
-		key: 'osm',
+		key: 'osm-vector',
 		label: 'OpenStreetMap',
 		hint: 'Recommended — the map with streets, buildings, and labels',
 		selected: true
 	},
 	{
-		key: 'satellite',
+		key: 'satellite-raster',
 		label: 'Satellite imagery',
 		hint: 'Satellite and aerial imagery, with labels if OpenStreetMap is selected too'
 	},
 	{
-		key: 'elevation',
+		key: 'elevation-raster',
 		label: 'Elevation',
 		hint: 'Adds hillshading and 3D terrain to OpenStreetMap or satellite imagery',
 		drawnWith: {
-			maps: ['osm', 'satellite'],
+			maps: ['osm-vector', 'satellite-raster'],
 			note: 'Elevation is only drawn on OpenStreetMap or satellite imagery, so select one of them too.'
 		}
 	},
 	{
 		// The frontends' styler draws it under OpenStreetMap when the server has it.
-		key: 'landcover-vectors',
+		key: 'landcover-vector',
 		label: 'Land cover',
 		hint: 'Adds forests, farmland, and other land cover to OpenStreetMap',
 		drawnWith: {
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			note: 'Land cover is only drawn under OpenStreetMap, so select it too.'
 		}
 	}

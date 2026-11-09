@@ -86,7 +86,7 @@ test.describe('server settings', () => {
 		await page.locator('button', { hasText: 'copy link' }).click();
 
 		const link = await page.evaluate(() => navigator.clipboard.readText());
-		expect(link).toContain('#linux+docker_nginx+osm+global+standard');
+		expect(link).toContain('#linux+docker_nginx+osm-vector+global+standard');
 		expect(link).not.toContain('my-city');
 	});
 });

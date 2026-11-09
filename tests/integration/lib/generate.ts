@@ -19,7 +19,7 @@ export const DEFAULT_FRONTEND: KeyFrontend = 'tiny';
 // Nearly all of a smoke test's time is spent fetching tiles. Unless a test asks
 // for `full`, it downloads a single source up to this zoom level only. (The
 // zoom limit has no effect on docker_nginx, which doesn't support one.)
-export const TEST_MAP: KeyMap = 'osm';
+export const TEST_MAP: KeyMap = 'osm-vector';
 export const TEST_MAX_ZOOM = 5;
 
 export interface TestOptions {

@@ -35,9 +35,9 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }, { key: 'satellite' }] as OptionMap[]
+				maps: [{ key: 'osm-vector' }, { key: 'satellite-raster' }] as OptionMap[]
 			})
-		).toBe('linux+docker+osm,satellite');
+		).toBe('linux+docker+osm-vector,satellite-raster');
 	});
 
 	it('returns OS, method, maps, and global coverage', () => {
@@ -45,10 +45,10 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'global' } as OptionCoverage
 			})
-		).toBe('linux+docker+osm+global');
+		).toBe('linux+docker+osm-vector+global');
 	});
 
 	it('returns OS, method, maps, bbox coverage, and bbox', () => {
@@ -56,11 +56,11 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'bbox' } as OptionCoverage,
 				bbox: [1, 2, 3, 4]
 			})
-		).toBe('linux+docker+osm+bbox,1,2,3,4');
+		).toBe('linux+docker+osm-vector+bbox,1,2,3,4');
 	});
 
 	it('returns full hash with frontend', () => {
@@ -68,11 +68,11 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'global' } as OptionCoverage,
 				frontend: { key: 'web' } as OptionFrontend
 			})
-		).toBe('linux+docker+osm+global+web');
+		).toBe('linux+docker+osm-vector+global+web');
 	});
 
 	it('does not encode the server settings', () => {
@@ -82,14 +82,14 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' } as OptionMap],
+				maps: [{ key: 'osm-vector' } as OptionMap],
 				coverage: { key: 'global' } as OptionCoverage,
 				frontend: { key: 'standard' } as OptionFrontend,
 				domain: 'tiles.my-city.org',
 				email: 'ops@my-city.org',
 				port: 8080
 			})
-		).toBe('linux+docker+osm+global+standard');
+		).toBe('linux+docker+osm-vector+global+standard');
 	});
 
 	it('encodes both minZoom and maxZoom with bbox coverage', () => {
@@ -97,14 +97,14 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'bbox' } as OptionCoverage,
 				bbox: [1, 2, 3, 4],
 				minZoom: 3,
 				maxZoom: 12,
 				frontend: { key: 'web' } as OptionFrontend
 			})
-		).toBe('linux+docker+osm+bbox,1,2,3,4+z,3,12+web');
+		).toBe('linux+docker+osm-vector+bbox,1,2,3,4+z,3,12+web');
 	});
 
 	it('encodes only minZoom with bbox coverage', () => {
@@ -112,12 +112,12 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'bbox' } as OptionCoverage,
 				bbox: [1, 2, 3, 4],
 				minZoom: 5
 			})
-		).toBe('linux+docker+osm+bbox,1,2,3,4+z,5,');
+		).toBe('linux+docker+osm-vector+bbox,1,2,3,4+z,5,');
 	});
 
 	it('encodes only maxZoom with bbox coverage', () => {
@@ -125,12 +125,12 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'bbox' } as OptionCoverage,
 				bbox: [1, 2, 3, 4],
 				maxZoom: 10
 			})
-		).toBe('linux+docker+osm+bbox,1,2,3,4+z,,10');
+		).toBe('linux+docker+osm-vector+bbox,1,2,3,4+z,,10');
 	});
 
 	it('drops zoom segment when coverage is global', () => {
@@ -138,13 +138,13 @@ describe('encodeHash', () => {
 			encodeHash({
 				os: { key: 'linux' } as OptionOS,
 				method: { key: 'docker' } as OptionMethod,
-				maps: [{ key: 'osm' }] as OptionMap[],
+				maps: [{ key: 'osm-vector' }] as OptionMap[],
 				coverage: { key: 'global' } as OptionCoverage,
 				minZoom: 3,
 				maxZoom: 12,
 				frontend: { key: 'web' } as OptionFrontend
 			})
-		).toBe('linux+docker+osm+global+web');
+		).toBe('linux+docker+osm-vector+global+web');
 	});
 });
 
@@ -170,47 +170,56 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes OS, method, and maps', () => {
-		expect(decodeHash('linux+docker+osm,satellite')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector,satellite-raster')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm', 'satellite']
+			maps: ['osm-vector', 'satellite-raster']
 		});
 	});
 
+	it('reads the old map names of links made before the rename', () => {
+		expect(decodeHash('linux+docker+osm,satellite,elevation,landcover-vectors').maps).toEqual([
+			'osm-vector',
+			'satellite-raster',
+			'elevation-raster',
+			'landcover-vector'
+		]);
+	});
+
 	it('decodes global coverage', () => {
-		expect(decodeHash('linux+docker+osm+global')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global'
 		});
 	});
 
 	it('decodes bbox coverage with valid bbox', () => {
-		expect(decodeHash('linux+docker+osm+bbox,1,2,3,4')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+bbox,1,2,3,4')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'bbox',
 			bbox: [1, 2, 3, 4]
 		});
 	});
 
 	it('decodes full hash with frontend', () => {
-		expect(decodeHash('linux+docker+osm+global+web')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global+web')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global',
 			frontend: 'web'
 		});
 	});
 
 	it('ignores invalid bbox', () => {
-		expect(decodeHash('linux+docker+osm+bbox,1,2,3')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+bbox,1,2,3')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'bbox'
 		});
 	});
@@ -223,25 +232,25 @@ describe('decodeHash', () => {
 		['a longitude out of range', 'bbox,-181,2,3,4'],
 		['a latitude out of range', 'bbox,1,2,3,91']
 	])('ignores a bbox with %s', (_, segment) => {
-		expect(decodeHash(`linux+docker+osm+${segment}`)).toEqual({
+		expect(decodeHash(`linux+docker+osm-vector+${segment}`)).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'bbox'
 		});
 	});
 
 	it('decodes a bbox with negative and fractional values', () => {
-		expect(decodeHash('linux+docker+osm+bbox,-180,-85.05,8.5,90').bbox).toEqual([
+		expect(decodeHash('linux+docker+osm-vector+bbox,-180,-85.05,8.5,90').bbox).toEqual([
 			-180, -85.05, 8.5, 90
 		]);
 	});
 
 	it('decodes zoom range with both bounds and trailing frontend', () => {
-		expect(decodeHash('linux+docker+osm+global+z,3,12+web')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global+z,3,12+web')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global',
 			minZoom: 3,
 			maxZoom: 12,
@@ -250,30 +259,30 @@ describe('decodeHash', () => {
 	});
 
 	it('decodes zoom range with only minZoom', () => {
-		expect(decodeHash('linux+docker+osm+global+z,5,')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global+z,5,')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global',
 			minZoom: 5
 		});
 	});
 
 	it('decodes zoom range with only maxZoom', () => {
-		expect(decodeHash('linux+docker+osm+global+z,,10')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global+z,,10')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global',
 			maxZoom: 10
 		});
 	});
 
 	it('treats segment without z, prefix as frontend, not zoom', () => {
-		expect(decodeHash('linux+docker+osm+global+standard')).toEqual({
+		expect(decodeHash('linux+docker+osm-vector+global+standard')).toEqual({
 			os: 'linux',
 			method: 'docker',
-			maps: ['osm'],
+			maps: ['osm-vector'],
 			coverage: 'global',
 			frontend: 'standard'
 		});

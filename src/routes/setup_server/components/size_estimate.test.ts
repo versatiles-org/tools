@@ -152,13 +152,13 @@ describe('loadSizeIndex', () => {
 	it('shares one request between concurrent callers', async () => {
 		global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(mockIndex) });
 
-		const [a, b] = await Promise.all([loadSizeIndex('osm'), loadSizeIndex('osm')]);
-		await loadSizeIndex('osm');
+		const [a, b] = await Promise.all([loadSizeIndex('osm-vector'), loadSizeIndex('osm-vector')]);
+		await loadSizeIndex('osm-vector');
 
 		expect(a).toBe(b);
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 		expect(global.fetch).toHaveBeenCalledWith(
-			'https://download.versatiles.org/osm.versatiles.index.json'
+			'https://download.versatiles.org/osm-vector/osm-vector.versatiles.index.json'
 		);
 	});
 
@@ -168,8 +168,10 @@ describe('loadSizeIndex', () => {
 			.mockResolvedValueOnce({ ok: false, status: 404 })
 			.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockIndex) });
 
-		await expect(loadSizeIndex('osm')).rejects.toThrow('Failed to load size index for osm: 404');
-		await expect(loadSizeIndex('osm')).resolves.toEqual(mockIndex);
+		await expect(loadSizeIndex('osm-vector')).rejects.toThrow(
+			'Failed to load size index for osm-vector: 404'
+		);
+		await expect(loadSizeIndex('osm-vector')).resolves.toEqual(mockIndex);
 		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 });
@@ -193,11 +195,11 @@ describe('estimateDownloadSizes', () => {
 			json: () => Promise.resolve(mockIndex)
 		});
 
-		const maps: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap', hint: '' }];
+		const maps: OptionMap[] = [{ key: 'osm-vector', label: 'OpenStreetMap', hint: '' }];
 		const result = await estimateDownloadSizes(maps, 'global');
 
 		expect(result).toHaveLength(1);
-		expect(result[0].mapKey).toBe('osm');
+		expect(result[0].mapKey).toBe('osm-vector');
 		expect(result[0].mapLabel).toBe('OpenStreetMap');
 		// zoom 0: 1 tile * 1000 = 1000
 		// zoom 1: 4 tiles, NW=500*1, NE=600*1, SW=700*1, SE=800*1 = 2600
@@ -216,7 +218,7 @@ describe('estimateDownloadSizes', () => {
 			json: () => Promise.resolve(mockIndex)
 		});
 
-		const maps: OptionMap[] = [{ key: 'osm', label: 'OpenStreetMap', hint: '' }];
+		const maps: OptionMap[] = [{ key: 'osm-vector', label: 'OpenStreetMap', hint: '' }];
 		// Small bbox — at zoom 0 it's still 1 tile
 		const result = await estimateDownloadSizes(maps, 'bbox', [10, 40, 20, 50]);
 
@@ -234,8 +236,8 @@ describe('estimateDownloadSizes', () => {
 			.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockSatellite) });
 
 		const maps: OptionMap[] = [
-			{ key: 'osm', label: 'OpenStreetMap', hint: '' },
-			{ key: 'satellite', label: 'Satellite Imagery', hint: '' }
+			{ key: 'osm-vector', label: 'OpenStreetMap', hint: '' },
+			{ key: 'satellite-raster', label: 'Satellite Imagery', hint: '' }
 		];
 		const result = await estimateDownloadSizes(maps, 'global');
 

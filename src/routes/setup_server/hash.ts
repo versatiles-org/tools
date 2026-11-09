@@ -1,9 +1,18 @@
-import type { BBox } from './options';
+import type { BBox, KeyMap } from './options';
 import type { SetupState } from './types';
 
 // utils for (de)serialising the form state into the URL hash
 
 const HASH_SEPARATOR = '+';
+
+// The maps were renamed so each name ends with its format. Share links made
+// before keep working by reading the old names as the new ones.
+const RENAMED_MAPS: Record<string, KeyMap> = {
+	osm: 'osm-vector',
+	satellite: 'satellite-raster',
+	elevation: 'elevation-raster',
+	'landcover-vectors': 'landcover-vector'
+};
 
 export const MIN_ZOOM_LIMIT = 0;
 export const MAX_ZOOM_LIMIT = 15;
@@ -87,7 +96,12 @@ export function decodeHash(hash: string): {
 	const method = segments[1];
 
 	// Third segment contains a comma‑separated list of map keys
-	const maps = segments[2] ? segments[2].split(',').filter(Boolean) : [];
+	const maps = segments[2]
+		? segments[2]
+				.split(',')
+				.filter(Boolean)
+				.map((key) => RENAMED_MAPS[key] ?? key)
+		: [];
 
 	let coverage: string | undefined;
 	let bbox: BBox | undefined;

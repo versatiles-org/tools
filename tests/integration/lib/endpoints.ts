@@ -12,16 +12,16 @@ const ENDPOINTS = [
 	},
 	{
 		path: '/tiles/index.json',
-		bodyCheck: (b: string): boolean => b.includes('osm'),
-		description: 'contains "osm"'
+		bodyCheck: (b: string): boolean => b.includes('osm-vector'),
+		description: 'contains "osm-vector"'
 	},
 	{
-		path: '/tiles/osm/tiles.json',
+		path: '/tiles/osm-vector/tiles.json',
 		bodyCheck: (b: string): boolean => b.includes('tilejson'),
 		description: 'contains "tilejson"'
 	},
 	{
-		path: '/tiles/osm/0/0/0',
+		path: '/tiles/osm-vector/0/0/0',
 		bodyCheck: (b: string): boolean => b.length > 0,
 		description: 'non-empty body'
 	}

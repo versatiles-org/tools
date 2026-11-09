@@ -53,8 +53,8 @@ describe('generateCode', () => {
 		const code = _generateCode(osLinux, methodHomebrew, maps);
 		expect(code).toContain('brew trust versatiles-org/versatiles');
 		expect(code).toContain('brew install versatiles');
-		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('\nversatiles serve --port 8080 "osm.versatiles"');
+		expect(code).toContain('curl -C - -fLo "osm-vector.versatiles"');
+		expect(code).toContain('\nversatiles serve --port 8080 "osm-vector.versatiles"');
 	});
 
 	it('generates code for script on windows', () => {
@@ -62,8 +62,8 @@ describe('generateCode', () => {
 		expect(code).toContain(
 			'Invoke-WebRequest -Uri "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-windows.ps1"'
 		);
-		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe serve --port 8080 "osm.versatiles"');
+		expect(code).toContain('curl.exe -C - -fLo "osm-vector.versatiles"');
+		expect(code).toContain('versatiles.exe serve --port 8080 "osm-vector.versatiles"');
 	});
 
 	it('generates code for cargo on linux', () => {
@@ -77,8 +77,8 @@ describe('generateCode', () => {
 		const installIdx = code!.indexOf('cargo install versatiles');
 		expect(sourceIdx).toBeGreaterThan(-1);
 		expect(installIdx).toBeGreaterThan(sourceIdx);
-		expect(code).toContain('curl -C - -fLo "osm.versatiles"');
-		expect(code).toContain('\nversatiles serve --port 8080 "osm.versatiles"');
+		expect(code).toContain('curl -C - -fLo "osm-vector.versatiles"');
+		expect(code).toContain('\nversatiles serve --port 8080 "osm-vector.versatiles"');
 	});
 
 	it('updates PATH before cargo install on windows', () => {
@@ -98,8 +98,8 @@ describe('generateCode', () => {
 			'Copy-Item "target\\release\\versatiles.exe" "$env:USERPROFILE\\.cargo\\bin\\"'
 		);
 		expect(code).not.toContain('Program Files');
-		expect(code).toContain('curl.exe -C - -fLo "osm.versatiles"');
-		expect(code).toContain('versatiles.exe serve --port 8080 "osm.versatiles"');
+		expect(code).toContain('curl.exe -C - -fLo "osm-vector.versatiles"');
+		expect(code).toContain('versatiles.exe serve --port 8080 "osm-vector.versatiles"');
 	});
 
 	it('fails on HTTP errors when piping the install script into a root shell', () => {
@@ -166,7 +166,7 @@ describe('generateCode', () => {
 		expect(code).toContain('--bbox "1,2,3,4"');
 		expect(code).toContain('echo "Starting VersaTiles server in a Docker container..."');
 		expect(code).toContain('--static "frontend.br.tar.gz"');
-		expect(code).toContain('"osm.versatiles"');
+		expect(code).toContain('"osm-vector.versatiles"');
 	});
 
 	it('generates code for docker_nginx on linux with maps, bbox, and frontend', () => {
@@ -174,25 +174,25 @@ describe('generateCode', () => {
 		expect(code).toContain('echo "Starting VersaTiles server with Nginx and TLS..."');
 		expect(code).toContain('-e DOMAIN=maps.example.com');
 		expect(code).toContain('-e EMAIL=admin@example.com');
-		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
+		expect(code).toContain('-e TILE_SOURCES=osm-vector.versatiles');
 		expect(code).toContain('-e BBOX="1,2,3,4"');
 		expect(code).toContain('-e FRONTEND=standard');
 		expect(code).toContain('versatiles/versatiles-nginx:latest');
 	});
 
 	it('generates code with satellite map selected', () => {
-		const satelliteMaps: OptionMap[] = [optionsMap.find((opt) => opt.key === 'satellite')!];
+		const satelliteMaps: OptionMap[] = [optionsMap.find((opt) => opt.key === 'satellite-raster')!];
 		const code = _generateCode(osLinux, methodScript, satelliteMaps);
-		expect(code).toContain('satellite.versatiles');
-		expect(code).not.toContain('osm.versatiles');
+		expect(code).toContain('satellite-raster.versatiles');
+		expect(code).not.toContain('osm-vector.versatiles');
 	});
 
 	it('generates code with both osm and satellite maps selected', () => {
 		const bothMaps: OptionMap[] = optionsMap;
 		const code = _generateCode(osLinux, methodDockerNginx, bothMaps, coverageBbox, bbox, frontend);
-		expect(code).toContain('osm.versatiles');
-		expect(code).toContain('satellite.versatiles');
-		expect(code).toContain('-e TILE_SOURCES=osm.versatiles,satellite.versatiles');
+		expect(code).toContain('osm-vector.versatiles');
+		expect(code).toContain('satellite-raster.versatiles');
+		expect(code).toContain('-e TILE_SOURCES=osm-vector.versatiles,satellite-raster.versatiles');
 	});
 
 	it('downloads nothing when coverage is bbox but no rectangle was drawn', () => {
@@ -249,7 +249,7 @@ describe('generateCode', () => {
 		);
 		expect(code).not.toContain('BBOX');
 		expect(code).toContain('-e FRONTEND=standard');
-		expect(code).toContain('-e TILE_SOURCES=osm.versatiles');
+		expect(code).toContain('-e TILE_SOURCES=osm-vector.versatiles');
 	});
 
 	describe('zoom range', () => {
@@ -265,7 +265,7 @@ describe('generateCode', () => {
 				undefined,
 				3
 			);
-			expect(code).toContain('curl -C - -fLo "osm.versatiles"');
+			expect(code).toContain('curl -C - -fLo "osm-vector.versatiles"');
 			expect(code).not.toContain('versatiles convert');
 			expect(code).not.toContain('--min-zoom');
 		});
@@ -285,7 +285,7 @@ describe('generateCode', () => {
 
 		it('keeps curl path when no bbox and no zoom is set', () => {
 			const code = _generateCode(osLinux, methodScript, maps, coverageGlobal);
-			expect(code).toContain('curl -C - -fLo "osm.versatiles"');
+			expect(code).toContain('curl -C - -fLo "osm-vector.versatiles"');
 			expect(code).not.toContain('versatiles convert');
 		});
 
@@ -509,8 +509,8 @@ describe('generateCode', () => {
 					'versatiles convert \\',
 					'  --bbox "1,2,3,4" --bbox-border 3 \\',
 					'  --min-zoom 2 --max-zoom 12 \\',
-					'  "https://download.versatiles.org/osm.versatiles" \\',
-					'  "osm.versatiles"'
+					'  "https://download.versatiles.org/osm-vector/osm-vector.versatiles" \\',
+					'  "osm-vector.versatiles"'
 				].join('\n')
 			);
 			expect(code).toContain(
@@ -518,10 +518,10 @@ describe('generateCode', () => {
 					'versatiles serve \\',
 					'  --port 8080 \\',
 					'  --static "frontend.br.tar.gz" \\',
-					'  "osm.versatiles" \\',
-					'  "satellite.versatiles" \\',
-					'  "elevation.versatiles" \\',
-					'  "landcover-vectors.versatiles"'
+					'  "osm-vector.versatiles" \\',
+					'  "satellite-raster.versatiles" \\',
+					'  "elevation-raster.versatiles" \\',
+					'  "landcover-vector.versatiles"'
 				].join('\n')
 			);
 			expect(code).not.toContain('`');
@@ -534,10 +534,10 @@ describe('generateCode', () => {
 					'versatiles.exe serve `',
 					'  --port 8080 `',
 					'  --static "frontend.br.tar.gz" `',
-					'  "osm.versatiles" `',
-					'  "satellite.versatiles" `',
-					'  "elevation.versatiles" `',
-					'  "landcover-vectors.versatiles"'
+					'  "osm-vector.versatiles" `',
+					'  "satellite-raster.versatiles" `',
+					'  "elevation-raster.versatiles" `',
+					'  "landcover-vector.versatiles"'
 				].join('\n')
 			);
 			// A backslash at the end of a line would not continue it in PowerShell.
@@ -566,7 +566,7 @@ describe('generateCode', () => {
 				if (method.key === 'docker_nginx') continue;
 				const code = generateCode({ ...state, os, method })!;
 				expect(code).toMatch(
-					/ serve (--port \d+ )?--static "frontend\.br\.tar\.gz" "osm\.versatiles"/
+					/ serve (--port \d+ )?--static "frontend\.br\.tar\.gz" "osm-vector\.versatiles"/
 				);
 				// …and not its alias `server` (headings may use the word)
 				expect(code).not.toMatch(/^(?!echo ).* server /m);

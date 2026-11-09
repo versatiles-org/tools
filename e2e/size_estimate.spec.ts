@@ -2,7 +2,7 @@ import { test, expect, type Page } from './fixtures';
 
 // The size indices are published on download.versatiles.org. The tests stub
 // the requests, so they stay offline and don't depend on the real data.
-const INDEX_URL = 'https://download.versatiles.org/*.versatiles.index.json';
+const INDEX_URL = 'https://download.versatiles.org/*/*.versatiles.index.json';
 
 async function selectUpToMaps(page: Page) {
 	await page.goto('/setup_server');

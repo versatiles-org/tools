@@ -26,7 +26,7 @@ test.describe('setup_server', () => {
 		await expect(code).toContainText(
 			'curl -fsSL "https://github.com/versatiles-org/versatiles-rs/releases/latest/download/install-unix.sh"'
 		);
-		await expect(code).toContainText('curl -C - -fLo "osm.versatiles"');
+		await expect(code).toContainText('curl -C - -fLo "osm-vector.versatiles"');
 		await expect(code).toContainText('versatiles serve');
 		await expect(code).toContainText('--port 8080');
 	});
@@ -60,7 +60,7 @@ test.describe('setup_server', () => {
 
 		await page.locator('button', { hasText: 'Entire world' }).click();
 		await expect(incomplete).toHaveCount(0);
-		await expect(code).toContainText('curl -C - -fLo "osm.versatiles"');
+		await expect(code).toContainText('curl -C - -fLo "osm-vector.versatiles"');
 		await expect(code).toContainText('versatiles serve');
 		await expect(page.getByLabel('Port')).toBeVisible();
 	});
@@ -132,9 +132,9 @@ test.describe('setup_server', () => {
 		const code = page.locator('code').first();
 		await expect(code).toContainText('versatiles convert');
 		await expect(code).toContainText('--bbox-border 3');
-		await expect(code).toContainText('"osm.versatiles"');
+		await expect(code).toContainText('"osm-vector.versatiles"');
 		// The non-converting curl path must NOT be present when bbox is in effect.
-		await expect(code).not.toContainText('curl -C - -fLo "osm.versatiles"');
+		await expect(code).not.toContainText('curl -C - -fLo "osm-vector.versatiles"');
 	});
 
 	test('zoom range is applied to the script and clamped', async ({ page }) => {

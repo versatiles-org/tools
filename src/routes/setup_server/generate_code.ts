@@ -8,7 +8,7 @@ import {
 	isValidEmail,
 	isValidPort
 } from './server_settings';
-import type { KeyOS } from './options';
+import { mapUrl, type KeyOS } from './options';
 import { wrapCommand } from './shell_format';
 import type { SetupState } from './types';
 
@@ -262,7 +262,7 @@ export function generateCode(state: SetupState): string | undefined {
 
 		for (const map of maps) {
 			const filename = `${map.key}.versatiles`;
-			const url = `https://download.versatiles.org/${filename}`;
+			const url = mapUrl(map.key);
 			if (needsConvert) {
 				const parts = [`${alternateVersatilesBin ?? versatilesBin} convert`];
 				if (bboxArg) parts.push(`--bbox "${bboxArg}" --bbox-border ${BORDER}`);
